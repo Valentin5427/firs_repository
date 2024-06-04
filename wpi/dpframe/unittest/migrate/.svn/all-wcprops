@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/72/trunk/dpframe/unittest/migrate
+END
+up_1.sql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/DPFrame/!svn/ver/69/trunk/dpframe/unittest/migrate/up_1.sql
+END
+up_2.sql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/DPFrame/!svn/ver/69/trunk/dpframe/unittest/migrate/up_2.sql
+END
+up_3.sql
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/DPFrame/!svn/ver/69/trunk/dpframe/unittest/migrate/up_3.sql
+END

@@ -1,0 +1,77 @@
+{
+    "paths": {
+        "resource": "./res", 
+        "ui": "ui", 
+        "rpt": "rpt"
+    }, 
+    "db": {
+        "host": "localhost", 
+        "password": "electrolab", 
+        "user": "postgres", 
+        "database": "postgres"
+    }, 
+    "winparam": {
+        "fullscreen": false, 
+        "nomouse": false
+    }, 
+    "devices": {
+        "ca5018_1": {
+            "active": false, 
+            "port": "COM4", 
+            "address": 0
+        }, 
+        "knt05": {
+            "port": "COM1"
+        }, 
+        "ca5018_2": {
+            "active": false, 
+            "port": "COM5", 
+            "address": 0
+        }, 
+        "scanner": "COM7", 
+        "chp02m": {
+            "port": "COM2", 
+            "ammeter": {
+                "address": "0"
+            }, 
+            "voltmeter": {
+                "address": "0"
+            }
+        }, 
+        "pr200": {
+            "port": "COM3", 
+            "address": 1
+        }
+    }, 
+    "wpt_session": {
+        "standNumber": 3
+    }, 
+    "session": {
+        "file": "session.json"
+    }, 
+    "snd_notify": {
+        "current_err": "current_err.wav", 
+        "point_skipped": "point_skipped.wav", 
+        "angular_err": "angular_err.wav", 
+        "coil_done": "point_found.wav", 
+        "point_found": "point_found.wav", 
+        "point_error": "angular_err.wav"
+    }, 
+    "printers": {
+        "report": "Send To OneNote 2016", 
+        "sticker": "Send To OneNote 2016"
+    }, 
+    "ports": {
+        "COM1": {
+            "baudrate": 4801
+        }, 
+        "COM7": {
+            "baudrate": 57600
+        }
+    }, 
+    "verification": {
+        "autoTest": true, 
+        "autoCA5018": true, 
+        "autoPR200": true
+    }
+}

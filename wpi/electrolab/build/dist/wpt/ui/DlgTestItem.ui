@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>331</width>
+    <height>96</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="buddy">
+      <cstring>ebTestMap</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="buddy">
+      <cstring>ebSerialNumber</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="buddy">
+      <cstring>ellipsiscombobox</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="cbIsTested">
+     <property name="text">
+      <string>CheckBox</string>
+     </property>
+     <property name="field" stdset="0">
+      <string>istested</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="EllipsisComboBox" name="ebTestMap">
+     <property name="reference">
+      <string>test_map</string>
+     </property>
+     <property name="field" stdset="0">
+      <string>test_map</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="EllipsisComboBox" name="ebSerialNumber">
+     <property name="reference">
+      <string>serial_number</string>
+     </property>
+     <property name="field" stdset="0">
+      <string>serial_number</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="EllipsisComboBox" name="ellipsiscombobox">
+     <property name="reference">
+      <string>defect</string>
+     </property>
+     <property name="field" stdset="0">
+      <string>defect</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EllipsisComboBox</class>
+   <extends>QWidget</extends>
+   <header>electrolab.gui.ellipsiscombobox</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>ebTestMap</tabstop>
+  <tabstop>ebSerialNumber</tabstop>
+  <tabstop>ellipsiscombobox</tabstop>
+  <tabstop>cbIsTested</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

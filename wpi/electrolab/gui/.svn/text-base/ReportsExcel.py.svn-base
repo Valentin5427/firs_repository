@@ -1,0 +1,798 @@
+# -*- coding: utf-8 -*-
+from win32com.client import Dispatch, constants
+
+from PyQt4.QtGui import QMessageBox
+
+
+def BAX(A, V, in_diameter, out_diameter, weight_magnetic, dens_iron, CoefVoltmeter, ControlLoops):
+        print "RepExcel1q", A, V
+        try:  
+            try:
+                xl = Dispatch('Excel.Application')
+            except:
+                print ("Не запускается Excel")
+                return    
+                      
+            xl.Visible = 1
+            wb = xl.Workbooks.Add()
+            ws = wb.Worksheets(1)            
+            ws.Name = u'ВАХ'
+            ws.Cells(2, 1).Value = "V"
+            ws.Cells(2, 2).Value = "A"
+            lenA = len(A)
+            for i in range(0, lenA):
+                ws.Cells(i+3, 1).Value = V[i]
+                ws.Cells(i+3, 2).Value = A[i]
+            
+            ws.Range('A2:B' + str(lenA + 2)).Select()
+            xl.Selection.HorizontalAlignment = 3
+            
+            for i in range(4):
+                xl.Selection.Borders(i+1).LineStyle = 1
+            ws.Range('A2:B2').Select()  # Без этой команды строятся два графика ??????????????????????????
+            chart = xl.Charts.Add()            
+#            chart = xl.AddChart(72, 10, 30, 50, 70)            
+#            chart = xl.Charts.Add(72, 10, 30, 50, 70)  
+
+            '''
+You can specify the location at the time of creation of the chart 
+expression.AddChart(Type, Left, Top, Width, Height) see here.
+If you don't want to embed the chart in a worksheet, you can create a chart sheet :
+ wb.Worksheets.Add(Type:=xlChart) Caveat : Microsoft.interop.Excel not win32com, but should work.
+python excel charts win32com
+            '''
+                      
+#            chart.ChartType = 65
+            chart.ChartType = 72
+            series = chart.SeriesCollection(1)
+            series.Name = u"ВАХ"
+            series.XValues = ws.Range('B3:B' + str(lenA + 2) )
+            series.Values = ws.Range('A3:A' + str(lenA + 2))
+                        
+            chart.Location (2, Name=ws.Name)
+
+            ws = wb.Worksheets(2)            
+            ws.Name = u'Характеристика намагничивания'
+            ws.Activate()
+            
+            ws.Cells(1, 1).ColumnWidth = 30            
+            ws.Cells(1, 3).ColumnWidth = 5            
+            ws.Cells(1, 4).ColumnWidth = 2            
+            ws.Cells(1, 5).ColumnWidth = 30            
+            
+            ws.Cells(1, 1).Value = u"Внутренний диаметр     Dвнутр."
+            ws.Cells(2, 1).Value = u"Наружний диаметр       Dнар."
+            ws.Cells(3, 1).Value = u"Вес магнитопровода     Р"
+            ws.Cells(1, 2).Value = in_diameter
+            ws.Cells(2, 2).Value = out_diameter
+            ws.Cells(3, 2).Value = weight_magnetic
+            ws.Cells(1, 3).Value = u"мм"
+            ws.Cells(2, 3).Value = u"мм"
+            ws.Cells(3, 3).Value = u"кг"
+            
+            ws.Cells(1, 8).Value = u"Удельный вес электротехнического железа  - "
+            ws.Cells(2, 8).Value = u"Коэф для вольтметра с действ. Знач. Напряж."
+            ws.Cells(3, 8).Value = u"Контрольные витки на магнитопров."
+            ws.Cells(1, 13).Value = dens_iron
+            ws.Cells(2, 13).Value = CoefVoltmeter
+            ws.Cells(3, 13).Value = ControlLoops
+            ws.Cells(1, 14).Value = u"кг/м³"
+                        
+            ws.Cells(1, 5).Value = u"Диаметр средней линии      Dср."
+            ws.Cells(2, 5).Value = u"Длинна средней линии       Lср."
+            ws.Cells(3, 5).Value = u"Коэф. заполнения           Q"
+            ws.Cells(4, 5).Value = u"К(Втл)"
+            ws.Cells(1, 6).Formula = "=(B1+B2)/2000"   # F1
+            ws.Cells(2, 6).Value = "=3.14*F1"          #F2
+            ws.Cells(3, 6).Value = "=B3/(F2*M1)"       #F3
+            ws.Cells(4, 6).Value = "=(M2/F3)/M3"       #F4
+            ws.Cells(1, 7).Value = u"м"
+            ws.Cells(2, 7).Value = u"м"
+
+            rt = 6
+            ct = 6
+            ws.Cells(rt, ct).Value = u"Bтл (тесла)"
+            ws.Cells(rt, ct+1).Value = "V"
+            ws.Cells(rt, ct+2).Value = "A"
+            ws.Cells(rt, ct+3).Value = "A/m (н)"
+            ws.Cells(rt, ct+5).Value = "m"
+            lenA = len(A)
+            for i in range(0, lenA):
+                ws.Cells(i+rt+1, ct).Value   = '=R4C6*R[0]C[1]'
+                ws.Cells(i+rt+1, ct+1).Value = V[i]
+                ws.Cells(i+rt+1, ct+2).Value = A[i]
+                ws.Cells(i+rt+1, ct+3).Value = '=R[0]C[-1]/R2C6'
+                ws.Cells(i+rt+1, ct+5).Value = '=R[0]C[-5]/R[0]C[-2]'
+                
+            ws.Range(ws.Cells(rt, ct), ws.Cells(rt + lenA, ct + 5)).Select()                
+            xl.Selection.HorizontalAlignment = 3
+            for i in range(4):
+                xl.Selection.Borders(i+1).LineStyle = 1
+            
+            ws.Range('I7:I27').Select()                
+            
+#            ws.Range('A2:B2').Select()  # Без этой команды строятся два графика ??????????????????????????
+            chart = xl.Charts.Add()            
+            chart.ChartType = 72
+            series = chart.SeriesCollection(1)
+            series.Name = u"Характеристика намагничивания"
+            series.XValues = ws.Range('I7:I27')
+            series.Values  = ws.Range('F7:F27')
+            
+            chart.Location (2, Name=ws.Name)
+                        
+        except:
+            print "Неопознанная ошибка1 ... "  
+    
+
+
+
+
+
+
+
+# Пример для изучения 
+#https://github.com/spidezad/pywinexcel/blob/master/pywinexcel/pyExcel.py
+
+
+#def BAX_coil(A, V, in_diameter, out_diameter, weight_magnetic, dens_iron, CoefVoltmeter, ControlLoops):
+def BAX_coil(fullname, serialnumbel, zakaz, coilsInfa):
+        import win32com.client.dynamic     
+        print "RepExcel1qqq"
+        try:  
+            try:
+                '''        
+    import win32com.client.dynamic     
+    xlapp = win32com.client.dynamic.Dispatch("Excel.Application") 
+    xlapp.Visible = 1
+    xlbook = xlapp.Workbooks.Add()
+    sht = xlbook.Worksheets(1)
+    chart = sht.ChartObjects().Add(100, 20, 30, 40) 
+           '''
+        
+                xl = win32com.client.dynamic.Dispatch("Excel.Application")
+         
+        #        xl = Dispatch('Excel.Application')
+            except:
+                print ("Не запускается Excel")
+                return    
+            print 'type(xl)=', type(xl)      
+                      
+            xl.Visible = 1
+            wb = xl.Workbooks.Add()
+            ws = wb.Worksheets(1)            
+            ws.Name = u'ВАХ'
+            
+            ws.Range('A1:L1').Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Результаты поверки тока намагничивания вторичных обмоток'
+            
+            ws.Range('A3:B3').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Объект испытаний:'
+            ws.Range('C3:L3').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(fullname)
+            
+            ws.Range('A4:B4').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заводской номер:'
+            ws.Range('C4').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(serialnumbel)
+            
+            ws.Range('A5:B5').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заказ:'
+            ws.Range('C5:L5').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(zakaz)
+            
+            nr = 4
+            for i in range(len(coilsInfa)):
+                nr += 2
+                ws.Range('A' + str(nr) + ':' + 'B' + str(nr)).Select()
+                xl.Selection.Merge()
+                xl.Selection.Value = u'Катушка:'
+#                ws.Range('C' + str(nr) + ':' + 'L' + str(nr)).Select()
+                ws.Range('C' + str(nr)).Select()
+                xl.Selection.Merge()
+                xl.Selection.Value = coilsInfa[i]['coil']
+                
+                nr += 1
+                ws.Cells(nr, 1).Value = "A"
+                ws.Cells(nr, 2).Value = "V"
+                
+                for j in range(len(coilsInfa[i]['points'])):
+                    nr += 1
+                    ws.Cells(nr, 1).Value = coilsInfa[i]['points'][j][0]
+                    ws.Cells(nr, 2).Value = coilsInfa[i]['points'][j][1]
+
+
+                
+            #???    ws.Range('I7:I27').Select()                
+            
+#            ws.Range('A2:B2').Select()  # Без этой команды строятся два графика ??????????????????????????
+                '''
+self.xlChart = self.xlBook.Sheets(sheet).ChartObjects().Add(
+Left = left, Width = width, Top = top,
+Height = height)
+'''
+               #wb     
+                '''    
+                #chart = xl.ChartObjects().Add(5, 6, 7, 8)
+                #return sht.ChartObjects().Add(left, top, width, height)                 
+                print 'q'
+                print ws.ChartObjects()
+                print ws.ChartObjects.Add(5, 6, 7, 8)
+                #chart = ws.ChartObjects().Add(5, 6, 7, 8) 
+                chart = ws.ChartObjects().Add()
+                print 'w'
+                ''' 
+                
+                ws.Range('A' + str(nr - len(coilsInfa[i]['points']) + 1) + ':A' + str(nr)).Select()
+                
+                
+                
+                ###chart = xl.Charts.Add()
+                print 1
+                chartObj = ws.ChartObjects().Add(100, 20, 300, 400) 
+                chart = chartObj.Chart
+                
+                            
+#                chart = xl.Charts.Add(Left = 10, Width = 100, Top = 20, Height = 200)            
+#                chart = xl.Charts.Add(72, 10, 10, 200, 200)            
+                print 2
+                chart.ChartType = 72
+
+
+
+                series = chart.SeriesCollection()
+                
+                print chartObj.Chart.SeriesCollection().Count
+                new_series =chartObj.Chart.SeriesCollection().Count
+                print new_series
+                print chartObj.Chart.SeriesCollection(new_series).Values
+                print chartObj.Chart.SeriesCollection(1).XValues
+                print chartObj.Chart.SeriesCollection(new_series).XValues
+                print 5
+                series.Values  = ws.Range('B' + str(nr - len(coilsInfa[i]['points']) + 1) + ':B' + str(nr))
+
+
+                chart.Location(2, Name=ws.Name)
+                
+                continue
+
+                
+                #chart.Location(10,10)
+                
+#            series = chart.SeriesCollection().NewSeries()
+                series = chart.SeriesCollection(1)
+                series.Name = u"Характеристика намагничивания"
+                print '1111111111111111111'
+                series.XValues = ws.Range('A8:A15')
+                series.Values  = ws.Range('B8:B15')
+                
+                chart.Location(2, Name=ws.Name)
+
+                nr += 2
+
+
+            
+            return        
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            print 5    
+            
+            
+            
+            
+            
+            
+                        
+            ws.Cells(2, 1).Value = "V"
+            ws.Cells(2, 2).Value = "A"
+            return
+            lenA = len(A)
+            for i in range(0, lenA):
+                ws.Cells(i+3, 1).Value = V[i]
+                ws.Cells(i+3, 2).Value = A[i]
+            
+            ws.Range('A2:B' + str(lenA + 2)).Select()
+            xl.Selection.HorizontalAlignment = 3
+            
+            for i in range(4):
+                xl.Selection.Borders(i+1).LineStyle = 1
+            ws.Range('A2:B2').Select()  # Без этой команды строятся два графика ??????????????????????????
+            chart = xl.Charts.Add()            
+            chart.ChartType = 72
+            series = chart.SeriesCollection(1)
+            series.Name = u"ВАХ"
+            series.XValues = ws.Range('B3:B' + str(lenA + 2) )
+            series.Values = ws.Range('A3:A' + str(lenA + 2))
+                        
+            chart.Location (2, Name=ws.Name)
+
+            ws = wb.Worksheets(2)            
+            ws.Name = u'Характеристика намагничивания'
+            ws.Activate()
+            
+            ws.Cells(1, 1).ColumnWidth = 30            
+            ws.Cells(1, 3).ColumnWidth = 5            
+            ws.Cells(1, 4).ColumnWidth = 2            
+            ws.Cells(1, 5).ColumnWidth = 30            
+            
+            ws.Cells(1, 1).Value = u"Внутренний диаметр     Dвнутр."
+            ws.Cells(2, 1).Value = u"Наружний диаметр       Dнар."
+            ws.Cells(3, 1).Value = u"Вес магнитопровода     Р"
+            ws.Cells(1, 2).Value = in_diameter
+            ws.Cells(2, 2).Value = out_diameter
+            ws.Cells(3, 2).Value = weight_magnetic
+            ws.Cells(1, 3).Value = u"мм"
+            ws.Cells(2, 3).Value = u"мм"
+            ws.Cells(3, 3).Value = u"кг"
+            
+            ws.Cells(1, 8).Value = u"Удельный вес электротехнического железа  - "
+            ws.Cells(2, 8).Value = u"Коэф для вольтметра с действ. Знач. Напряж."
+            ws.Cells(3, 8).Value = u"Контрольные витки на магнитопров."
+            ws.Cells(1, 13).Value = dens_iron
+            ws.Cells(2, 13).Value = CoefVoltmeter
+            ws.Cells(3, 13).Value = ControlLoops
+            ws.Cells(1, 14).Value = u"кг/м³"
+                        
+            ws.Cells(1, 5).Value = u"Диаметр средней линии      Dср."
+            ws.Cells(2, 5).Value = u"Длинна средней линии       Lср."
+            ws.Cells(3, 5).Value = u"Коэф. заполнения           Q"
+            ws.Cells(4, 5).Value = u"К(Втл)"
+            ws.Cells(1, 6).Formula = "=(B1+B2)/2000"   # F1
+            ws.Cells(2, 6).Value = "=3.14*F1"          #F2
+            ws.Cells(3, 6).Value = "=B3/(F2*M1)"       #F3
+            ws.Cells(4, 6).Value = "=(M2/F3)/M3"       #F4
+            ws.Cells(1, 7).Value = u"м"
+            ws.Cells(2, 7).Value = u"м"
+
+            rt = 6
+            ct = 6
+            ws.Cells(rt, ct).Value = u"Bтл (тесла)"
+            ws.Cells(rt, ct+1).Value = "V"
+            ws.Cells(rt, ct+2).Value = "A"
+            ws.Cells(rt, ct+3).Value = "A/m (н)"
+            ws.Cells(rt, ct+5).Value = "m"
+            lenA = len(A)
+            for i in range(0, lenA):
+                ws.Cells(i+rt+1, ct).Value   = '=R4C6*R[0]C[1]'
+                ws.Cells(i+rt+1, ct+1).Value = V[i]
+                ws.Cells(i+rt+1, ct+2).Value = A[i]
+                ws.Cells(i+rt+1, ct+3).Value   = '=R[0]C[-1]/R2C6'
+                ws.Cells(i+rt+1, ct+5).Value   = '=R[0]C[-5]/R[0]C[-2]'
+                
+            ws.Range(ws.Cells(rt, ct), ws.Cells(rt + lenA, ct + 5)).Select()                
+            xl.Selection.HorizontalAlignment = 3
+            for i in range(4):
+                xl.Selection.Borders(i+1).LineStyle = 1
+            
+            ws.Range('I7:I27').Select()                
+            
+            chart = xl.Charts.Add()            
+            chart.ChartType = 72
+            series = chart.SeriesCollection(1)
+            series.Name = u"Характеристика намагничивания"
+            series.XValues = ws.Range('I7:I27')
+            series.Values  = ws.Range('F7:F27')
+                        
+            chart.Location (2, Name=ws.Name)
+                        
+        except:
+            print "Неопознанная ошибка2 ... "  
+
+
+
+#def report(shortName, series, globalReport, Devices):
+def report(shortName, series, ordernumber, globalReport, _accuracyR, _accuracyI):
+        #print 'ordernumber =', ordernumber     
+        #print 'type(ordernumber) =', type(ordernumber)     
+        try:
+            try:
+                xl = Dispatch('Excel.Application')
+            except:
+                QMessageBox.warning(None, u"Предупреждение", u"Не запускается Excel!", QMessageBox.Ok)
+                
+            print 11
+                
+                
+            wb = xl.Workbooks.Add()
+            print 12
+            xl.Visible = True
+                              
+            print 1    
+            ws = wb.Worksheets(1)  
+            
+            
+                      
+            #ws.Name = u'Результаты поверки тока намагничивания вторичных обмоток'
+            ws.Name = u'Результаты поверки тока'
+
+            ws.PageSetup.Orientation = 2
+
+            ws.PageSetup.TopMargin = 28
+            ws.PageSetup.LeftMargin = 23
+            ws.PageSetup.RightMargin = 23
+            ws.PageSetup.BottomMargin = 42
+            ws.PageSetup.PrintTitleRows = "$4:$5"    # Для переноса малой шапки на следующие страницы
+
+            print 2    
+
+#            for i in range(10):            
+#                ws.Cells(1, i + 1).ColumnWidth = 9
+            ws.Cells(1, 1).ColumnWidth = 6            
+#            ws.Cells(1, 2).ColumnWidth = 7            
+            ws.Cells(1, 2).ColumnWidth = 8            
+            ws.Cells(1, 3).ColumnWidth = 9            
+            ws.Cells(1, 4).ColumnWidth = 8            
+            ws.Cells(1, 5).ColumnWidth = 8            
+            ws.Cells(1, 6).ColumnWidth = 9            
+            ws.Cells(1, 7).ColumnWidth = 8            
+            ws.Cells(1, 8).ColumnWidth = 8            
+            ws.Cells(1, 9).ColumnWidth = 9            
+            ws.Cells(1, 10).ColumnWidth = 9            
+            ws.Cells(1, 11).ColumnWidth = 9            
+            ws.Cells(1, 12).ColumnWidth = 9            
+            ws.Cells(1, 13).ColumnWidth = 7
+                        
+            print 3    
+
+            ws.Range('A1:L1').Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Результаты поверки тока намагничивания вторичных обмоток'
+            ws.Range('A2:M2').Select()
+            xl.Selection.Merge()
+            print 4    
+            xl.Selection.Value = u'Трансформатор: ' + unicode(shortName)
+            print 5    
+            
+#            xl.Selection.Value = u'Трансформатор: ' + '123'
+            ws.Range('A3:M3').Select()
+            xl.Selection.Merge()
+         #   print 'series', series
+            
+            
+            if ordernumber == None:
+                #QMessageBox.warning(None, u"Предупреждение",  's13321', QMessageBox.Ok)
+                xl.Selection.Value = u'Серия: ' + str(series)
+            else:    
+                #QMessageBox.warning(None, u"Предупреждение",  's13322', QMessageBox.Ok)
+                xl.Selection.Value = u'Серия: ' + unicode(str(series)) + u'    Заказ: ' + unicode(str(ordernumber))
+                #xl.Selection.Value = u'Серия: ' + series + u'    Заказ: ' + ordernumber
+            #QMessageBox.warning(None, u"Предупреждение",  's1333', QMessageBox.Ok)
+            ws.Range("A4:M5").Select()
+            xl.Selection.Borders(1).LineStyle = 1
+            xl.Selection.Borders(2).LineStyle = 1
+            xl.Selection.Borders(3).LineStyle = 1
+            xl.Selection.Borders(4).LineStyle = 1
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.WrapText = True
+
+            ws.Range("A4:A5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Зав.\n№'
+            
+            ws.Range("B4:B5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'№ обмот.'
+            
+            ws.Range("C4:E4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Сопротивление'
+            ws.Range("C5:C5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Величина'
+            ws.Range("D5:E5").Select()
+            xl.Selection.Merge()
+#            xl.Selection.Value = u'Коридор (' + str(Devices.data['accuracy']['r']) + '%)' 
+            xl.Selection.Value = u'Коридор (' + str(_accuracyR) + '%)' 
+
+            ws.Range("F4:H4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Ток намагничивания'
+            ws.Range("F5:F5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Величина'
+            ws.Range("G5:H5").Select()
+            xl.Selection.Merge()
+#            xl.Selection.Value = u'Коридор (' + str(Devices.data['accuracy']['a']) + '%)'
+            xl.Selection.Value = u'Коридор (' + str(_accuracyI) + '%)'
+            ws.Range("I4:I5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Ном. напряж'
+            #4.02
+            '''            
+            ws.Range("J4:J5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Коэфф. безопас'
+            '''
+            ws.Range("J4:K4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Коэфф. безопас'
+            
+            ws.Range("J5:J5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Расч-ый'
+            
+            ws.Range("K5:K5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заданный'
+            
+                        
+            
+            ws.Range("L4:L5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Дата поверки'
+            ws.Range("M4:M5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Код тележки'
+                        
+            M = []
+            k = 0
+            print globalReport
+            print series
+            
+            for i in range(len(globalReport)):
+                #20.04
+                '''
+                if globalReport[i][1] == int(series):
+                    M += [globalReport[i][2:]]
+                '''
+#11.11.16   ошивка преобразования       if globalReport[i][1] == int(series):
+          #      print globalReport[i][1], series
+                
+#                if unicode(globalReport[i][1]) == unicode(series):
+                if globalReport[i][1] == series:
+                    print ordernumber, globalReport[i][2]
+                    if ordernumber == None or (ordernumber != None and globalReport[i][2] == ordernumber):
+#                    if ordernumber == None or (ordernumber != None and unicode(globalReport[i][2]) == unicode(ordernumber)):
+                        M += [globalReport[i][3:]]
+                                        
+            print 'M=', M        
+            ws.Range("A" + str(6) + ":M" + str(5 + len(M))).Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Borders(1).LineStyle = 1
+            xl.Selection.Borders(2).LineStyle = 1
+            xl.Selection.Borders(3).LineStyle = 1
+            xl.Selection.Borders(4).LineStyle = 1
+            xl.Selection.Value = M
+                        
+            ws.Range("E" + str(6) + ":E" + str(5 + len(M))).Select()
+            xl.Selection.Borders(7).LineStyle = 0
+            ws.Range("H" + str(6) + ":H" + str(5 + len(M))).Select()
+            xl.Selection.Borders(7).LineStyle = 0
+                        
+            for i in range(len(M)):
+                # Подкраска ячеек, не входящих в коридор
+                if M[i][2] < M[i][3] or M[i][2] > M[i][4]:
+                    xl.ActiveSheet.Cells(i + 6, 3).Interior.Color = 255            
+                if M[i][5] < M[i][6] or M[i][5] > M[i][7]:
+                    xl.ActiveSheet.Cells(i + 6, 6).Interior.Color = 255
+                     
+                #4.02
+                if M[i][13] == 1:
+                    if M[i][9] > M[i][10]:
+                        xl.ActiveSheet.Cells(i + 6, 10).Interior.Color = 255 
+                if M[i][13] == 2:
+                    if M[i][9] < M[i][10]:
+                        xl.ActiveSheet.Cells(i + 6, 10).Interior.Color = 255 
+                    
+                # Группировка колонок
+                if i <> len(M) - 1:
+                    if M[i][1] == M[i + 1][1]:
+                        xl.ActiveSheet.Cells(i + 7, 2).Value = ''                        
+                        xl.ActiveSheet.Cells(i + 6, 2).Borders(4).LineStyle = 0
+                        xl.ActiveSheet.Cells(i + 7, 2).Borders(3).LineStyle = 0
+                        if i <> len(M) - 2:
+                            xl.ActiveSheet.Cells(i + 7, 2).Borders(4).LineStyle = 0
+                    if M[i][8] == M[i + 1][8]:
+                        xl.ActiveSheet.Cells(i + 7, 9).Value = ''                        
+                        xl.ActiveSheet.Cells(i + 6, 9).Borders(4).LineStyle = 0
+                        xl.ActiveSheet.Cells(i + 7, 9).Borders(3).LineStyle = 0
+                        #4.02
+                        #xl.ActiveSheet.Cells(i + 7, 10).Value = ''                        
+                        #xl.ActiveSheet.Cells(i + 6, 10).Borders(4).LineStyle = 0
+                        #xl.ActiveSheet.Cells(i + 7, 10).Borders(3).LineStyle = 0
+                        if i <> len(M) - 2:
+                            xl.ActiveSheet.Cells(i + 7, 9).Borders(4).LineStyle = 0
+                            #xl.ActiveSheet.Cells(i + 7, 10).Borders(4).LineStyle = 0
+                        
+        except:
+            print "Неопознанная ошибка3 ... "  
+                       
+        return
+
+
+
+def BAX_coil1(fullname, serialnumbel, zakaz, coilsInfa):
+        print "RepExcel1w"
+        try:  
+            try:
+                xl = Dispatch('Excel.Application')
+            except:
+                print ("Не запускается Excel")
+                return    
+            print 'type(xl)=', type(xl)      
+                     
+                      
+            xl.Visible = 1
+            wb = xl.Workbooks.Add()
+            ws = wb.Worksheets(1)            
+            ws.Name = u'ВАХ'
+            
+            ws.Range('A1:I1').Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Результаты поверки тока намагничивания вторичных обмоток'
+            
+            ws.Range('A3:B3').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Объект испытаний:'
+            ws.Range('C3:I3').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(fullname)
+            
+            ws.Range('A4:B4').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заводской номер:'
+            ws.Range('C4').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(serialnumbel)
+            
+            ws.Range('A5:B5').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заказ:'
+###            ws.Range('C5:L5').Select()
+            ws.Range('C5').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = unicode(zakaz)
+            
+            nr = 7
+            for i in range(len(coilsInfa)):
+                ws.Range('A' + str(nr) + ':' + 'B' + str(nr)).Select()
+                xl.Selection.Merge()
+                xl.Selection.Value = u'Катушка:'
+                ws.Range('C' + str(nr)).Select()
+                xl.Selection.Merge()
+                xl.Selection.Value = coilsInfa[i]['coil']
+                
+                nr += 1
+                ws.Cells(nr, 1).Value = "A"
+                ws.Cells(nr, 2).Value = "V"
+                ws.Range('A' + str(nr) + ':' + 'B' + str(nr)).Select()
+                xl.Selection.HorizontalAlignment  = 3            
+                xl.Selection.Borders(1).LineStyle = 1
+                xl.Selection.Borders(2).LineStyle = 1
+                xl.Selection.Borders(3).LineStyle = 1
+                xl.Selection.Borders(4).LineStyle = 1
+                                
+                countPoints = len(coilsInfa[i]['points'])
+                #for j in range(len(coilsInfa[i]['points'])):
+                # Расчет расположения графика
+                left   = int(5.625 * (ws.Columns(1).ColumnWidth + ws.Columns(2).ColumnWidth) + 10)  
+                top    = int((nr - 1) * ws.Rows(nr).RowHeight)
+                width  = 320
+                height = 15 * ws.Rows(nr).RowHeight
+                for j in range(countPoints):
+                    nr += 1
+#                    ws.Cells(nr, 1).Value = coilsInfa[i]['points'][j][0]
+#                    ws.Cells(nr, 2).Value = coilsInfa[i]['points'][j][1]
+                    ws.Cells(nr, 1).Value = round(coilsInfa[i]['points'][j][0],3)
+                    ws.Cells(nr, 2).Value = round(coilsInfa[i]['points'][j][1],3)
+                    ws.Range('A' + str(nr) + ':' + 'B' + str(nr)).Select()
+                    xl.Selection.HorizontalAlignment  = 3            
+                    xl.Selection.Borders(1).LineStyle = 1
+                    xl.Selection.Borders(2).LineStyle = 1
+                    xl.Selection.Borders(3).LineStyle = 1
+                    xl.Selection.Borders(4).LineStyle = 1
+
+#                if countPoints < 15:
+#                    nr += 14 - countPoints 
+                
+                print 2                
+                #chart = ws.ChartObjects().Add(left, 200, 400, 300) 
+                chart = ws.ChartObjects().Add(left, top, width, height) 
+                print 3
+                chart.Chart.ChartType = 72
+                series = chart.Chart.SeriesCollection()
+                ns = series.NewSeries()
+                ns.XValues = ws.Range('A' + str(nr - len(coilsInfa[i]['points']) + 1) + ':A' + str(nr))
+                ns.Values  = ws.Range('B' + str(nr - len(coilsInfa[i]['points']) + 1) + ':B' + str(nr))
+                ns.Name = u""
+                ###ns.XValues.Text = u"WERTY"
+#                print 'ns.XValues.HasTitle()=', ns.XValues.HasTitle()
+                '''
+                print 'constants.xlCategory',constants.xlCategory
+                print 'constants.xlCategory',type(constants.xlCategory)
+                print 'constants.xlValue',constants.xlValue
+                print 'constants.xlValue',type(constants.xlValue)
+                QMessageBox.warning(None, u"Предупреждение", u"h", QMessageBox.Ok)
+                chart.Chart.Axes(constants.xlCategory).HasTitle = True
+                QMessageBox.warning(None, u"Предупреждение", u"2", QMessageBox.Ok)
+                chart.Chart.Axes(constants.xlCategory).AxisTitle.Caption = u"Сила тока A"
+                QMessageBox.warning(None, u"Предупреждение", u"3", QMessageBox.Ok)
+                chart.Chart.Axes(constants.xlValue).HasTitle = True
+                QMessageBox.warning(None, u"Предупреждение", u"4", QMessageBox.Ok)
+                chart.Chart.Axes(constants.xlValue).AxisTitle.Caption = u"Напряжение V"
+                QMessageBox.warning(None, u"Предупреждение", u"5", QMessageBox.Ok)
+                
+                chart.Chart.HasTitle = False
+                print 'chart.Chart.HasLegend', chart.Chart.HasLegend
+                QMessageBox.warning(None, u"Предупреждение", u"6", QMessageBox.Ok)
+                chart.Chart.HasLegend = False
+                QMessageBox.warning(None, u"Предупреждение", u"7", QMessageBox.Ok)
+                '''
+                
+                #chart.Chart.Axes(constants.xlCategory).HasTitle = True
+                #поскольку constants.xlCategory и constants.xlValue не
+                #воспринимаются сборкой,
+                #в место constants.xlCategory пишем 1,
+                #а в место constants.xlValue пишем 2                
+                
+                chart.Chart.Axes(1).HasTitle = True
+                chart.Chart.Axes(1).AxisTitle.Caption = u"Сила тока A"
+                chart.Chart.Axes(2).HasTitle = True
+                chart.Chart.Axes(2).AxisTitle.Caption = u"Напряжение V"
+                
+                chart.Chart.HasTitle = False
+                chart.Chart.HasLegend = False
+                   
+
+                if countPoints < 15:
+                    nr += 14 - countPoints 
+                                                                
+                '''
+                chart = xl.Charts.Add()                
+                chart.ChartType = 72                
+                series = chart.SeriesCollection(1)
+                series.Name = u"Характеристика намагничивания"
+                series.XValues = ws.Range('A' + str(nr - len(coilsInfa[i]['points']) + 1) + ':A' + str(nr))
+                series.Values  = ws.Range('B' + str(nr - len(coilsInfa[i]['points']) + 1) + ':B' + str(nr))            
+                chart.Location(2, Name=ws.Name)
+                '''
+                                  
+                nr += 2
+                        
+        except:
+            print "Неопознанная ошибка4 ... "  
+
+

@@ -1,0 +1,3824 @@
+# -*- coding: UTF-8 -*-
+#
+
+#from PyQt4.QtGui import QMessageBox, QDateEdit, QIcon, QCheckBox, QColor
+
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QMessageBox, QWidget, QKeyEvent, QIcon, QFont,       QDoubleSpinBox,         QToolButton
+from PyQt4.QtCore import pyqtSlot, pyqtSignal, QVariant, QObject
+from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+from serial import Serial
+from serial.serialutil import SerialException
+
+from dpframe.tech.SimpleSound import SimpleSound
+
+from electrolab.gui.common import UILoader
+from electrolab.gui.msgbox import getTrue, msgBox
+from electrolab.app.item import Item
+from devices import Devices
+from TestCoilReport import TestCoilReport
+from electrolab.gui.reporting import FRPrintForm
+from win32com.client import Dispatch
+#import os, stat, wmi
+import stat
+
+#from PyQt4.QtGui import QMessageBox, QIcon
+#import ui.ico_64_rc
+
+import json
+import math
+import time
+import datetime
+#import ui.ico_64_rc
+#import os
+
+
+import binhex
+import binascii
+import struct
+
+global port
+port = Serial()
+
+model = QSqlQueryModel()
+model_2 = QSqlQueryModel()
+model_3 = QSqlQueryModel()
+model_4 = QSqlQueryModel()
+model_5 = QSqlQueryModel()
+
+#Флаг глобального состояния 
+PAUSE = u'PAUSE'
+WORK = u'WORK'
+stateWork = PAUSE
+isReadPort = False                                 
+
+isBreak = False        
+
+
+
+#~ Table of CRC values for high–order byte
+auchCRCHi = [
+0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+0x40]
+
+#~ Table of CRC values for low–order byte
+auchCRCLo = [
+0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+0x40]
+##########################################################################
+
+# Расчет контрольной суммы по протоколу modbus
+def crc16(data):
+    uchCRCHi = 0xFF   # high byte of CRC initialized
+    uchCRCLo = 0xFF   # low byte of CRC initialized
+    uIndex   = 0x0000 # will index into CRC lookup table
+
+    for ch in data :
+        uIndex   = uchCRCLo ^ ord(ch)
+        uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex]
+        uchCRCHi = auchCRCLo[uIndex]
+    return uchCRCLo, uchCRCHi
+    #return hex(uchCRCLo), hex(uchCRCHi)
+    #return (uchCRCHi << 8 | uchCRCLo)
+
+
+                                 
+class MyThread(QtCore.QThread):
+        def __init__(self, parent = None):
+            QtCore.QThread.__init__(self, parent)
+        def run(self):
+            nComError = 0        
+            
+            global AV, points, stateWork 
+
+            self.nPoint = 0
+            points = []
+            stateWork = WORK
+            AV = None
+            while stateWork == WORK:
+                global isReadPort
+                isReadPort = False
+                self.emit(QtCore.SIGNAL('treadsignal'))
+                self.msleep(10)
+                #Задержка, чтобы цикл не проскакивал
+                
+                while not isReadPort:
+                    pass
+                                        
+                
+                if AV == None:
+                    if stateWork == PAUSE:
+                        return
+                    nComError += 1
+                
+                    self.emit(QtCore.SIGNAL('mysignal'))
+                    time.sleep(0.001)   #Задержка, чтобы цикл не проскакивал
+                                
+                    if nComError < 10:
+                        continue
+                    else:
+                        nComError = 0
+                    
+                        self.emit(QtCore.SIGNAL('mysignal2'))
+                        return
+                                
+                nComError = 0
+
+                '''                
+                #17.02
+                if AV[0] == False or AV[1] == False:
+                    # хотя бы в одной цепочке приборов нет реального значения
+                    continue
+                '''
+
+                #if self.checking_2 == None:
+                #    self.emit(QtCore.SIGNAL('mysignal2'))
+                #    return
+                global isBreak
+                isBreak = False        
+                self.emit(QtCore.SIGNAL('mysignal3'))
+                time.sleep(0.001)   #Задержка, чтобы цикл не проскакивал
+                #time.sleep(0.2)   #Задержка, чтобы цикл не проскакивал
+                if isBreak == True:
+                    return
+                time.sleep(0.001)   #Задержка, чтобы цикл не проскакивал
+                #time.sleep(0.1)   #Задержка, чтобы цикл не проскакивал
+            return
+
+
+class TestCoil(QWidget, UILoader):    
+    def __init__(self, _env, oMap, tvItem, tvCoil, btnStart, VerificationForm):
+        
+        super(QWidget, self).__init__()
+
+       # QMessageBox.warning(self, u"Предупреждение", u"В БД", QMessageBox.Yes, QMessageBox.No)                        
+
+        self.test('aa', 2)
+                
+        self.setUI(_env.config, u"TestCoil.ui")
+        self.setEnabled(False)
+        # временно
+        self.yyy = 0.3
+        self.ui.radioButton.setVisible(False)
+        self.ui.radioButton_2.setVisible(False)
+#####        self.yyy = 0.0
+
+                
+        '''
+        a = [[10, 443, 9.0, 10.9, 3.0, 7.0],
+             [10, 17, 9.0, 10.0, 4.7919, 7.0],
+             [2, 3, 2.7, 3.31, 0.01, 0.01],
+             [2, 5, 2.8, 3.32, 0.02, 0.02],
+             [2, 4, 2.9, 3.33, 0.03, 0.03]]
+        for i in range(len(a)):
+            print a[i]
+        print    
+        b = a.sort()
+        for i in range(len(a)):
+            print a[i]            
+        print            
+        a.insert(2, None)
+        for i in range(len(a)):
+            print a[i]
+        '''
+
+
+        self.sound = SimpleSound(_env)
+
+        
+       # self.ui.pushButton.setEnabled(False)
+
+
+
+        self.query = QSqlQuery(_env.db)
+        self.query_2 = QSqlQuery(_env.db)
+        self.query_3 = QSqlQuery(_env.db)
+        self.query_4 = QSqlQuery(_env.db)
+        self.query_5 = QSqlQuery(_env.db)
+        self.query_9 = QSqlQuery(_env.db)
+                
+        self.oMap = oMap        
+        self.tvItem = tvItem
+        self.tvCoil = tvCoil
+        self.btnStart = btnStart
+               
+        self.VerificationForm = VerificationForm
+        try:
+            self.VerificationForm.ui.lbShortName.setWordWrap(True)
+        except Exception:
+            pass
+            
+        self.idStand = None
+        self.idItem = None
+        self.idCoil = None
+        self.idItemLast = None
+        self.idCoilLast = None
+        self.K = None              # Коэффициент
+        self.nomVoltage = None     # Номинальное напряжение
+
+        self.curr_r  = None    # Текущее сопротивление
+        self.curr_inom = None  # Текущий ток
+        self.curr_un = None    # Текущее напряжение
+        self.curr_k  = None    # Текущий коэффициент
+        self.curr_rating  = None   #Текущая номинальная или расчетная предельная кратность
+        self.rating = None
+        self.fRating = None
+
+        self.coefR = 1   # Преобразователь ед. измер. сопротивления
+
+        #self.ALess = False # Сила тока меньше минимальной для снятия показаний
+        #self.ABack = False # Сила тока поползла назад
+        #self.ABlock = False # Блокировка записи показаний амперметра в график
+        self.MinAmp = 0.5   # В перспективе взять из настроек
+        #self.MinAmp = 0.02   # В перспективе взять из настроек
+        self.isHand = True # Кнопка 'Start' нажимается ручками
+        self.wasHand = True # Кнопка 'Start' была нажата ручками
+        
+        self.isWork = False 
+
+        self.workAmp = None
+        self.workVolt = None
+        
+        self.series = None   # Номер текущей серии
+        self.ordernumber = None   # Номер текущего заказа
+        self.serialnumber = None # Текущий заводской номер
+         
+        self.graphicsScene = QtGui.QGraphicsScene()
+        self.graphicsScene.setSceneRect(0, 0, 1, 1)
+        self.ui.graphicsView.setScene(self.graphicsScene)        
+
+         
+        self.pen = QtGui.QPen()        
+        self.pen_2 = QtGui.QPen()        
+        self.epsilon = 0.0000001
+         
+        self.points = None           
+        self.oldPoints = None 
+
+        self.sample = None
+        self.corridors = None
+        self.globalCorridors = None
+        self.defectItem = False   # Наличие отклонения какого-либо параметра транса во время испытания
+
+
+        self.oItem = None
+
+
+        self.ui.lineEdit.returnPressed.connect(self.returnPress)
+        self.ui.lineEdit_2.returnPressed.connect(self.returnPress_2)
+
+        self.idPreStand = self.preStand()
+
+        self.tread = MyThread()     
+        self.connect(self.tread, QtCore.SIGNAL("treadsignal"), self.on_treadsignal, QtCore.Qt.QueuedConnection)
+        self.connect(self.tread, QtCore.SIGNAL("mysignal"), self.on_mysignal, QtCore.Qt.QueuedConnection)
+        self.connect(self.tread, QtCore.SIGNAL("mysignal2"), self.on_mysignal2, QtCore.Qt.QueuedConnection)
+        self.connect(self.tread, QtCore.SIGNAL("mysignal3"), self.on_mysignal3, QtCore.Qt.QueuedConnection)
+
+        #self.ui.pushButton_3.setIcon(QIcon(u':/ico/ico/64_down.png'))
+        #self.ui.pushButton_4.setIcon(QIcon(u':/ico/ico/up_64.png'))
+
+        self.ui.pushButton.setVisible(False)
+        # Временно
+        #QtGui.QCheckBox.setChecked(False)
+        self.ui.pushButton.clicked.connect(self.pushButton_Click)
+        self.ui.pushButton_2.clicked.connect(self.pushButton_2_Click)        
+        self.ui.pushButton_3.clicked.connect(self.pushButton_3_Click)        
+        self.ui.checkBox.clicked.connect(self.checkBox_Click)
+        self.ui.checkBox_2.clicked.connect(self.checkBox_2_Click)
+#        self.ui.checkBox.setVisible(True)
+#        self.ui.checkBox.setChecked(True)
+        self.ui.checkBox.setChecked(False)
+        self.checkBox_Click()
+
+
+        
+      #  self.testEnabled(False)        
+        
+        self.env = _env
+        self.Devices = Devices(_env)
+        self.setMeasureR(self.Devices.ui.comboBox.currentText())        
+        self.TestCoilReport = TestCoilReport(self.env)
+
+        if not self.TestBase(_env.db):
+            return
+        
+        if self.oMap == None:  #ВРЕМЕННО
+            return
+        self.oItem = Item(self.env, None, self.oMap.iMapID, True)
+        
+       # print 'self.oMap.iMapID', self.oMap.iMapID
+
+    def test(self, a, b=1):
+        print 'aaaaa=', a
+        print 'bbbbb=', b
+
+
+
+    def on_treadsignal(self):
+        global AV
+        AV = self.ReadPort()
+
+
+    def calcK(self, I, R, U, S):
+        try:
+            B1 = I
+            B2 = R
+            B3 = U
+            B4 = S        
+        
+            B15 = B1 * B1
+            B18 = abs(B4/B15)
+            B11 = abs(B2 + B18 * 0.8)
+            B16 = B11 * B11
+              
+            B12 = abs(B18 * 0.6)
+            B17 = B12 * B12
+
+            B13 = B16 + B17
+            B14 = math.sqrt(B13)
+            K = B3 / (B1 * B14)
+        except Exception:
+            K = None        
+        return K
+
+
+    def clear(self):
+        #QtGui.QLineEdit.clear()
+        self.ui.lineEdit.clear()
+        self.ui.lineEdit_2.clear()
+        self.ui.lineEdit_3.clear()
+        self.ui.lineEdit_4.clear()
+        self.ui.lineEdit_5.clear()
+        self.ui.lineEdit_6.clear()
+        self.ui.lineEdit_7.clear()
+        self.ui.lineEdit_8.clear()
+        self.ui.lineEdit_9.clear()
+        self.ui.lineEdit_10.clear()
+        self.graphicsScene.clear()
+        self.points = None        
+
+
+
+    def code_type_test(self, idStand):
+        self.idStand = idStand
+        
+        model.clear()
+        
+        strSQL = """
+select test_type.code
+from stand, test_type
+where stand.test_type = test_type.id
+and stand.id = :id
+"""
+        self.query.prepare(strSQL)
+        self.query.bindValue("id", idStand)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+        else:    
+            model.setQuery(self.query)
+        if model.rowCount() < 1:
+            self.codeTypeTest = None
+        else:
+            self.codeTypeTest = int(model.record(0).field('code').value().toString())
+        return self.codeTypeTest 
+
+
+    def preStand(self):
+        model.clear()
+        
+        strSQL = """
+select stand.id
+from stand, test_type
+where stand.test_type = test_type.id
+and test_type.code = 3
+"""
+        self.query.prepare(strSQL)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+        else:    
+            model.setQuery(self.query)
+        if model.rowCount() < 1:
+            return None
+        else:
+            return int(model.record(0).field('id').value().toString())
+
+
+    def item_change_row(self, idItem):
+        self.defectItem = False
+
+
+    def calcSeries(self, idItem):
+        #return
+        #Вычисляем номер серии
+        strSQL = """
+select t2.series, t2.serialnumber, t2.ordernumber
+from item t1, serial_number t2
+where t1.serial_number = t2.id
+and t1.id = :item
+--order by chektimestamp"""
+        self.query_4.prepare(strSQL)
+        self.query_4.bindValue(":item", self.idItemLast)
+        if not self.query_4.exec_():
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка определения серии", QMessageBox.Ok)
+        else:    
+            model_4.setQuery(self.query_4)
+                
+        if model_4.rowCount() > 0:
+            self.series = model_4.record(0).field('series').value().toString()
+            self.ordernumber = model_4.record(0).field('ordernumber').value().toString()
+            self.serialnumber = int(model_4.record(0).field('serialnumber').value().toString())
+        
+ 
+
+    def coil_change_row(self, idCoil, idItem):
+        if idCoil == None:  # Чтобы не повторялось построение графика
+            return
+        self.idCoil = idCoil
+        self.idItem = idItem
+
+                
+    def coil_after_change_row(self, idCoil, idItem, info):
+#        QMessageBox.warning(self, u"Предупреждение", u"coil_after_change_row", QMessageBox.Ok)
+#        if (self.idItemLast == idItem) and (self.idCoilLast == None or idCoil == None or self.idCoilLast == idCoil):
+        print '*******1111111111self.idCoilLastself.idCoilLastself.idCoilLastself.idCoilLastself.idCoilLast', self.idCoilLast, idCoil
+        if self.idCoilLast == None or idCoil == None:  # Чтобы не повторялось построение графика
+            self.idCoilLast = idCoil
+            self.idItemLast = idItem
+            return
+        self.graphicsScene.clear()
+        
+        self.idCoilLast = idCoil
+        self.idItemLast = idItem
+        self.info = info       
+        
+        model_2.clear()
+        
+#        print 'idItem, idCoil = ', idItem, idCoil
+        '''       
+        strSQL = """
+select id, r, un, inom, k
+from checking_2
+where stand = :stand
+and item = :item
+and coil = :coil
+"""
+'''
+        strSQL = """
+--select t1.id, t1.r, t1.un, t1.inom, t1.k, 99 as rating
+--26.01
+--select t1.id, t1.r, t1.un, t1.inom, t1.k, t2.rating
+select t1.id, t1.r, t1.un, t1.inom, t1.k, t1.rating, t2.rating as rating2
+from checking_2 t1, coil t2
+where t1.stand = :stand
+and t1.item = :item
+and t1.coil = t2.id
+and t1.coil = :coil
+"""
+
+        print '*******2222222self.idStand, self.idItemLast, self.idCoilLast', self.idStand, self.idItemLast, self.idCoilLast
+
+
+
+        self.query_2.prepare(strSQL)
+        self.query_2.bindValue(":stand", self.idStand)
+        self.query_2.bindValue(":item", self.idItemLast)
+        self.query_2.bindValue(":coil", self.idCoilLast)
+        if not self.query_2.exec_():
+            raise Exception(self.query_2.lastError().text())
+            return
+        else:    
+            model_2.setQuery(self.query_2)
+
+        print '********33333333333model_2.rowCount()model_2.rowCount()',model_2.rowCount()
+        if model_2.rowCount() < 1:
+            self.curr_r  = None
+            self.curr_un = None
+            self.curr_inom  = None
+            self.curr_k  = None
+            self.curr_rating  = None
+            self.ui.lineEdit.setText('')
+            self.ui.lineEdit_2.setText('')            
+            self.ui.lineEdit_10.setText('')            
+            self.ui.lineEdit_3.setText('')
+            self.ui.lineEdit_8.setText('')
+            self.checking_2 = None
+            self.rating2 = None
+            self.fRating2 = None
+        else:
+            
+            self.curr_r  = self.coefR * float(model_2.record(0).field('r').value().toString())
+            self.ui.lineEdit.setText(str(self.curr_r))
+            
+#            self.curr_r  = float(model_2.record(0).field('r').value().toString())
+                        
+            self.curr_un = float(model_2.record(0).field('un').value().toString())
+            self.curr_inom = float(model_2.record(0).field('inom').value().toString())
+            self.curr_k  = float(model_2.record(0).field('k').value().toString())
+#            self.ui.lineEdit.setText(model_2.record(0).field('r').value().toString())
+            #26.01
+            #self.rating = model_2.record(0).field('rating').value().toString()
+            self.curr_rating = model_2.record(0).field('rating').value().toString()
+            self.rating2 = model_2.record(0).field('rating2').value().toString()
+
+            self.ui.lineEdit_2.setText(str(round(self.curr_un, 2)))
+
+            self.ui.lineEdit_3.setText(str(round(self.curr_k, 1)))
+                                    
+            #27.01
+            # Выясняем, есть ли номилальная кратность в таблице 'coil'            
+            try:
+                self.fRating2 = float(self.rating2)
+            except Exception:
+                self.fRating2 = None                                           
+
+                                            
+            #1.02
+            #print 'self.fRating', self.fRating
+            #4.02 исправил ошибку
+            if self.fRating2 == None or self.fRating2 < self.epsilon:
+            #if self.fRating == None or self.fRating < self.epsilon:
+                self.ui.lineEdit_8.setText(str(self.curr_rating))
+            else:    
+                self.ui.lineEdit_8.setText(str(self.fRating2))
+                                            
+                                            
+            '''                                
+            # Округление коэффициента безопасности                    
+            if self.fRating == None or self.fRating < self.epsilon:
+                if str(self.info.ClassAccuracy).find('P') == -1:
+                    #измерительная обмотка
+                    self.rating = round(5. * math.ceil(self.curr_k/5))
+                    print 'self.rating', self.rating, self.curr_k
+                else:
+                    #защитная обмотка
+                    self.rating = round(10. * math.ceil(self.curr_k/10))                    
+                    print 'self.rating1', self.rating, self.curr_k
+                    
+            #20.01
+            #self.ui.lineEdit_8.setText(self.rating)
+            self.ui.lineEdit_8.setText(str(self.rating))
+            '''            
+
+            self.checking_2 = int(model_2.record(0).field('id').value().toString())            
+                                                
+#        self.selectPoints(self.idStand, self.idItemLast, self.idCoilLast )
+        self.selectPoints(self.checking_2)
+        self.selectOldPoints()
+        
+###        self.VerificationForm.btnCoilClear.setEnabled(len(self.points) > 0)
+        self.VerificationForm.btnCoilClear.setEnabled(self.checking_2 != None or len(self.points) > 0)
+        self.graphEmpty = (len(self.points) < 1) 
+        
+        #24.11
+        self.calcSeries(idItem)
+        self.sample = self.calcSample(self.series, self.ordernumber, self.idCoilLast)
+        self.ui.lineEdit_11.setText(str(self.sampleSerialnumber))
+
+
+        
+        if model_2.rowCount() >= 1:
+            if self.curr_inom < self.epsilon:
+                if self.serialnumber == self.sampleSerialnumber:
+                    self.ui.lineEdit_10.setText(str(self.info.SecondCurrent))
+                else:    
+                    self.ui.lineEdit_10.setText('')
+            else:                                        
+                self.ui.lineEdit_10.setText(str(round(self.curr_inom, 2)))
+        
+        
+        #24.12       
+        if self.sample != None and self.sample['un'] > self.epsilon:
+            self.ui.lineEdit_2.setText(str(round(self.sample['un'],2)))
+        
+        
+        if self.serialnumber == self.sampleSerialnumber:
+            self.ui.pushButton_3.setText(u'Удалить')
+        else:    
+            self.ui.pushButton_3.setText(u'Назначить')
+                                    
+        #23.11
+        print 
+        self.setColors(idItem, idCoil)
+        
+        self.BieldScene(self.graphicsScene, self.ui.graphicsView.width(), self.ui.graphicsView.height(), self.points, self.oldPoints, 2)
+        
+            
+                                    
+#    def selectPoints(self, idStand, idItem, idCoil ):
+    def selectPoints(self, checking_2):
+        #global points
+        self.points = []
+        strSQL = """
+select a, v
+from checking_2sp
+where checking_2 = :checking_2
+order by id"""
+        self.query_4.prepare(strSQL)
+        self.query_4.bindValue(":checking_2", checking_2)
+        #self.query_4.bindValue(":stand", idStand)
+        #self.query_4.bindValue(":item", idItem)
+        #self.query_4.bindValue(":coil", idCoil)
+        if not self.query_4.exec_():
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка выборки результатов испытания", QMessageBox.Ok)
+        else:    
+            model_4.setQuery(self.query_4)
+                 
+        for i in range(model_4.rowCount()):                                
+            self.points += [[float(model_4.record(i).field('a').value().toString()), float(model_4.record(i).field('v').value().toString())]]
+        print
+        print
+        print
+        print 'checking_2=', checking_2    
+        print  'self.points   self.points = ',   self.points 
+            
+    def selectOldPoints(self):
+        
+        self.oldPoints = []
+        if self.codeTypeTest == 3:
+            return
+        items = '('
+        
+        '''
+        strSQL = """
+select id
+from item
+where serial_number = :serial_number"""
+        self.query_4.prepare(strSQL)
+        self.query_4.bindValue(":serial_number", self.idSerialNumber)
+        '''
+        
+        strSQL = """
+select id
+from item
+where serial_number in
+(select serial_number from item where id=:idItem)"""
+        self.query_4.prepare(strSQL)
+        self.query_4.bindValue(":idItem", self.idItem)
+                
+        if not self.query_4.exec_():
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка выборки серийных номеров", QMessageBox.Ok)
+        else:    
+            model_4.setQuery(self.query_4)
+        for i in range(model_4.rowCount()): 
+            items += model_4.record(i).field('id').value().toString()
+            if i <> model_4.rowCount() - 1:
+                items += ','
+        items += ')'
+        if items == '()':
+            return
+                         
+        strSQL = """
+select a, v
+from checking_2 t1, checking_2sp t2
+where t1.id = t2.checking_2
+and stand = :stand
+and item in """
+        strSQL += items
+        strSQL += """
+and coil = :coil
+order by t2.id
+--order by chektimestamp"""
+        self.query_4.prepare(strSQL)
+        self.query_4.bindValue(":stand", self.idPreStand)
+        self.query_4.bindValue(":coil", self.idCoilLast)
+        if not self.query_4.exec_():
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка выборки предыдущего испытания", QMessageBox.Ok)
+        else:    
+            model_4.setQuery(self.query_4)
+                 
+        for i in range(model_4.rowCount()):                                
+            self.oldPoints += [[float(model_4.record(i).field('a').value().toString()), float(model_4.record(i).field('v').value().toString())]]
+            
+            
+    def resizeEvent(self, event):
+        if self.points != None: 
+            self.BieldScene(self.graphicsScene, self.ui.graphicsView.width(), self.ui.graphicsView.height(), self.points, self.oldPoints, 2) 
+        pass
+            
+                        
+    def returnPress(self):
+        try:
+            if self.ui.lineEdit.text().trimmed() == '':
+                self.curr_r = 0
+            else:    
+                self.curr_r  = float(self.ui.lineEdit.text())
+        except Exception:
+            QMessageBox.warning(self, u"Предупреждение",  u'Величина сопротивления: ' + self.ui.lineEdit.text() + u' не корректна', QMessageBox.Ok)
+            return
+       
+        
+        self.saveR()
+        
+#        QMessageBox.warning(self, u"Предупреждение",  '1', QMessageBox.Ok)
+        self.calcGlobal(self.oMap.iMapID, None, self.idStand, None, None)
+#        QMessageBox.warning(self, u"Предупреждение",  '2', QMessageBox.Ok)
+        rez = self.setColors(self.idItem, self.idCoil)
+#        QMessageBox.warning(self, u"Предупреждение",  '3', QMessageBox.Ok)
+        #4.02
+        if rez != '':
+#            QMessageBox.warning(self, u"Предупреждение",  '4', QMessageBox.Ok)
+            self.btnStart.click()
+            self.sound.play(self.env.config.snd_notify.point_error)
+            #4.02
+            #QMessageBox.warning(self, u"Предупреждение",  u'Cопротивление ' + self.ui.lineEdit.text() + u' не входит в рассчитанный коридор', QMessageBox.Ok)
+            QMessageBox.warning(self, u"Предупреждение",  rez, QMessageBox.Ok)
+        else:    
+#            QMessageBox.warning(self, u"Предупреждение",  '5', QMessageBox.Ok)
+            self.move_item_coil(False)
+#            QMessageBox.warning(self, u"Предупреждение",  '6', QMessageBox.Ok)
+                    
+                        
+                         
+    def move_item_coil(self, isTested):
+        if self.tvCoil.table.currentIndex().row() < self.tvCoil.get_row_count() - 1:
+            self.tvCoil.table.selectRow(self.tvCoil.table.currentIndex().row() + 1)
+#            QMessageBox.warning(self, u"Предупреждение",  'q', QMessageBox.Ok)
+        else:
+            
+            # Пометить трансформ, как протестированный
+            # ..........................
+            # def set_is_tested(self, _item, _value):
+            if self.tvItem.table.currentIndex().row() < self.tvItem.get_row_count() - 1:                
+                self.tvItem.table.selectRow(self.tvItem.table.currentIndex().row() + 1)
+#                QMessageBox.warning(self, u"Предупреждение",  'w', QMessageBox.Ok)
+            else:    
+                self.tvItem.table.selectRow(0)
+                self.tvCoil.table.selectRow(0)
+#                QMessageBox.warning(self, u"Предупреждение",  'e', QMessageBox.Ok)
+        self.tvItem.setEnabled(False)
+        self.tvCoil.setEnabled(False)
+                                         
+                    
+    def returnPress_2(self):
+        pass
+
+    def saveR(self):            
+#        QMessageBox.warning(self, u"Предупреждение", str(model_2.rowCount()), QMessageBox.Ok)
+        if model_2.rowCount() < 1:
+            self.query_9.prepare('INSERT INTO checking_2 (stand, item, coil, r) values (:stand, :item, :coil, :r)')            
+            self.query_9.bindValue(":stand", self.idStand)
+            self.query_9.bindValue(":item", self.idItemLast)
+            self.query_9.bindValue(":coil", self.idCoilLast)
+        else:
+            if self.ui.lineEdit.text() == model_2.record(0).field('r').value().toString():
+                return  # Если значение не поменялось, не сохранять
+                        
+            id = int(model_2.record(0).field('id').value().toString())
+            self.query_9.prepare('UPDATE checking_2 SET r=:r WHERE id=:id')            
+            self.query_9.bindValue(":id", id)
+                
+        if self.ui.lineEdit.text().trimmed() == '':
+            self.query_9.bindValue(":r", None)
+        else:                
+            self.query_9.bindValue(":r", self.curr_r / self.coefR)
+                                
+        if not self.query_9.exec_():
+            QMessageBox.warning(None, u"Предупреждение",
+            u"Ошибка сохранения значения сопротивления в БД",
+            QMessageBox.Ok)
+
+
+    def save_calcData(self, checking_2):
+        # Сохранение Un, In, K в таблице
+        self.query_9.prepare('UPDATE checking_2 SET un=:un, un_=:un_, inom=:inom, k=:k, rating=:rating WHERE id=:id')            
+        self.query_9.bindValue(":id", checking_2)
+        
+        #3.11
+        if self.sample == None or self.sample['un'] < self.epsilon:
+            self.query_9.bindValue(":un", self.nomVoltage)
+        else:    
+            self.query_9.bindValue(":un", self.sample['un'])
+            
+        #26.09
+       # QMessageBox.warning(self, u"Предупреждение", str(self.nomVoltage), QMessageBox.Ok)
+        self.query_9.bindValue(":un_", self.nomVoltage)
+                
+        self.query_9.bindValue(":inom", self.nomAmperage)
+        
+        #26.01
+        self.query_9.bindValue(":k", self.K)
+        if self.sample == None or self.sample['rating'] < self.epsilon:
+            if self.fRating2 == None or self.fRating2 < self.epsilon:
+                self.query_9.bindValue(":rating", self.rating)  # Расчетная номинальная кратность
+            else:    
+                self.query_9.bindValue(":rating", round(self.fRating2)) # Номинальная кратность из таблицы coil
+        else:    
+            self.query_9.bindValue(":rating", self.sample['rating']) # Номинальная кратность из образца
+                
+        '''
+        if self.fRating == None:        
+            self.query_9.bindValue(":k", self.K)
+        else:    
+            self.query_9.bindValue(":k", self.fRating)
+        '''
+        
+
+        self.query_9.exec_()
+        if self.query_9.lastError().isValid():
+            print self.query_9.lastError().text()
+            
+            stateWork = PAUSE
+            self.tread.quit()
+            return
+
+        self.curr_un = self.nomVoltage
+        self.curr_k  = self.K
+        #26.01
+        self.curr_rating  = self.rating
+        
+                
+
+    def save_points(self):
+        self.coil_clear_()
+                            
+        global points
+        print 
+        print 
+        print 
+        print 'self.checking_2=', self.checking_2
+        print 'points', points          
+        for i in range(len(points)):
+            self.query_9.prepare('INSERT INTO checking_2sp (checking_2, chektimestamp, a, v) values (:checking_2, CURRENT_TIMESTAMP, :a, :v)')
+            self.query_9.bindValue(":checking_2", self.checking_2)
+            self.query_9.bindValue(":a", points[i][0])
+            self.query_9.bindValue(":v", points[i][1])
+                                    
+            self.query_9.exec_()
+            if self.query_9.lastError().isValid():
+                print self.query_9.lastError().text()
+                return
+
+        model.clear()
+        
+        strSQL = """
+select distinct coil from checking_2 t1, checking_2sp t2
+where t1.id = t2.checking_2 and t1.item=:item
+"""
+        self.query.prepare(strSQL)
+        self.query.bindValue("item", self.idItem)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+        else:    
+            model.setQuery(self.query)
+        if model.rowCount() < self.tvCoil.get_row_count():
+            pass
+            print u'МЕНЬШЕ'
+        else:
+            self.oItem = Item(self.env, None, self.oMap.iMapID, True)
+            
+            if not self.defectItem: 
+                self.oItem.set_done(self.idItem)
+            #self.oItem.set_defect(self.idItem, 1)
+            #self.oItem.set_noteste(self.idItem)
+                self.oMap.mapRefresh.emit()
+
+
+#19.04
+    #def calcSample(self, series, coil):
+    def calcSample(self, series, ordernumber, coil):
+#19.04
+#    def calcSample(self, series, ordernumber, coil):
+        # Определение образца (первого испытанного транса) из указанной серии
+
+        self.sampleSerialnumber = None
+
+        model.clear()
+        strSQL = """
+select min(t1.id) as id
+from checking_2 t1, item t2, serial_number t3
+where t1.item = t2.id
+and t2.serial_number = t3.id
+and series = :series
+--19.04
+and ordernumber = :ordernumber
+
+and coil = :coil
+"""
+
+        
+        print strSQL
+        print 'series, ordernumber, coil = ', series, ordernumber, coil 
+        self.query.prepare(strSQL)
+        self.query.bindValue(":series", series)
+#19.04
+        self.query.bindValue(":ordernumber", ordernumber)
+        self.query.bindValue(":coil", coil)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return None
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            id = -1
+        else:
+            id =  int(model.record(0).field('id').value().toString())
+
+        model.clear()
+        strSQL = """
+select max(t1.id) as id
+from checking_2 t1, item t2, serial_number t3
+where t1.item = t2.id
+and t2.serial_number = t3.id
+and series = :series
+--19.04
+and ordernumber = :ordernumber
+
+and coil = :coil
+--and t1.id <= :checking_2
+and sample
+"""
+
+
+   #     print strSQL
+        self.query.prepare(strSQL)
+        self.query.bindValue(":series", series)
+#19.04
+        self.query.bindValue(":ordernumber", ordernumber)
+        self.query.bindValue(":coil", coil)
+        #self.query.bindValue(":checking_2", self.checking_2)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return None
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            id1 = -1
+        else:
+            id1 =  int(model.record(0).field('id').value().toString())
+
+        #print 'id, id1=', id, id1
+        id = max(id, id1)
+        if id == -1:
+            return None
+
+
+        model.clear()
+        strSQL = """
+select serialnumber from checking_2 t1, item t2, serial_number t3
+where t1.item = t2.id
+and t2.serial_number = t3.id
+and t1.id = :id
+"""
+        self.query.prepare(strSQL)
+        self.query.bindValue(":id", id)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return None
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            return None
+        else:
+            self.sampleSerialnumber =  int(model.record(0).field('serialnumber').value().toString())
+            
+            if self.sampleSerialnumber == 0:
+                return None
+
+            
+            model.clear()
+            strSQL = "select * from checking_2 where id = :id"
+            self.query.prepare(strSQL)
+            self.query.bindValue(":id", id)
+            if not self.query.exec_():
+                raise Exception(self.query.lastError().text())
+                return None
+            else:
+                model.setQuery(self.query)            
+            
+            if model.rowCount() < 1:
+                return None
+            else:
+                r      = self.coefR * float(model.record(0).field('r').value().toString())
+                k      =  float(model.record(0).field('k').value().toString())
+                rating =  float(model.record(0).field('rating').value().toString())
+                un     = float(model.record(0).field('un').value().toString())
+                inom   = float(model.record(0).field('inom').value().toString())
+###                if math.fabs(r) < self.epsilon or math.fabs(un) < self.epsilon:
+###                    return None
+                return {'id':  id, 'r':  r,  'k':  k, 'rating': rating, 'un': un, 'in': inom}
+        pass
+
+
+
+
+
+#    def calcGlobal(self, iMapID_, idItem_, idStand):
+    def calcGlobal(self, iMapID_, serial_number_, idStand, _accuracyR, _accuracyI):
+        
+        # Если точности по сопротивлению и току равны None,
+        # то их берем из словаря "self.Devices.data" иначе из параметров
+        accuracyR = _accuracyR
+        accuracyI = _accuracyI
+        if accuracyR == None:
+            accuracyR = self.Devices.data['accuracy']['r']
+        if accuracyI == None:
+            accuracyI = self.Devices.data['accuracy']['a']
+        
+        
+        print 'calcGlobal', iMapID_, serial_number_        
+        
+        # iMapId_ != None, serial_number_ == None   -  Для программы тестирования сердечников
+        # iMapId_ == None, serial_number_ != None   -  Для печати отчета из TestInfo
+        
+        iMapID = iMapID_
+        #idItem = idItem_
+        serial_number = serial_number_
+                
+        if iMapID == None and serial_number == None:
+            return False
+        
+        
+        #if idItem != None:
+        if serial_number != None:
+            # Вычисляем iMapID для этого итема                
+            model.clear()
+            
+            
+            #strSQL = "select test_map from item where id = :id"
+            #self.query.prepare(strSQL)
+            #self.query.bindValue(":id", idItem)
+            print 'q'   
+            strSQL = """
+select t1.id as item, t1.test_map from item as t1,
+(select distinct item from checking_2) as t2
+where serial_number = :serial_number and t1.id = t2.item
+"""            
+            self.query.prepare(strSQL)
+            self.query.bindValue(":serial_number", serial_number)
+                        
+            if not self.query.exec_():
+                raise Exception(self.query.lastError().text())
+                return False
+            else:
+                model.setQuery(self.query)
+                
+            print 'strSQL', strSQL    
+                
+            print 'model.rowCount()', model.rowCount()    
+            if model.rowCount() < 1:
+                return False
+            iMapID = int(model.record(0).field('test_map').value().toString())
+            idItem = int(model.record(0).field('item').value().toString())
+
+            print 'idItem-', idItem
+        
+        print 'iMapID=', iMapID
+
+#19.04 Загонять ordernumber в self.globalInfa??????????????????????? 
+
+
+        model.clear()
+        #19.04
+        strSQL = """
+select t1.id as id_item, t3.id as id_coil, series, ordernumber,        t4.fullname
+from item t1, serial_number t2, coil t3                               , transformer t4
+where t1.serial_number = t2.id
+and t2.transformer = t3.transformer
+--and test_map = 37790
+and test_map = :test_map
+
+                                                                   and t3.transformer = t4.id
+
+
+--and t1.defect is null
+
+
+order by t1.id, t3.id
+"""
+
+        self.query.prepare(strSQL)
+        self.query.bindValue(":test_map", iMapID)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return False
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            return False
+
+        self.globalInfa = []
+        self.globalItem = []
+        item = -1
+        for i in range(model.rowCount()):
+            idItem = int(model.record(i).field('id_item').value().toString())
+            idCoil = int(model.record(i).field('id_coil').value().toString())
+#11.11.16   ошивка преобразования         series = int(model.record(i).field('series').value().toString())
+
+            '''
+            QMessageBox.warning(self, u"Предупреждение",  'y', QMessageBox.Ok)
+            try:            
+#                unicode(oQuery.record().value(u'FullName').toString())
+                print 'MMMMMMMM', self.query.record().value(u'fullname').toString()
+                QMessageBox.warning(self, u"Предупреждение",  'y1', QMessageBox.Ok)
+                print model.record(i).field('fullname').value().toString()
+            except Exception:
+                QMessageBox.warning(self, u"Предупреждение",  'error', QMessageBox.Ok)                                
+            QMessageBox.warning(self, u"Предупреждение",  'y2', QMessageBox.Ok)
+            '''
+            
+            
+            '''
+            series = model.record(i).field('series').value().toString()
+            QMessageBox.warning(self, u"Предупреждение",  's2', QMessageBox.Ok)
+            ordernumber = model.record(i).field('ordernumber').value().toString()
+            QMessageBox.warning(self, u"Предупреждение",  's3', QMessageBox.Ok)
+            
+            QMessageBox.warning(self, u"Предупреждение",  series, QMessageBox.Ok)
+            QMessageBox.warning(self, u"Предупреждение",  's31', QMessageBox.Ok)
+            '''
+            
+            series = model.record(i).field('series').value().toString()
+            ###############MMMMMseries = unicode(str(model.record(i).field('series').value().toString()))
+            #QMessageBox.warning(self, u"Предупреждение",  's4', QMessageBox.Ok)
+            #19.04
+            ordernumber = model.record(i).field('ordernumber').value().toString()
+            ################MMMMMordernumber = unicode(str(model.record(i).field('ordernumber').value().toString()))
+            #QMessageBox.warning(self, u"Предупреждение",  's5', QMessageBox.Ok)
+            #19.04
+            self.globalInfa += [[idItem, idCoil, series, ordernumber, None, None, None, None, None]]
+            #QMessageBox.warning(self, u"Предупреждение",  's6', QMessageBox.Ok)
+            if item != idItem:
+                self.globalItem += [[idItem, True]]
+                item = idItem
+        
+
+
+
+
+
+
+        
+        series = '('
+        model.clear()
+        strSQL = """
+select distinct series from item t1, serial_number t2
+where t1.test_map = :test_map
+and t1.serial_number = t2.id
+"""
+        self.query.prepare(strSQL)
+        self.query.bindValue(":test_map", iMapID)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return False
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            return False
+
+        for i in range(model.rowCount()):
+            s = ','
+            if i == model.rowCount() - 1:
+                s = ')'                                
+            series += "'" + model.record(i).field('series').value().toString() + "'" + s
+
+
+        
+        model.clear()
+        strSQL = u"""
+--19.04        
+select t1.id, t1.test_map, series, ordernumber, serialnumber, item, coil, coilnumber, tap, 
+r, un, inom, t4.k, t4.rating, t3.rating as rating2,
+t5.createdatetime, t4.id as checking_2, t1.test_map, t1.defect, 
+t3.classaccuracy
+from item t1, serial_number t2, coil t3, checking_2 t4, test_map t5
+where  t2.series in """ + series + """
+and t1.serial_number = t2.id
+and t2.transformer = t3.transformer
+--and t4.stand = :stand
+--and t4.stand = """ + str(idStand) + """ 
+and t1.id = t4.item
+and t3.id = t4.coil 
+and t1.test_map = t5.id
+--19.04
+order by series, ordernumber, coil, sample, t4.id
+"""
+
+
+     #   print 'strSQL=', strSQL
+        self.query.prepare(strSQL)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+            return False
+        else:
+            model.setQuery(self.query)
+
+        if model.rowCount() < 1:
+            return False
+        
+        self.globalCorridors = []
+        self.globalReport = []
+        
+#        series_ = -1
+        series_ = ''
+#19.04
+        ordernumber_ = ''
+        coil_ = -1
+        
+        
+        for i in range(model.rowCount()):
+            #idItem       = int(model.record(i).field('id').value().toString())
+            idMap          = int(model.record(i).field('test_map').value().toString())
+            checking_2     = int(model.record(i).field('checking_2').value().toString())
+            serialnumber   = int(model.record(i).field('serialnumber').value().toString())
+#11.11.16   ошивка преобразования     series         = int(model.record(i).field('series').value().toString())
+            series         = model.record(i).field('series').value().toString()
+            ################MMMMMseries         = unicode(str(model.record(i).field('series').value().toString()))
+#            print 'unicodeunicodeunicode=', unicode(str(model.record(i).field('series').value().toString()))
+#            print '                     =', str(model.record(i).field('series').value().toString())
+#19.04
+#            ordernumber   = model.record(i).field('ordernumber').value().toString()
+            ordernumber   = model.record(i).field('ordernumber').value().toString()
+            #################MMMMMordernumber   = unicode(str(model.record(i).field('ordernumber').value().toString()))
+            item           = int(model.record(i).field('item').value().toString())
+            coil           = int(model.record(i).field('coil').value().toString())
+            coilnumber     = int(model.record(i).field('coilnumber').value().toString())
+            tap            = int(model.record(i).field('tap').value().toString())
+#            coilname       = u'И' + str(coilnumber) + u'И' + str(tap)
+            coilname       = str(coilnumber) + u'И1-' + str(coilnumber) + u'И' + str(tap)
+#--'И' || cast(t3.coilnumber as varchar ) || 'И' || cast(t3.tap as varchar )  as coilname,
+#            coilname       = str(model.record(i).field('coilname').value().toString())
+            createdatetime = str(model.record(i).field('createdatetime').value().toDate().toString("dd.MM.yy"))
+            #25.02
+            r              = float(model.record(i).field('r').value().toString())
+###            r              = self.coefR * float(model.record(i).field('r').value().toString())
+            inom           = float(model.record(i).field('inom').value().toString())
+            un             = float(model.record(i).field('un').value().toString())
+            k              = float(model.record(i).field('k').value().toString())
+            rating         = float(model.record(i).field('rating').value().toString())
+            rating_2       = model.record(i).field('rating2').value().toString()
+            defect         = int(model.record(i).field('defect').value().toString())
+            
+            #self.curr_rating = model_2.record(0).field('rating').value().toString()
+            #self.rating2 = model_2.record(0).field('rating2').value().toString()
+                                    
+            #4.02
+            # Выясняем, есть ли номилальная кратность в таблице 'coil'            
+            try:
+                fRating2 = float(rating2)
+            except Exception:
+                fRating2 = None                                           
+
+            if fRating2 != None and fRating2 > self.epsilon:
+                rating = fRating2
+
+
+                
+            classaccuracy  = str(model.record(i).field('classaccuracy').value().toString())
+            if str(classaccuracy).find('P') == -1:
+                idClass = 1  # измерительная
+            else:    
+                idClass = 2  # защитная
+                        
+        #    print item, coil            
+            if idMap == iMapID:
+                for j in range(len(self.globalInfa)):
+                    if self.globalInfa[j][0] == item and self.globalInfa[j][1] == coil:            
+                        self.globalInfa[j][4] = r #19.04
+                        self.globalInfa[j][5] = inom #19.04
+                        self.globalInfa[j][6] = k #19.04
+                        self.globalInfa[j][7] = rating #19.04
+                        self.globalInfa[j][8] = idClass #19.04
+                        
+            #19.04                                     
+            if series_ != series or ordernumber_ != ordernumber or coil_ != coil:
+#                if series_ != -1:
+                if series_ != '':
+                    #19.04
+                    self.globalCorridors += [[series_, ordernumber_, coil_, min_r, max_r, min_in, max_in]]
+                # Образцовая катушка
+                series_ = series
+###                series_ = unicode(series)
+             #   print 'series =', series
+             #   print 'series_=', series_
+                #19.04
+                ordernumber_ = ordernumber
+###                ordernumber_ = unicode(ordernumber)
+                coil_   = coil
+                
+                #21.01                
+#                if r > self.epsilon:
+                if r > self.epsilon and defect == 0:
+                    #????????????
+                    #accur_r = r * self.Devices.data['accuracy']['r'] / 100
+                    accur_r = r * accuracyR / 100
+                    min_r  = r - accur_r
+                    max_r  = r + accur_r
+                else:
+                    #???
+                    min_r  = None
+                    max_r  = None
+                
+                
+                #21.01                
+                #if inom > self.epsilon:
+                if inom > self.epsilon and defect == 0:
+                    #????????????
+                    #accur_in = inom * self.Devices.data['accuracy']['a'] / 100
+                    accur_in = inom * accuracyI / 100
+                    min_in  = inom - accur_in
+                    max_in  = inom + accur_in
+                else:
+                    #???
+                    min_in = None
+                    max_in = None
+            else:
+                if r > self.epsilon and defect == 0:
+                    #???????????????
+                    if min_r == None:
+                        #accur_r = r * self.Devices.data['accuracy']['r'] / 100
+                        accur_r = r * accuracyR / 100
+                        min_r  = r - accur_r
+                        max_r  = r + accur_r
+                    else:    
+                        #12.02
+                        #if r >= min_r and r <= max_r:
+                        if r >= min_r - self.epsilon and r <= max_r + self.epsilon:
+                            min_r = max(min_r, r - accur_r)  
+                            max_r = min(max_r, r + accur_r)                    
+                    
+                if inom > self.epsilon and defect == 0:
+                    if min_in == None:
+                        #accur_in = inom * self.Devices.data['accuracy']['a'] / 100
+                        accur_in = inom * accuracyI / 100
+                        min_in  = inom - accur_in
+                        max_in  = inom + accur_in
+                    else:    
+                        #12.02
+                        #if inom >= min_in and inom <= max_in:
+                        if inom >= min_in - self.epsilon and inom <= max_in + self.epsilon:
+                            min_in = max(min_in, inom - accur_in)  
+                            max_in = min(max_in, inom + accur_in)                    
+
+
+
+            # Поскольку в отчете сопротивление с коридором должно быть 
+            # представлено в Омах, производим обратное преобразование
+            '''
+            отставить!!!
+            r_ = None
+            if r != None:
+                r_ = r / self.coefR
+            min_r_ = None
+            if min_r != None:
+                min_r_ = min_r / self.coefR
+            max_r_ = None
+            if max_r != None:
+                max_r_ = max_r / self.coefR
+            '''    
+
+#            print r, min_r, max_r, inom, min_in, max_in, un, k
+            #25.02 
+            if min_r != None:
+                min_r = round(min_r, 3)
+            if max_r != None:
+                max_r = round(max_r, 3)
+            if min_in != None:
+                min_in = round(min_in, 2)
+            if max_in != None:
+                max_in = round(max_in, 2)
+
+            #25.02
+            self.globalReport += [[checking_2, series, ordernumber, serialnumber, coilname, round(r, 3), min_r, max_r, round(inom, 2), min_in, max_in, round(un, 2), round(k, 2), rating, createdatetime, idMap, idClass]]
+            
+        #19.04     
+        self.globalCorridors += [[series, ordernumber, coil, min_r, max_r, min_in, max_in]]
+###        self.globalCorridors += [[unicode(series), unicode(ordernumber), coil, min_r, max_r, min_in, max_in]]
+        
+
+        #self.globalReport.sort()    
+        
+        if serial_number != None:  # Эта ситуация имеет место при печати отчета
+            return True
+                        
+        for i in range(len(self.globalItem)):
+            for j in range(len(self.globalInfa)):
+                if self.globalInfa[j][0] == self.globalItem[i][0]:
+                    #19.04
+                    if self.globalInfa[j][4] == None: #19.04
+                        self.globalItem[i][1] = False
+                    else:
+                        for k in range(len(self.globalCorridors)):
+                                                        
+                            #19.04
+                            if self.globalInfa[j][2] == self.globalCorridors[k][0] and \
+                               self.globalInfa[j][3] == self.globalCorridors[k][1] and \
+                               self.globalInfa[j][1] == self.globalCorridors[k][2]:
+                                if self.globalInfa[j][4] < self.epsilon or \
+                                   self.globalInfa[j][5] < self.epsilon or \
+                                   self.globalInfa[j][4] < self.globalCorridors[k][3] or \
+                                   self.globalInfa[j][4] > self.globalCorridors[k][4] or \
+                                   self.globalInfa[j][5] < self.globalCorridors[k][5] or \
+                                   self.globalInfa[j][5] > self.globalCorridors[k][6]:
+                                    self.globalItem[i][1] = False
+
+        #print    
+        #for i in range(len(self.globalItem)):
+        #    print self.globalItem[i]
+
+            if self.globalItem[i][1]:
+                self.oItem.oHelperItem.set_isTested(self.globalItem[i][0], True)
+                self.oItem.to_done(self.globalItem[i][0])
+            else:    
+                self.oItem.oHelperItem.set_isTested(self.globalItem[i][0], False)
+                self.oItem.to_noteste(self.globalItem[i][0])
+                
+            self.oItem.changeItem.emit(self.globalItem[i][0])
+        self.oMap.mapRefresh.emit()
+        
+
+
+
+    def setColors(self, idItem, idCoil):
+        if self.isVisible() == False:
+            return None
+        self.ui.lineEdit.setStyleSheet("background-color: white")
+        self.ui.lineEdit_3.setStyleSheet("background-color: white")
+        self.ui.lineEdit_10.setStyleSheet("background-color: white")
+        self.ui.lineEdit_7.setText('') 
+        self.ui.lineEdit_6.setText('')
+        r    = None
+        minR = None
+        maxR = None
+        inom = None
+        minI = None
+        maxI = None
+        series = None
+        ordernumber = None #19.04
+        self.corridors = None
+        
+    #    print 'self.oTestCoil.setVisible(True)', self.isVisible()
+        
+        
+        #19.04
+        for i in range(len(self.globalInfa)):
+            print self.globalInfa[i]
+            if self.globalInfa[i][0] == idItem and self.globalInfa[i][1] == idCoil:
+                series = self.globalInfa[i][2]
+                ordernumber = self.globalInfa[i][3] #19.04
+                #print 'ordernumberordernumberordernumberordernumberordernumber', ordernumber
+                r      = self.globalInfa[i][4] #19.04
+                inom   = self.globalInfa[i][5] #19.04
+                k      = self.globalInfa[i][6] #19.04
+                rating = self.globalInfa[i][7] #19.04
+                p      = self.globalInfa[i][8] #19.04
+                break
+        
+        rez = ''
+        #print 'p == 1 and k > rating) or (p == 2 and k < rating', p, k, rating
+        if (p == 1 and k > rating) or (p == 2 and k < rating):
+            self.ui.lineEdit_3.setStyleSheet("background-color: red")
+            rez = u'Неверный расчетный коэффициент по отношению к заданному.\n'
+            
+#        print '                    if series != None and self.globalCorridors != None:',  series, self.globalCorridors   
+        if series != None and self.globalCorridors != None:   
+            for i in range(len(self.globalCorridors)):
+                #19.04
+                #if self.globalCorridors[i][0] == series and self.globalCorridors[i][1] == idCoil:
+                if self.globalCorridors[i][0] == series and self.globalCorridors[i][1] == ordernumber and self.globalCorridors[i][2] == idCoil:
+                    minR = self.globalCorridors[i][3] #19.04
+                    maxR = self.globalCorridors[i][4] #19.04
+                    minI = self.globalCorridors[i][5] #19.04
+                    maxI = self.globalCorridors[i][6] #19.04
+                    
+                    self.corridors = {'min_r':  minR, 'max_r': maxR,
+                                      'min_in': minI, 'max_in': maxI}                    
+                    break
+
+            print 'self.ui.lineEdit_7.setText(str(round(self.coefR * minR,3)) +  -  + str(self.coefR * round(maxR,3)))'
+            print self.coefR, minR, maxR
+             
+
+            if minR != None and maxR != None:
+                #25.02
+                self.ui.lineEdit_7.setText(str(round(self.coefR * minR,3)) + ' - ' + str(self.coefR * round(maxR,3))) 
+                #self.ui.lineEdit_7.setText(str(round(minR,2)) + ' - ' + str(round(maxR,2))) 
+            if r != None and minR != None and maxR != None:
+                if r < minR or r > maxR:
+                    self.ui.lineEdit.setStyleSheet("background-color: red")
+                    rez += u'Cопротивление ' + self.ui.lineEdit.text() + u' не входит в рассчитанный коридор.'
+                    #rez = 1
+            if minI != None and maxI != None:
+                self.ui.lineEdit_6.setText(str(round(minI,2)) + ' - ' + str(round(maxI,2)))
+           # print 'inom,  minI,  maxI', inom,  minI,  maxI
+            # 22.12                 
+            if inom != None and minI != None and maxI != None        and inom > self.epsilon:
+                if inom < minI or inom > maxI:
+                    self.ui.lineEdit_10.setStyleSheet("background-color: red")
+                    rez += u'Ток намагничивания: ' + self.ui.lineEdit_10.text() + u' не входит в рассчитанный коридор.'
+                    '''                    
+                    if rez == 1:
+                        rez = 3
+                    else:    
+                        rez = 2
+                    '''
+                    
+            return rez    
+
+        
+
+    def outStat(self):
+        pass 
+
+
+    #20.01
+    def coefMeasure(self, id_dev):
+        coef = 1.0
+        #print id_dev
+        #print self.Devices.data
+        #print 'self.Devices.data[devices][str(id_dev)][ind_measure]',self.Devices.data['devices'][str(id_dev)]['ind_measure']
+        if self.Devices.data['devices'][str(id_dev)]['ind_measure'] == 1:
+#            coef = 0.1
+            coef = 0.001
+        if self.Devices.data['devices'][str(id_dev)]['ind_measure'] == 2:
+#            coef = 10.0
+            coef = 1000.0
+        return coef    
+
+
+    def work(self):
+#        self.getSecondCurrent = False   # Признак достижения графиком номинального тока
+        #QMessageBox.warning(self, u"Предупреждение", u"Пуск", QMessageBox.Ok)
+        
+        
+        self.workAmp = None
+        self.workVolt = None
+        self.ui.label_4.setText(u'Амперметр')
+        self.ui.label_5.setText(u'Вольтметр')
+        
+        #print "WORK"
+        self.isWork = True 
+        
+        #QMessageBox.warning(self, u"Предупреждение", u"21", QMessageBox.Ok)
+        self.Devices = Devices(self.env)
+        
+        #18.01
+        # Расчет self.MinAmp как максимальное значение из min_value всех активных амперметров       
+#        self.MinAmp = 0
+        self.MinAmp = 999999
+        for i in range(len(self.Devices.data['devices'])):
+            if self.Devices.data['devices'][str(i)]['activ'] == True and self.Devices.data['devices'][str(i)]['ind_name'] == 0:
+                # Без учета единиц измерения
+                #if self.MinAmp < self.Devices.data['devices'][str(i)]['min_value']:
+                #    self.MinAmp = self.Devices.data['devices'][str(i)]['min_value']
+                
+                #20.01
+                # С учетом единиц измерения
+                #if self.MinAmp < self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value']:
+                #    self.MinAmp = self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value']
+                # Без учета единиц измерения (другой алгоритм)
+                if self.MinAmp > self.Devices.data['devices'][str(i)]['min_value']:
+                    self.MinAmp = self.Devices.data['devices'][str(i)]['min_value']
+                    
+        print 'self.MinAmp self.MinAmp self.MinAmp = ', self.MinAmp
+         
+        #20.01 ВРЕМЕННО !!!!!!!!!!!!!!!!!!!!!!!
+        #self.MinAmp = 0.1
+                
+                        
+        #QMessageBox.warning(self, u"Предупреждение", u"22", QMessageBox.Ok)
+#        for i in range(len(self.Devices.data)):
+#            print self.Devices.data['devices'][str(i)]                            
+                
+        self.testEnabled(True)
+        #QMessageBox.warning(self, u"Предупреждение", u"23", QMessageBox.Ok)
+        
+        global stateWork
+        #QMessageBox.warning(self, u"Предупреждение", u"24", QMessageBox.Ok)
+        
+        self.wasHand = self.isHand
+        if True:                
+            # Проверка работоспособности порта и приборов
+            #QMessageBox.warning(self, u"Предупреждение", u"25", QMessageBox.Ok)
+            global AV                 #, ReadPort
+            #QMessageBox.warning(self, u"Предупреждение", u"26", QMessageBox.Ok)
+            global isBreak
+            #QMessageBox.warning(self, u"Предупреждение", u"27", QMessageBox.Ok)
+            AV = self.ReadPort()
+            #QMessageBox.warning(self, u"Предупреждение", u"28", QMessageBox.Ok)
+            
+            if AV == None:
+                isBreak = True                                
+                msgBox(self, u"Проблемы считывания данных с приборов!")
+                self.isHand = False   
+                self.btnStart.click()
+                return False
+
+
+            ''' 
+        #20.01 Перерасчет AV
+        if self.workAmp != None:
+            AV[0] = str(self.coefMeasure(self.workAmp) * float(AV[0]))
+        if self.workVolt != None:
+            AV[1] = str(self.coefMeasure(self.workVolt) * float(AV[1]))
+        print 'AV[0], AV[1] self.MinAmp', AV[0], AV[1], self.MinAmp        
+            
+        if float(AV[0]) < self.MinAmp:        
+'''
+
+
+            # 20.01 подумать как пересчитать единицу измерения
+            if float(AV[0]) >= self.MinAmp:
+#            if self.coefMeasure(self.workAmp) * float(AV[0]) >= self.MinAmp:
+                isBreak = True                                
+                print 'if float(AV[0]) >= self.MinAmp:', float(AV[0]), self.MinAmp
+                #print 'self.workAmp, self.workVolt, self.coefMeasure(self.workAmp)=', self.workAmp, self.workVolt, self.coefMeasure(self.workAmp)
+                msgBox(self, u"Выставьте реостат в ноль и\nзапустите поверку заново.!!!")
+                
+                #QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
+                self.ui.horizontalSlider.setValue(0)
+                
+                self.isHand = False   
+                self.btnStart.click()
+                return False
+                        
+            stateWork = WORK
+            #QMessageBox.warning(self, u"Предупреждение", u"29", QMessageBox.Ok)
+            self.tread.start()
+            #QMessageBox.warning(self, u"Предупреждение", u"2q", QMessageBox.Ok)
+        self.isHand = True
+        #QMessageBox.warning(self, u"Предупреждение", u"2w", QMessageBox.Ok)
+        self.ui.lineEdit.setFocus()
+        #QMessageBox.warning(self, u"Предупреждение", u"2e", QMessageBox.Ok)
+
+        return True
+        
+                    
+    def pause(self):
+        #print "PAUSE"
+        self.isWork = False 
+        self.testEnabled(False)
+    
+        global stateWork        
+        self.wasHand = self.isHand
+#        if self.isHand:                
+        if True:                
+            stateWork = PAUSE
+            self.tread.quit()   # А надо ли?
+                                
+        self.isHand = True   
+
+
+    def on_mysignal(self):
+        self.ui.label_6.setText(self.ui.label_6.text() + "#")
+        if len(self.ui.label_6.text()) > 20:
+            self.ui.label_6.setText("")
+        self.ui.lineEdit_4.setText('____')
+        self.ui.lineEdit_5.setText('____')
+
+    def on_mysignal2(self):
+        print('Обработан пользовательский сигнал2')
+                
+        msgBox(self, u"Сбой COM-порта!\nЗапустите поверку заново.!")
+        self.isHand = True   
+        self.btnStart.click()
+                        
+                
+    def on_mysignal3(self):
+        global AV
+        global points
+        global isBreak
+        global stateWork
+        
+        self.ui.label_6.setText("")
+        #20.01
+        #self.ui.lineEdit_4.setText(AV[0])
+        #self.ui.lineEdit_5.setText(AV[1])
+
+
+        #17.02
+        if AV[0] == False:
+            self.ui.lineEdit_4.setText('____')
+        else:    
+            self.ui.lineEdit_4.setText(str(round(float(AV[0]),5)))
+        
+        if AV[1] == False:
+            self.ui.lineEdit_5.setText('____')
+        else:    
+            self.ui.lineEdit_5.setText(str(round(float(AV[1]),5)))        
+        
+        if AV[0] == False or AV[1] == False:
+            # хотя бы в одной цепочке приборов нет реального значения
+            return
+
+        #self.ui.lineEdit_4.setText(str(round(float(AV[0]),5)))
+        #self.ui.lineEdit_5.setText(str(round(float(AV[1]),5)))
+
+        
+        #20.01 Перерасчет AV
+        if self.workAmp != None:
+            AV[0] = str(self.coefMeasure(self.workAmp) * float(AV[0]))
+        if self.workVolt != None:
+            AV[1] = str(self.coefMeasure(self.workVolt) * float(AV[1]))
+        #print 'AV[0], AV[1] self.MinAmp', AV[0], AV[1], self.MinAmp        
+            
+        if float(AV[0]) < self.MinAmp:        
+            if len(points) >= 1:
+                # завершение испытания очередной обмотки
+                self.workAmp = None
+                self.workVolt = None
+                ''' 
+                if self.getSecondCurrent == False:
+                    # График построен не полностью
+                    self.isHand = True   
+                    self.btnStart.click()
+                    if getTrue(self, u'Латер не достиг номинального тока и тем не менее сохранить график?') == False:
+                        return            
+             #       self.isHand = False   
+             #       self.btnStart.click()
+                '''
+                
+                self.calcNomAmperage(points, self.checking_2, self.sample, self.info.SecondCurrent)
+                                
+                if self.nomAmperage == None:     
+                    self.ui.lineEdit_10.setText('')
+                else:    
+                    self.ui.lineEdit_10.setText(str(round(self.nomAmperage,2)))
+
+                if self.nomAmperage != None and self.nomVoltage != None:
+                    un = self.sample['un']
+                    if un < self.epsilon:
+                        un = self.nomVoltage
+                    self.K = self.calcK(self.nomAmperage, float(self.ui.lineEdit.text()) / self.coefR, un, self.info.SecondLoad)
+                    
+                                        
+                    # Округление коэффициента безопасности                    
+                    if self.fRating == None or self.fRating < self.epsilon:
+                        if str(self.info.ClassAccuracy).find('P') == -1:
+                            #измерительная обмотка
+                            self.rating = round(5. * math.ceil(self.K/5))
+                            print 'self.rating', self.rating, self.curr_k
+                        else:
+                            #защитная обмотка
+                            #4.02                            
+                            self.rating = 10                                                
+                            ###self.rating = round(10. * math.ceil(self.K/10))                    
+                            print 'self.rating1', self.rating, self.curr_k
+                    
+                    
+                    
+                    
+                    #25.01 теперь реальный коэффициент не будет браться из образца                   
+                    #if self.sample['k'] > self.epsilon:
+                    #    self.K = self.sample['k']
+                    
+                    self.ui.lineEdit_3.setText(str(round(self.K,1)))
+                else:    
+                    self.ui.lineEdit_3.setText(u'__________')
+
+
+                #26.09
+            #  self.nomVoltage_ = self.calcNomVoltage(points, self.info.SecondCurrent)
+                print 'self.info.SecondCurrent', self.info.SecondCurrent
+
+                print '@@@@@@@@@@@@@@@@@@@@@@@@@@@self.getSecondCurrent=', self.getSecondCurrent
+                if self.getSecondCurrent == False:
+                    # График построен не полностью
+                    self.isHand = True   
+                    self.btnStart.click()
+                    #if getTrue(self, u'Латер не достиг номинального тока и тем не менее сохранить график?') == False:
+                    msgBox(self, u"Латер не достиг номинального тока.\n Перепроверьте эту катушку заново!")
+                    return            
+
+                
+                print 'SAVE SAVE SAVE SAVE SAVE '                
+                self.save_calcData(self.checking_2)
+                self.save_points()
+
+                self.calcGlobal(self.oMap.iMapID, None, self.idStand, None, None)                
+                
+                rez = self.setColors(self.idItem, self.idCoil)
+                
+                self.ui.label_4.setText(u'Амперметр')                            
+                self.ui.label_5.setText(u'Вольтметр')                            
+                                
+                # Временно                
+#####################################                self.yyy -= 0.05                
+                #self.yyy -= 0.1                
+
+                points = []
+                
+                #4.02
+#                if rez == 2 or rez == 3:                
+                if rez != '':                
+                    self.isHand = True
+                    self.sound.play(self.env.config.snd_notify.point_error)
+                    #QMessageBox.warning(self, u"Предупреждение",  u'Ток намагничивания: ' + self.ui.lineEdit_10.text() + u' не входит в рассчитанный коридор', QMessageBox.Ok)
+                    self.btnStart.click()
+                    QMessageBox.warning(self, u"Предупреждение",  rez, QMessageBox.Ok)
+                    #self.btnStart.click()
+                    return
+                                        
+                # останавливаем чтение с приборов, если протестированы все трансы
+                if (self.tvCoil.table.currentIndex().row() == self.tvCoil.get_row_count() - 1 and
+                    self.tvItem.table.currentIndex().row() == self.tvItem.get_row_count() - 1):                
+                    self.isHand = True   
+                    self.btnStart.click()
+                    return
+                                
+                self.isHand = False
+                #3.11   
+                self.move_item_coil(True)
+            return
+        else:
+            
+            if self.checking_2 == None:
+                isBreak = True        
+                msgBox(self, u"Продолжение невозможно, поскольку\n не сохранено сопротивление!")
+                self.isHand = True   
+                self.btnStart.click()
+                return
+            
+            if not self.graphEmpty:            
+                isBreak = True        
+                msgBox(self, u"Продолжение невозможно, поскольку\nтестирование данной катушки\nбыло проведено ранее!")
+                self.isHand = True   
+                self.btnStart.click()
+                return            
+            
+            
+            # 18.01.2015
+            # 20.01
+            if not self.ui.checkBox.isChecked():
+                if self.workAmp == None or self.workVolt == None:
+                    return
+            
+            
+                        
+            if len(points) < 1:
+                if not self.wasHand:
+                    self.isHand = False   
+                    self.btnStart.click()
+                points += [[float(AV[0]), float(AV[1])]]
+                print 'points=', points
+                return
+            else:
+                if float(AV[0]) < points[len(points)-1][0]:
+                    return    # крутанули латер назад
+                else:
+                    if float(AV[0]) == points[len(points)-1][0]:
+                        return    # игнорирование повторяющихся точек
+                    points += [[float(AV[0]), float(AV[1])]]
+                    print 'points111=', points
+                                        
+                    self.getSecondCurrent = False        # Признак достижения графиком номинального тока                
+                    if points[len(points)-1][0] > self.info.SecondCurrent:
+                        # сигнал к тому, что достигнуто значение номинального тока и латер дальше можно не крутить
+                        self.getSecondCurrent = True           # Признак достижения графиком номинального тока             
+                        self.ui.lineEdit_10.setStyleSheet("background-color: green")
+                        self.sound.play(self.env.config.snd_notify.coil_done)
+                                                                
+                    ###self.corridors = None         ###      17.10.16
+                    self.BieldScene(self.graphicsScene, self.ui.graphicsView.width(), self.ui.graphicsView.height(), points, self.oldPoints, 1)
+
+                    #24.12
+                    self.calcNomAmperage(points, self.checking_2, self.sample, self.info.SecondCurrent)
+                                
+                    if self.nomAmperage == None:     
+                        self.ui.lineEdit_10.setText('')
+                    else:    
+                        self.ui.lineEdit_10.setText(str(round(self.nomAmperage,2)))
+
+
+                    
+                    if self.nomAmperage != None and self.nomVoltage != None:
+                        un = self.sample['un']
+                        if un < self.epsilon:
+                            un = self.nomVoltage
+                        self.K = self.calcK(self.nomAmperage, float(self.ui.lineEdit.text()) / self.coefR, un, self.info.SecondLoad)
+                                                            
+                        # Округление коэффициента безопасности                    
+                        if self.fRating == None or self.fRating < self.epsilon:
+                            if str(self.info.ClassAccuracy).find('P') == -1:
+                                #измерительная обмотка
+                                self.rating = round(5. * math.ceil(self.K/5))                                                                                            
+                            else:
+                                #защитная обмотка
+                                self.rating = 10                                                
+                    
+                        self.ui.lineEdit_3.setText(str(round(self.K,1)))
+                        
+                        if self.fRating2 == None or self.fRating2 < self.epsilon:
+                            self.ui.lineEdit_8.setText(str(self.rating))                        
+                        
+                    else:    
+                        self.ui.lineEdit_3.setText(u'__________')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    #24.12
+                    if self.sample == None or self.sample['un'] < self.epsilon:
+                        if self.ui.lineEdit.text() != '' and self.nomVoltage != None:
+                            self.ui.lineEdit_2.setText(str(round(self.nomVoltage,2)))
+                        else:    
+                            self.ui.lineEdit_2.setText(u'__________')
+                    '''
+                    if self.sample != None and self.sample['un'] > self.epsilon:
+                        self.ui.lineEdit_2.setText(str(round(self.sample['un'],4)))
+                    else:    
+                        if self.ui.lineEdit.text() != '' and self.nomVoltage != None:
+                            self.ui.lineEdit_2.setText(str(round(self.nomVoltage,4)))
+                        else:    
+                            self.ui.lineEdit_2.setText(u'__________')
+                    '''
+
+
+
+        
+
+    def calcNomAmperage(self, points, checking_2, sample, SecondCurrent):
+        # Расчет обратного номинального тока
+        if sample == None or checking_2 == sample['id']:
+            self.nomAmperage = SecondCurrent
+            return self.nomAmperage             
+        self.nomAmperage = None
+#        for i in range(len(points) - 1):
+        #24.11
+        for i in range(len(points)):
+            if (i > 0 and sample['un'] >= points[i - 1][1]
+                      and sample['un'] <= points[i][1]):
+                # График пересекся с линией y = self.sample['un']
+                x1 = points[i - 1][0]
+                x2 = points[i][0]
+                y1 = points[i - 1][1]
+                y2 = points[i][1]
+                #print 'x1, x2, y1, y2=', x1, x2, y1, y2
+                                
+                if abs(y2 - y1) > self.epsilon:
+                    self.nomAmperage = (sample['un'] - y1) * (x2 - x1) / (y2 - y1) + x1
+                else:
+                    self.nomAmperage = y1
+                return self.nomAmperage             
+                    
+        # График не пересекся с линией y = self.sample['un']
+        # Продлеваем последний отрезок и пытаемся найти пересечение
+           
+        i = len(points) - 1                
+        x2 = points[i][0]
+        y2 = points[i][1]        
+        while i > 0 and y2 <= points[i - 1][1]:
+            i -= 1        
+        if i > 0:  
+            x1 = points[i - 1][0]
+            y1 = points[i - 1][1]                
+            y  = sample['un']
+            #print y, y1, y2, x1, x2
+            if abs(x2 - x1) > self.epsilon and abs(y2 - y1) > self.epsilon:
+                self.nomAmperage = (y - y1) * (x2 - x1) / (y2 - y1) + x1
+        
+                                        
+        return self.nomAmperage             
+    
+
+        
+    def showTestCoilReport(self):
+        self.TestCoilReport.ui.groupBox.setTitle(u'Данные по катушке № ' + str(self.info.CoilNumber) + u' (серия: ' + self.series + ')')
+        
+        self.TestCoilReport.ui.label.setText(u'Образец\nЗав.№ ' + str(self.sampleSerialnumber))
+        self.TestCoilReport.ui.label_2.setText(u'Изделие\nЗав.№ ' + str(self.serialnumber))
+        
+        self.TestCoilReport.ui.lineEdit.setText(str(self.sample['r']))
+        self.TestCoilReport.ui.lineEdit_2.setText(str(self.sample['un']))
+        self.TestCoilReport.ui.lineEdit_3.setText(str(self.sample['in']))
+        self.TestCoilReport.ui.lineEdit_4.setText(str(self.sample['k']))
+        self.TestCoilReport.ui.lineEdit_5.setText(self.ui.lineEdit.text())
+        self.TestCoilReport.ui.lineEdit_6.setText(self.ui.lineEdit_2.text())
+####        self.TestCoilReport.ui.lineEdit_7.setText(self.ui.lineEdit_6.text())
+        self.TestCoilReport.ui.lineEdit_7.setText(self.ui.lineEdit_10.text())
+        self.TestCoilReport.ui.lineEdit_8.setText(self.ui.lineEdit_3.text())
+        self.TestCoilReport.ui.lineEdit_9.setText(str(self.Devices.data['accuracy']['r']))
+        self.TestCoilReport.ui.lineEdit_10.setText(str(self.Devices.data['accuracy']['a']))
+        self.TestCoilReport.ui.lineEdit_13.setText(str(self.fact_accur_r))        
+        if self.fact_accur_r  > self.Devices.data['accuracy']['r']:                        
+            self.TestCoilReport.ui.lineEdit_13.setStyleSheet("background-color: red")
+        else:    
+            self.TestCoilReport.ui.lineEdit_13.setStyleSheet("background-color: white")
+        
+        self.TestCoilReport.ui.lineEdit_14.setText(str(self.fact_accur_un))
+        if self.fact_accur_un  > self.Devices.data['accuracy']['a']:                        
+            self.TestCoilReport.ui.lineEdit_14.setStyleSheet("background-color: red")
+        else:    
+            self.TestCoilReport.ui.lineEdit_14.setStyleSheet("background-color: white")
+                                                
+        self.TestCoilReport.setEnabled(True)
+        self.TestCoilReport.exec_()
+        
+                
+    def signScale(self, x):
+        # Генерирует список подписей осей координат
+        if abs(x) < self.epsilon:
+            return [0]
+        sgn = 1
+        if x < 0:
+            sgn = -1            
+        n = 0
+        x_ = abs(x)
+        if x_ >= 100:
+            while x_ >= 100:
+                x_ /= 10;  n += 1
+        if x_ < 10:
+            while x_ < 10:
+                x_ *= 10;  n -= 1
+        x_ = round(x_)
+        signs = []
+        k = 1.    
+        if x_ > 25 and x_ <= 50:
+            k = 0.5
+        if x_ <= 25:
+            k = 0.25
+        for i in range(10):    
+            sign = sgn * round(k * (i+1) * pow(10, n+1), -n+1)
+            if abs(sign) > abs(x):
+                break
+            signs += [sign]
+        return signs    
+
+
+    def BieldScene(self, scene, width, height, points, pre_points, mode):
+        # mode = 1 - виден график целиком
+        # mode = 2 - виден график до правой линии коридора 
+        #print 'BieldScene'
+        scene.clear()
+        
+        self.nomVoltage = None
+        all_points = points + pre_points
+        if len(all_points) < 1:
+            return
+
+        maxX = all_points[0][0]
+        maxY = all_points[0][1]
+        for i in range(len(all_points)):
+            if all_points[i][0] > maxX:
+                maxX = all_points[i][0]
+            if all_points[i][1] > maxY:
+                maxY = all_points[i][1]
+                
+        print '1maxX=', maxX        
+        #14.10.16
+#        '''
+        if mode == 1:                        
+            if self.corridors != None and maxX < self.corridors['max_in']: 
+                maxX = self.corridors['max_in']        
+            if self.curr_inom != None and maxX < self.curr_inom:
+                maxX = self.curr_inom
+        else:            
+            maxX_ = self.info.SecondCurrent    
+            if self.corridors != None and maxX_ < self.corridors['max_in']: 
+                maxX_ = self.corridors['max_in']        
+            if self.curr_inom != None and maxX_ < self.curr_inom:
+                maxX_ = self.curr_inom
+            maxX = maxX_            
+        #14.10.16    
+            
+            
+            
+        maxX *= 1.02 # Чтобы были видны линии коридоров  
+        
+        
+        
+             
+       # maxX *= 1.2  # Чтобы были видны линии коридоров
+                
+                
+        smXl = round(0.1 * width)
+        smXr = round(0.05 * width)
+        smYt = round(0.1 * height)
+        smYb = round(0.1 * height)
+        vW = width
+        vH = height
+        grW = width - smXl - smXr
+        grH = height - smYt - smYb
+        rPoint = 2
+        
+        kX = kY = 1
+        
+        if abs(maxX) > self.epsilon:
+            kX = maxX / grW        
+        if abs(maxY) > self.epsilon:
+            kY = maxY / grH        
+        
+        # Оси координат
+        self.pen.setColor(QtCore.Qt.black)
+        self.pen.setWidth(2)
+                
+        
+        scene.addLine(smXl, smYt, smXl, vH - smYb, self.pen)
+        scene.addLine(smXl, vH - smYb, vW - smXr, vH - smYb, self.pen)
+
+        # Подписи осей
+        #24.05.2016
+        fnt =  QFont()
+        fnt.setPixelSize(20)
+        t1 = scene.addText('A', fnt)            
+        t1.setPos(vW - smXr + 2, vH - 2 * smYb)
+        t1 = scene.addText('V', fnt)            
+        t1.setPos(smXl, 2)
+        
+        self.pen.setWidth(1)
+        ss = self.signScale(maxX)
+        for i in range(len(ss)):
+            self.pen.setColor(QtCore.Qt.gray)
+            scene.addLine(smXl + round(ss[i] / kX), vH - smYb, smXl + round(ss[i] / kX), smYt, self.pen)
+            t1 = scene.addText(str(ss[i]))
+            #t1 = scene.addText('{:.0f}'.format(ss[i]))
+            
+            t1.setPos(smXl + round(ss[i] / kX - t1.boundingRect().width() / 2), vH - smYb - 4)
+        ss = self.signScale(maxY)
+        for i in range(len(ss)):
+            scene.addLine(smXl, vH - smYb - round(ss[i] / kY), vW - smXr, vH - smYb - round(ss[i] / kY), self.pen)
+            t1 = scene.addText(str(ss[i]))
+            #t1 = scene.addText('{:.0f}'.format(ss[i]))
+            smT = smXl - t1.boundingRect().width()
+            if smT < 0:
+                smT = 0
+            t1.setPos(smT , vH - smYb - round(ss[i] / kY + t1.boundingRect().height() / 2))
+                
+        # Линия номинального вторичного тока
+        self.pen.setColor(QtCore.Qt.red)
+        scene.addLine(smXl + round(self.info.SecondCurrent/kX), smYt,
+                      smXl + round(self.info.SecondCurrent/kX), vH - smYb, self.pen)
+                
+        # Расчет номинального напряжения
+        self.nomVoltage = self.calcNomVoltage(points, self.info.SecondCurrent)
+                                  
+                                                               
+        # Линия номинального напряжения
+#        if self.nomVoltage != None and self.nomVoltage > self.epsilon:                                
+#            scene.addLine(smXl, vH - smYt - round(self.nomVoltage/kY), vW - smXr, vH - smYt - round(self.nomVoltage/kY), self.pen)
+
+        # Линия номинального напряжения образца
+        if self.sample != None:
+            self.pen.setColor(QtCore.Qt.green)
+            scene.addLine(smXl, vH - smYt - round(self.sample['un']/kY), vW - smXr, vH - smYt - round(self.sample['un']/kY), self.pen)
+
+        # Линия номинального тока рассчитанного по данным образца
+        #print self.curr_inom, self.curr_inom, self.epsilon
+        #2.11
+        
+        
+        print
+        print
+        print
+        print '                     self.info.SecondCurrent=', self.info.SecondCurrent
+        print '                     self.curr_inom=', self.curr_inom
+        
+        if self.curr_inom != None:
+            scene.addLine(smXl + round(self.curr_inom/kX), smYt,
+                          smXl + round(self.curr_inom/kX), vH - smYb, self.pen)
+        
+        # Коридор номинального тока по всей серии/заказу
+        print u'Коридор номинального тока по всей серии/заказу', self.corridors
+        self.pen_2.setWidth(2)
+        self.pen_2.setColor(QtCore.Qt.green)
+        self.pen_2.setDashPattern([5,5])
+        self.pen_2.setDashOffset(5)
+        
+        if self.corridors != None:
+            
+           # print 'self.corridorsself', self.corridors, smXl
+            if self.corridors['min_in'] != None:
+                scene.addLine(smXl + round(self.corridors['min_in']/kX), smYt,
+                              smXl + round(self.corridors['min_in']/kX), vH - smYb, self.pen_2)
+                scene.addLine(smXl + round(self.corridors['max_in']/kX), smYt,
+                              smXl + round(self.corridors['max_in']/kX), vH - smYb, self.pen_2)
+
+        # Кривая предыдущего испытания
+        if pre_points != []:
+            self.pen.setColor(QtCore.Qt.red)
+            for i in range(len(pre_points) - 1):
+                scene.addLine(smXl + round(pre_points[i][0]/kX), vH - smYt - round(pre_points[i][1]/kY),
+                              smXl + round(pre_points[i+1][0]/kX), vH - smYt - round(pre_points[i+1][1]/kY), self.pen)
+
+
+        self.pen.setWidth(2)
+        # Кривая текущего испытания
+        self.pen.setColor(QtCore.Qt.black)
+        for i in range(len(points) - 1):
+            scene.addLine(smXl + round(points[i][0]/kX), vH - smYt - round(points[i][1]/kY),
+                          smXl + round(points[i+1][0]/kX), vH - smYt - round(points[i+1][1]/kY), self.pen)
+
+
+        
+        # Достраиваем график до пересечения с линией номинального напряжения (в случае необходимости)
+        '''
+        if self.sample != None:
+            self.pen.setColor(QtCore.Qt.gray)
+            scene.addLine(smXl, vH - smYt - round(self.sample['un']/kY), vW - smXr, vH - smYt - round(self.sample['un']/kY), self.pen)
+'''
+
+
+    def calcNomVoltage(self, points, SecondCurrent):
+        # Расчет номинального напряжения
+       # print 'points', points
+       # print 'SecondCurrent', SecondCurrent
+#        for i in range(len(points) - 1):
+        for i in range(len(points)):
+            if (i > 0 and SecondCurrent >= points[i - 1][0]
+                      and SecondCurrent <= points[i][0]):
+                x1 = points[i - 1][0]
+                x2 = points[i][0]
+                y1 = points[i - 1][1]
+                y2 = points[i][1]
+              #  print 'x1,x2,y1,y2', x1,x2,y1,y2
+                if abs(x2 - x1) > self.epsilon:
+                    return (SecondCurrent - x1) * (y2 - y1) / (x2 - x1) + y1
+                else:
+                    return y1
+        return None
+
+
+
+    def pushButton_2_Click(self):
+        #QMessageBox.warning(self, u"Предупреждени1еее", str(model_2.rowCount()), QMessageBox.Ok)
+        return
+        
+        global port
+        port = Serial()
+        return
+        
+        
+        '''
+#        K = self.calcK(self.nomAmperage, float(self.ui.lineEdit.text()) / self.coefR, un, self.info.SecondLoad)
+        #K = self.calcK(self.nomAmperage, r, un, secondload)
+        K = self.calcK(4.5675382781, 10.0 / 1000, 2.1360679775, 10.0)
+        print K
+        K = self.calcK(5, 10.0 / 1000, 2.1360679775, 10.0)
+        print K
+        return
+        K = self.calcK(5.4575864031, 9.0 / 1000, 2.2360679775, 10.0)
+        print K
+        return
+        '''
+        
+        
+        x1 = 5.0
+        y1 = 2.0860679775
+        x2 = 5.6
+        y2 = 2.2164319132
+        y =  2.1860679775
+        x = (y - y1)*(x2 - x1) / (y2 - y1) + x1
+        print x
+        return
+        
+        x1 = 5.4
+        y1 = 2.2237900077
+        x2 = 5.6
+        y2 = 2.2664319132
+        y =  2.2360679775
+        x = (y - y1)*(x2 - x1) / (y2 - y1) + x1
+        print x
+        
+        x1 = 5.4
+        y1 = 2.1737900077
+        x2 = 5.6
+        y2 = 2.2164319132
+        y =  2.1860679775
+        x = (y - y1)*(x2 - x1) / (y2 - y1) + x1
+        print x
+        
+        return
+        print self.Devices.data['devices']
+        for i in range(len(self.Devices.data['devices'])):
+            print self.Devices.data['devices'][str(i)]['min_value']
+#            print self.Devices.data['devices'][i]['min_value']
+        
+        
+        
+        return
+#        inputParms = {u'test_map':self.oMap.iMapID} 
+#        inputParms = {u'snID':148377}    
+        inputParms = {u'snID':148377, u'item':245095}    
+        
+        try:
+            rpt = FRPrintForm(u'error_estimation.fr3' ,inputParms , self.env)
+            rpt.preview()
+            # rpt.design()
+        except:
+            pass
+        
+        return
+
+
+
+        inputParms = {u'test_map':1000}
+        print 'self.env', self.env
+        rpt = FRPrintForm(u'ReportTickets.fr3' ,inputParms , self.env)
+        print 111
+        print rpt.get_connection_string()
+        print 222
+        rpt.preview()
+        print 333
+        print 444
+        
+        #rpt.print_()
+        return
+        
+        
+        
+        #print 'self.oMap.iMapID', self.oMap.iMapID
+        #return
+
+        return
+                
+        print 'self.sample=', self.sample
+        self.calcGlobal()
+        return
+        print 'self.oMap.iMapID', self.oMap.iMapID
+        return
+        self.oMap.mapRefresh.emit()
+        return
+        
+        print self.idItem
+#        print self.oItem.stateItem
+###        self.oItem.set_noteste(self.idItem)
+        self.oItem.oHelperItem.set_isTested(self.idItem, False)
+        self.oItem.to_noteste(self.idItem)
+        self.oItem.changeItem.emit(self.idItem)
+#        self.oItem.set_noteste(245095)
+#        self.oMap.mapRefresh.emit()
+#        self.oItem.set_noteste(245096)
+        self.oMap.mapRefresh.emit()
+
+        
+    def pushButton_Click(self):
+        # 9.02
+        #self.report()
+        import ReportsExcel
+        if self.ui.checkBox.isChecked():
+            ReportsExcel.report(self.VerificationForm.ui.lbShortName.text(), self.series, None, self.globalReport, self.Devices.data['accuracy']['r'], self.Devices.data['accuracy']['a'])
+        else:            
+            ReportsExcel.report(self.VerificationForm.ui.lbShortName.text(), self.series, self.ordernumber, self.globalReport, self.Devices.data['accuracy']['r'], self.Devices.data['accuracy']['a'])                
+        return
+        #self.oMap.iMapID
+        
+#        inputParms = {u'test_map':1000} 
+#        rpt = FRPrintForm(u'tester_protocol.fr3' ,inputParms , self.env)
+        inputParms = {u'test_map':self.oMap.iMapID} 
+        rpt = FRPrintForm(u'ReportTickets.fr3' ,inputParms , self.env)
+        rpt.print_()
+        
+       # self.setMeasureR()
+        return
+        print self.idItem
+        print self.oItem.stateItem
+        self.oItem.oHelperItem.set_isTested(self.idItem, True)
+        self.oItem.to_done(self.idItem)
+        self.oItem.changeItem.emit(self.idItem)
+###        self.oItem.set_done(self.idItem)
+        #self.oItem.set_done(245095)
+        #self.oMap.mapRefresh.emit()
+        #self.oItem.set_done(245096)
+        self.oMap.mapRefresh.emit()
+        print 2        
+#        self.oItem.set_noteste(self.idItem)
+        return
+        
+        
+#        elif self.oMap.stateMap in (self.oMap.EMPTY, self.oMap.FULL, self.oMap.DONE):
+#        self.oMap.stateMap = self.oMap.DONE
+#        self.oMap.stateMap = self.oMap.DONE
+        self.oMap.stateMap = self.oMap.EMPTY
+        return
+        
+        
+        
+                
+        
+        
+        self.TestCoilReport.setEnabled(True)
+        self.TestCoilReport.exec_()
+        return
+        
+        print self.TestCoilReport.ui.lineEdit.text()
+        #print self.TestCoilReport
+        self.TestCoilReport.setEnabled(True)
+        self.TestCoilReport.exec_()
+        return
+        
+
+    def ReadPort(self):
+        global port
+        global isReadPort
+
+        time.sleep(0.01)
+        
+        # Чтение показания приборов (амперметр, вольтметр)    
+        global isTest
+        
+        try:
+            A = ''
+            V = ''
+            port.port = self.env.config.devices.chp02m.port
+            port.baudrate = 9600
+            port.bytesize = 8
+            port.parity = 'N'
+            port.stopbits = 1
+            port.timeout = 0.1
+            #16.02
+#            if not self.ui.checkBox.isChecked():
+            if not self.ui.checkBox.isChecked() or self.ui.checkBox_2.isChecked():
+                port.close()
+                port.open()
+                        
+                        
+            if self.ui.checkBox.isChecked():
+                a = self.workAmp
+                if a != None: a += 1
+                v = self.workVolt
+                if v != None: v += 1
+                
+                self.ui.checkBox_2.setText(u'Читать приборы (' + str(a) + ') (' + str(v) + ')')                     
+                                                
+            # A - показание амперметра
+            # 20.01
+            #if self.ui.checkBox.isChecked():
+               # Эмуляция чтения порта
+            #    A = str(0.2*self.ui.horizontalSlider.value())
+            #else:
+            if self.Devices.data['min_alg'] == False:    
+                A = self.ReadDevices(port, 0)
+            else:    
+                A = self.ReadDevices_2(port, 0, self.workAmp)
+            print 'AAAAA', A
+                  
+            #QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
+            if A == None:
+                isReadPort = True
+                return None
+            time.sleep(0.01)
+            # V - показание вольтметра
+            # 20.01            
+            #if self.ui.checkBox.isChecked():
+               # Эмуляция чтения порта
+            #    V = str(math.sqrt(0.2*self.ui.horizontalSlider.value()) + self.yyy)
+            #else:            
+            if self.Devices.data['min_alg'] == False:    
+                V = self.ReadDevices(port, 1)
+            else:    
+                V = self.ReadDevices_2(port, 1, self.workVolt)
+            print 'VVVVV', V
+                            
+            if V == None:
+                isReadPort = True
+                return None
+            
+        except SerialException:
+            print u"Порт " + port.port + u' не открывается!'
+            self.errStr = u"Порт " + port.port + u' не открывается!'
+            isReadPort = True
+            return None
+        except Exception:
+            isReadPort = True
+            return None
+        finally:
+            port.close()
+        isReadPort = True
+        #20.01
+        #return A.strip(), V.strip()
+        #return (A.strip(), V.strip())
+        
+        # 17.02
+        if A != False:
+            A = A.strip()
+        if V != False:
+            V = V.strip()
+        print '[A, V]', [A, V]    
+        return [A, V]                    
+        #return [A.strip(), V.strip()]
+
+    def ReadDevices(self, port, ind_name):
+        # Чтение показаний цепочки приборов (выбирается показание с первого работающего прибора)        
+        # ind_name = 0 - амперметры        
+        # ind_name = 1 - вольтметры
+        
+        self.ind_name = ind_name # self.ind_name - для режима эмуляции 
+                
+        for i in range(len(self.Devices.data['devices'])):
+            self.ind_device = i + 1  # self.ind_device - для режима эмуляции
+            
+            if self.Devices.data['devices'][str(i)]['activ'] == False or self.Devices.data['devices'][str(i)]['ind_name'] <> ind_name:
+                continue
+#            if workDev != None and workDev != i:
+#                continue
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(3)+chr(0)+chr(5)+chr(0)+chr(5)
+
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(4)+chr(0)+chr(22)+chr(0)+chr(2)
+            st += chr(crc16(st)[0]) + chr(crc16(st)[1])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                Val = self.ReadDevice(port,  st, True)
+                if ind_name == 0:
+                    self.ui.lineEdit_14.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    self.ui.lineEdit_15.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                time.sleep(self.Devices.data['pause'])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:                 
+                Val = self.ReadDevice1(port,  st, True)
+                if ind_name == 0:
+                    self.ui.lineEdit_14.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    self.ui.lineEdit_15.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                    
+                if i == 2:    
+                    self.ui.lineEdit_16.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                time.sleep(self.Devices.data['pause'])
+                
+            '''               
+            # Определение рабочего прибора и присвоение ему индекса
+            if workDev == None:
+                if Val != None:
+                    # С учетом единицы измеренния
+                    if float(Val) > self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value']:
+                        workDev = i #??????????????????????????
+                        if ind_name == 0:
+                            print 'ValAmper=', Val
+                            self.workAmp = i                            
+                            self.ui.label_4.setText(str(self.workAmp + 1) + u'. Амперметр (' + self.Devices.Measures[self.workAmp].currentText() + u')')                            
+
+                        if ind_name == 1:
+                            print 'ValVoltmetr=', Val
+                            self.workVolt = i
+                            self.ui.label_5.setText(str(self.workVolt + 1) + u'. Вольтметр (' + self.Devices.Measures[self.workVolt].currentText() + u')')                            
+                            
+                        return Val
+                    else:
+                        continue
+            '''                                     
+#        if workDev == None:
+#            return False   # False означает, что показания всех трансов из цепочки нулевые
+            if Val == None:
+                continue
+            else:
+                return Val                             
+        return Val
+
+    def ReadDevices_2(self, port, ind_name, workDev):
+        # Чтение показаний цепочки приборов (выбирается показание с первого прибора превышающего минимальное значение)         
+        # ind_name = 0 - амперметры        
+        # ind_name = 1 - вольтметры
+        
+        #20.01
+        self.ind_name = ind_name # self.ind_name - для режима эмуляции 
+                
+        for i in range(len(self.Devices.data['devices'])):
+            self.ind_device = i + 1  # self.ind_device - для режима эмуляции
+#            print 'i=', i, 'ind_name=',ind_name, 'workDev=', workDev
+            #time.sleep(0.01)
+            
+            if self.Devices.data['devices'][str(i)]['activ'] == False or self.Devices.data['devices'][str(i)]['ind_name'] <> ind_name:
+                continue
+            if workDev != None and workDev != i:
+                continue
+#            print '                   i=', i, 'ind_name=',ind_name, 'workDev=', workDev
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(3)+chr(0)+chr(5)+chr(0)+chr(5)
+
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(4)+chr(0)+chr(22)+chr(0)+chr(2)
+            #st_ = str(ord(s[0]))+' '+str(ord(s[1]))+' '+str(ord(s[2]))+' '+str(ord(s[3]))+' '+str(ord(s[4])) 
+            st += chr(crc16(st)[0]) + chr(crc16(st)[1])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                Val = self.ReadDevice(port,  st)
+                if ind_name == 0:
+                    print 'ADDRESS1111111', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_14.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    print 'ADDRESS2222222', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_15.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                #time.sleep(0.001)
+                #time.sleep(0.02)
+                time.sleep(self.Devices.data['pause'])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:
+                 
+                Val = self.ReadDevice1(port,  st)
+                if ind_name == 0:
+                    print 'ADDRESS3333333', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_14.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    print 'ADDRESS4444444', str(self.Devices.data['devices'][str(i)]['address']), Val
+                    self.ui.lineEdit_15.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                    
+                if i == 2:    
+                    self.ui.lineEdit_16.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                #time.sleep(0.001)
+                #time.sleep(0.02)
+                time.sleep(self.Devices.data['pause'])
+            # Определение рабочего прибора и присвоение ему индекса
+            #print 'Val__________________=', Val
+            if workDev == None:
+                if Val != None:
+                    # С учетом единицы измеренния
+                    #print 'Val=', Val
+                    #print float(Val), self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value'], i
+                    if float(Val) > self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value']:
+                        workDev = i #??????????????????????????
+                        if ind_name == 0:
+                            print 'ValAmper=', Val
+                            self.workAmp = i                            
+                            #19.01 поменял единицу измерения 
+                            self.ui.label_4.setText(str(self.workAmp + 1) + u'. Амперметр (' + self.Devices.Measures[self.workAmp].currentText() + u')')                            
+
+                        if ind_name == 1:
+                            print 'ValVoltmetr=', Val
+                            self.workVolt = i
+                            #19.01 поменять единицу измерения 
+                            self.ui.label_5.setText(str(self.workVolt + 1) + u'. Вольтметр (' + self.Devices.Measures[self.workVolt].currentText() + u')')                            
+                            
+                        return Val
+                    else:
+                        continue                            
+        #17.02                            
+        if workDev == None:
+            return False   # False означает, что показания всех трансов из цепочки нулевые                             
+        return Val
+
+                    
+    def ReadDevices_999(self, port, ind_name, workDev): # Архивный вариант
+        # Чтение показаний цепочки приборов        
+        # ind_name = 0 - амперметры        
+        # ind_name = 1 - вольтметры
+        
+        #20.01
+        self.ind_name = ind_name # self.ind_name - для режима эмуляции 
+                
+        for i in range(len(self.Devices.data['devices'])):
+            self.ind_device = i + 1  # self.ind_device - для режима эмуляции
+#            print 'i=', i, 'ind_name=',ind_name, 'workDev=', workDev
+            #time.sleep(0.01)
+            
+            if self.Devices.data['devices'][str(i)]['activ'] == False or self.Devices.data['devices'][str(i)]['ind_name'] <> ind_name:
+                continue
+            if workDev != None and workDev != i:
+                continue
+#            print '                   i=', i, 'ind_name=',ind_name, 'workDev=', workDev
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(3)+chr(0)+chr(5)+chr(0)+chr(5)
+
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:
+                st = chr(self.Devices.data['devices'][str(i)]['address'])+chr(4)+chr(0)+chr(22)+chr(0)+chr(2)
+            #st_ = str(ord(s[0]))+' '+str(ord(s[1]))+' '+str(ord(s[2]))+' '+str(ord(s[3]))+' '+str(ord(s[4])) 
+            st += chr(crc16(st)[0]) + chr(crc16(st)[1])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 0:
+                Val = self.ReadDevice(port,  st)
+                if ind_name == 0:
+                    print 'ADDRESS1111111', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_14.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    print 'ADDRESS2222222', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_15.setText(u'М' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                #time.sleep(0.001)
+                #time.sleep(0.02)
+                time.sleep(self.Devices.data['pause'])
+                
+            if self.Devices.data['devices'][str(i)]['ind_type'] == 1:
+                 
+                Val = self.ReadDevice1(port,  st)
+                if ind_name == 0:
+                    print 'ADDRESS3333333', str(self.Devices.data['devices'][str(i)]['address']),Val
+                    self.ui.lineEdit_14.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                if ind_name == 1:
+                    print 'ADDRESS4444444', str(self.Devices.data['devices'][str(i)]['address']), Val
+                    self.ui.lineEdit_15.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                    
+                if i == 2:    
+                    self.ui.lineEdit_16.setText(u'П' + str(self.Devices.data['devices'][str(i)]['address']) + '  ' + str(Val))
+                #time.sleep(0.001)
+                #time.sleep(0.02)
+                time.sleep(self.Devices.data['pause'])
+            # Определение рабочего прибора и присвоение ему индекса
+            #print 'Val__________________=', Val
+            if workDev == None:
+                if Val != None:
+                    # С учетом единицы измеренния
+                    #print 'Val=', Val
+                    #print float(Val), self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value'], i
+                    if float(Val) > self.coefMeasure(i) * self.Devices.data['devices'][str(i)]['min_value']:
+                        workDev = i #??????????????????????????
+                        if ind_name == 0:
+                            print 'ValAmper=', Val
+                            self.workAmp = i                            
+                            #19.01 поменял единицу измерения 
+                            self.ui.label_4.setText(str(self.workAmp + 1) + u'. Амперметр (' + self.Devices.Measures[self.workAmp].currentText() + u')')                            
+
+                        if ind_name == 1:
+                            print 'ValVoltmetr=', Val
+                            self.workVolt = i
+                            #19.01 поменять единицу измерения 
+                            self.ui.label_5.setText(str(self.workVolt + 1) + u'. Вольтметр (' + self.Devices.Measures[self.workVolt].currentText() + u')')                            
+                            
+                        return Val
+                    else:
+                        continue                            
+        #17.02                            
+        if workDev == None:
+            return False   # False означает, что показания всех трансов из цепочки нулевые                             
+        return Val
+
+                    
+    def ReadDevice(self, port, command, ignor_err = False):
+        # Чтение показания прибора типа ЩП02М
+        #print 'ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ ЩММ '
+        global isTestHeart
+        try:
+            #16.02
+            if not self.ui.checkBox.isChecked() or self.ui.checkBox_2.isChecked():
+                port.write(command)                
+                s = port.read(15)
+                #'''
+                if len(s) < 13:
+                    self.errStr = u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0]))
+                    #QMessageBox.warning(None, u"Предупреждение", u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0])), QMessageBox.Ok)
+                    ###isTestHeart = False
+                    return None
+                #'''
+
+
+            if self.ui.checkBox.isChecked():
+               # Эмуляция чтения порта
+                if self.ind_name == 0:
+                    #print 'self.ind_device, int(self.ui.lineEdit_12.text())', self.ind_device, int(self.ui.lineEdit_12.text())
+                    A = 0
+                    if self.ind_device == int(self.ui.lineEdit_12.text()):
+                        A = str(0.2*self.ui.horizontalSlider.value())
+                else:    
+                    #print 'self.ind_device, int(self.ui.lineEdit_13.text())', self.ind_device, int(self.ui.lineEdit_13.text())
+                    A = 0
+                    if self.ind_device == int(self.ui.lineEdit_13.text()):
+                        A = str(math.sqrt(0.2*self.ui.horizontalSlider.value()) + self.yyy)
+                return A                        
+            
+            
+            print s[8] + s[7] + s[10] + s[9] + s[12] + s[11]
+            
+            #QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
+            '''
+            if self.ui.checkBox.isChecked():
+                # Эмуляция чтения порта
+                y = 0.0
+                if self.ui.radioButton.isChecked() and ord(command[0]) == 2:
+                    y = math.fabs(math.sin(0.2*self.ui.horizontalSlider.value() * 1.2 / 5.))    ### + self.yyy
+                if self.ui.radioButton_2.isChecked() and ord(command[0]) == 3:
+                    y = 2 * math.fabs(math.sin(0.2*self.ui.horizontalSlider.value() * 1.2 / 5.))    ### + self.yyy
+                return str(y)
+            '''    
+            
+            return s[8] + s[7] + s[10] + s[9] + s[12] + s[11]
+        except SerialException:
+            ###isTestHeart = False
+            self.errStr = u"Проблема работы прибора с адресом: " + command
+            if ignor_err == False:
+                QMessageBox.warning(None, u"Предупреждение", u"Проблема работы прибора с адресом: " + command, QMessageBox.Ok)
+            return None                            
+        except Exception:
+            ###isTestHeart = False
+            self.errStr = u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0]))
+            print u'Ошибка чтения показаний прибора щм с адресом:' + str(ord(command[0]))
+            #QMessageBox.warning(None, u"Предупреждение", u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0])), QMessageBox.Ok)
+            return None
+
+
+    def ReadDevice1(self, port, command, ignor_err = False):
+        #print 'ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП ЩПП '
+        # Чтение показания прибора типа ЩП02П через регистры
+        global isTestHeart
+        try:
+            
+            print 'str(ord(command[0]))', str(ord(command[0]))
+            if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'q')
+                        
+            #16.02
+            if not self.ui.checkBox.isChecked() or self.ui.checkBox_2.isChecked():
+                
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'q')
+                port.write(command)
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'w')
+                s = port.read(16)
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'e')
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'eee ' + str(len(s)))                
+                a1 = str(hex(ord(s[4])))[2:]
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'r')
+                if len(a1) == 1:
+                    a1 = '0' + a1
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u't')
+                a2 = str(hex(ord(s[3])))[2:]
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'y')
+                if len(a2) == 1:
+                    a2 = '0' + a2
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'u')
+                a3 = str(hex(ord(s[6])))[2:]
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'i')
+                if len(a3) == 1:
+                    a3 = '0' + a3
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'o')
+                a4 = str(hex(ord(s[5])))[2:]
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'p')
+                if len(a4) == 1:
+                    a4 = '0' + a4
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'a')
+                a = a1 + a2 + a3 + a4
+                #a = str(hex(ord(s[4])))[2:] + str(hex(ord(s[3])))[2:] + str(hex(ord(s[6])))[2:] + str(hex(ord(s[5])))[2:]
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u's')
+                b = struct.unpack('<f', binascii.unhexlify(a))
+                if str(ord(command[0])) == '3': self.ui.lineEdit_17.setText(u'd')
+                
+
+
+
+            
+            if self.ui.checkBox.isChecked():
+               # Эмуляция чтения порта
+                if self.ind_name == 0:
+                    #print 'self.ind_device, int(self.ui.lineEdit_12.text())', self.ind_device, int(self.ui.lineEdit_12.text())
+                    A = 0
+                    if self.ind_device == int(self.ui.lineEdit_12.text()):
+                        A = str(0.2*self.ui.horizontalSlider.value())
+                else:    
+                    #print 'self.ind_device, int(self.ui.lineEdit_13.text())', self.ind_device, int(self.ui.lineEdit_13.text())
+                    A = 0
+                    if self.ind_device == int(self.ui.lineEdit_13.text()):
+                        A = str(math.sqrt(0.2*self.ui.horizontalSlider.value()) + self.yyy)
+                return A                        
+
+
+            '''             
+            if self.ui.checkBox.isChecked():
+               # Эмуляция чтения порта
+                if self.ind_name == 0:
+                    A = str(0.2*self.ui.horizontalSlider.value())
+                else:    
+                    #A = str(2*self.ui.horizontalSlider.value())
+                    A = str(math.sqrt(0.2*self.ui.horizontalSlider.value()) + self.yyy)
+                return A
+            '''    
+                        
+            #16.02
+            #port.write(command)
+            #s = port.read(16)
+            
+            return str(b[0])
+        
+        except SerialException:
+            ###isTestHeart = False
+            self.errStr = u"Проблема работы прибора с адресом: " + command
+            if ignor_err == False:
+                QMessageBox.warning(None, u"Предупреждение", u"Проблема работы прибора с адресом: " + command, QMessageBox.Ok)
+            return None                            
+        except Exception:
+            ###isTestHeart = False
+            self.errStr = u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0]))
+            print u'Ошибка чтения показаний прибора щп с адресом:' + str(ord(command[0]))
+            #QMessageBox.warning(None, u"Предупреждение", u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0])), QMessageBox.Ok)
+            return None
+
+
+
+    def coil_clear(self, mode):
+        '''
+        mode = 1 - Очищается график вместе с сопротивлением
+        mode = 2 - Очищается только график
+        '''
+        
+        self.coil_clear_()
+        self.points = []
+            
+        #if mode == 1:   
+        #    self.query_9.prepare('DELETE FROM checking_2 WHERE id=:id')            
+        #    self.query_9.bindValue(":id", self.checking_2)
+                            
+        #if mode == 2:   
+        self.query_9.prepare('UPDATE checking_2 SET un=:un, inom=:inom, k=:k, rating=:rating WHERE id=:id')            
+        self.query_9.bindValue(":id", self.checking_2)                
+        self.query_9.bindValue(":un", None)
+        self.query_9.bindValue(":inom", None)
+        self.query_9.bindValue(":k", None)
+        self.query_9.bindValue(":rating", None)
+        #self.query_9.bindValue(":sample", None)
+
+        self.query_9.exec_()
+        if not self.query_9.exec_():
+            QMessageBox.warning(None, u"Предупреждение",
+            u"Ошибка обнуления данных2",
+            QMessageBox.Ok)        
+        
+        self.oItem.stateItem = self.oItem.NOITEM  # Для того чтобы set_noteste гарантированно срабатывала  
+        self.oItem.set_noteste(self.idItem)        
+        self.oMap.mapRefresh.emit()
+        
+        
+        
+        self.BieldScene(self.graphicsScene, self.ui.graphicsView.width(), self.ui.graphicsView.height(), self.points, self.oldPoints, 1)
+        
+        
+        '''
+        self.coil_clear_()
+        self.points = []
+        self.query_9.prepare('DELETE FROM checking_2 WHERE id=:id')            
+        self.query_9.bindValue(":id", self.checking_2)                
+
+        self.query_9.exec_()
+        if not self.query_9.exec_():
+            QMessageBox.warning(None, u"Предупреждение",
+            u"Ошибка обнуления данных2",
+            QMessageBox.Ok)        
+        
+        self.oItem.stateItem = self.oItem.NOITEM  # Для того чтобы set_noteste гарантированно срабатывала  
+        self.oItem.set_noteste(self.idItem)        
+        self.oMap.mapRefresh.emit()
+        
+        self.BieldScene(self.graphicsScene, self.ui.graphicsView.width(), self.ui.graphicsView.height(), self.points, self.oldPoints)
+'''
+        
+        
+    def coil_clear_(self):
+        self.query_9.prepare('DELETE FROM checking_2sp WHERE checking_2 in (SELECT id FROM checking_2 WHERE item = :item AND coil = :coil AND stand = :stand)')
+        self.query_9.bindValue(":stand", self.idStand)
+        self.query_9.bindValue(":item", self.idItemLast)
+        self.query_9.bindValue(":coil", self.idCoilLast)
+        if not self.query_9.exec_():
+            QMessageBox.warning(None, u"Предупреждение",
+            u"Ошибка обнуления данных1",
+            QMessageBox.Ok)
+            return        
+
+    def testEnabled(self,enab):
+        self.ui.label.setEnabled(enab)
+        self.ui.label_2.setEnabled(enab)
+        self.ui.label_3.setEnabled(enab)
+        self.ui.label_4.setEnabled(enab)
+        self.ui.label_5.setEnabled(enab)
+        self.ui.label_7.setEnabled(enab)
+        self.ui.lineEdit.setEnabled(enab)
+        self.ui.lineEdit_2.setEnabled(enab)
+        self.ui.lineEdit_3.setEnabled(enab)
+        self.ui.lineEdit_4.setEnabled(enab)
+        self.ui.lineEdit_5.setEnabled(enab)
+        self.ui.lineEdit_6.setEnabled(enab)
+        self.ui.lineEdit_7.setEnabled(enab)
+        self.ui.lineEdit_8.setEnabled(enab)
+        self.ui.lineEdit_9.setEnabled(enab)
+        self.ui.lineEdit_10.setEnabled(enab)
+        #self.ui.lineEdit_11.setEnabled(enab)
+        #self.ui.pushButton.setEnabled(enab)
+###        self.ui.pushButton.setEnabled(not enab)
+        # временно
+       # self.ui.pushButton.setEnabled(False)
+        self.VerificationForm.ui.btnDevices.setEnabled(not enab)
+        self.ui.pushButton.setEnabled(not enab)
+        self.ui.pushButton_3.setEnabled(not enab)
+        #self.ui.pushButton_4.setEnabled(not enab)
+        
+        #self.ui.pushButton_2.setEnabled(not enab)
+        global isBreak
+        if isBreak:        
+            self.VerificationForm.btnCoilClear.setEnabled(False)
+            if enab == False:
+###                self.VerificationForm.btnCoilClear.setEnabled(len(self.points) > 0)
+                self.VerificationForm.btnCoilClear.setEnabled(self.checking_2 != None or len(self.points) > 0)
+        else:    
+            self.VerificationForm.btnCoilClear.setEnabled(not enab)
+
+
+    def done_test(self):
+        # Проверяем протестирован ли трансформатор полностью
+        model.clear()
+        
+        strSQL = """
+select * from item
+where test_map = :test_map
+and istested <> true
+"""
+        self.query.prepare(strSQL)
+        self.query.bindValue("test_map", self.oMap.iMapID)
+        if not self.query.exec_():
+            raise Exception(self.query.lastError().text())
+        else:    
+            model.setQuery(self.query)
+        if model.rowCount() > 0:
+            return False
+        else:
+            return True
+
+
+    def ReadPreTest(self):
+        # Читаем результаты тестирования образца (первый трансформатор из этого заказа и серии
+        pass
+        strSQL = """
+select * 
+from serial_number t1, item t2, checking_2 t3
+where t1.id = t2.serial_number and t2.id = t3.item
+"""
+
+
+    def closeEvent(self, event):
+        return    
+        # ЗАПИСАТЬ
+        f = open('coilsettings.json','w')
+        data = {}        
+        data['indAmp'] = str(self.indAmp)
+        data['indVolt'] = str(self.indVolt)
+        json.dump(data, f)
+
+
+    def setMeasureR(self, nameMeasure):
+        try:
+            self.ui.label.setText(u'Сопротивление, ' + nameMeasure + u' / коридор ')
+            self.coefR = 1
+            if self.Devices.data['ind_measureR'] == 1:
+                self.coefR = 1000
+        except Exception:
+            pass
+
+
+    def pushButton_3_Click(self):        
+#        QMessageBox.warning(None, u"Предупреждение", u"ОБРАЗЕЦ ОБРАЗЕЦ ОБРАЗЕЦ ", QMessageBox.Ok)
+#        return
+                
+        err = u"Ошибка удаления образца"
+        if self.ui.pushButton_3.text() == u'Назначить':
+            
+            strSQL = """
+select * 
+from
+(
+select t1.id as idItem, t3.id as idCoil 
+from item t1, serial_number t2, coil t3
+where series = :series
+and t1.id = :item
+and t1.serial_number = t2.id
+and t2.transformer = t3.transformer
+) t1 LEFT OUTER JOIN (select item, coil, un, inom from checking_2 where stand = :stand) t2
+ON (idItem =item and idCoil = coil)
+where t2.inom is NULL
+--where t2.un is NULL
+"""
+
+            print strSQL
+            print self.series, self.idItem, self.idStand
+            self.query_5.prepare(strSQL)
+            self.query_5.bindValue(":series", self.series)
+            self.query_5.bindValue(":item", self.idItem)
+            self.query_5.bindValue(":stand", self.idStand)
+        
+            if not self.query_5.exec_():
+#            raise Exception(self.query.lastError().text())
+                QMessageBox.warning(None, u"Предупреждение", u"Ошибка работы с БД", QMessageBox.Ok)
+                return None
+            else:
+                model_5.setQuery(self.query_5)
+        
+            print 'model_5.rowCount()', model_5.rowCount()
+        
+            if  model_5.rowCount() > 0:
+                msgBox(self, u"Назначение данного трансформатора в качестве образца невозможно,\n поскольку он полностью не протестирован!")
+                return
+            
+            err = u"Ошибка назначения образца"
+
+#        err = u"Ошибка назначения образца"
+        
+        st =  u"""Изменение статуса образца приведет к перерасчету
+характеристик трансформаторов по всей серии.
+Тем не менее, продолжить?"""
+        #print getTrue(self, st)            
+        if getTrue(self, st) == False:
+            return            
+                
+
+        strSQL = """
+UPDATE checking_2 SET sample = NULL
+WHERE stand = :stand
+AND item in
+(
+  SELECT t1.id FROM item t1, serial_number t2
+  WHERE t1.serial_number = t2.id
+  AND series = :series
+)   
+"""            
+        print self.idStand, self.idItemLast, self.idCoilLast
+        self.query_9.prepare(strSQL)            
+        self.query_9.bindValue(":stand", self.idStand)
+        self.query_9.bindValue(":series", self.series)
+#        self.query_9.bindValue(":coil", self.idCoilLast)
+        if not self.query_9.exec_():
+            QMessageBox.warning(None, u"Предупреждение", err, QMessageBox.Ok)
+            return
+
+            
+        if self.ui.pushButton_3.text() == u'Назначить':
+            strSQL = """
+UPDATE checking_2 SET sample = TRUE
+WHERE stand = :stand
+AND item = :item
+--AND coil = :coil
+"""            
+            print self.idStand, self.idItemLast, self.idCoilLast
+            self.query_9.prepare(strSQL)            
+            self.query_9.bindValue(":stand", self.idStand)
+            self.query_9.bindValue(":item", self.idItemLast)
+#            self.query_9.bindValue(":coil", self.idCoilLast)
+            if not self.query_9.exec_():
+                QMessageBox.warning(None, u"Предупреждение", err, QMessageBox.Ok)
+                return
+        if self.recalcTesting():
+            self.calcGlobal(self.oMap.iMapID, None, self.idStand, None, None)
+            msgBox(self, u"Перерасчет прошел успешно!")
+        else:    
+            msgBox(self, u"Перерасчет потерпел неудачу!")
+                
+
+
+
+    def recalcTesting(self):
+        print 'recalcTesting'
+        #Перерасчет по всей серии
+        model_5.clear()
+        
+        strSQL = """
+select t4.id as checking_2, item, coil, r, un, inom, k, t3.secondcurrent, t3.secondload,
+       t3.rating as rating2, t3.classaccuracy
+from item t1, serial_number t2, coil t3, checking_2 t4
+where  t2.series = :series
+and t1.serial_number = t2.id
+and t2.transformer = t3.transformer
+--and t4.stand = 16
+and t4.stand = :stand 
+and t1.id = t4.item
+and t3.id = t4.coil
+
+
+--and t1.defect is null
+ 
+order by coil, sample, t4.id
+"""
+
+        print strSQL
+        self.query_5.prepare(strSQL)
+        self.query_5.bindValue(":series", self.series)
+        self.query_5.bindValue(":stand", self.idStand)
+        if not self.query_5.exec_():
+            raise Exception(self.query.lastError().text())
+            return None
+        else:
+            model_5.setQuery(self.query_5)
+
+        print 'model_5.rowCount()', model_5.rowCount()
+        coil = -1
+        for i in range(model_5.rowCount()):
+            checking_2 = int(model_5.record(i).field('checking_2').value().toString())
+            self.selectPoints(checking_2)
+            print checking_2
+            coil1 = int(model_5.record(i).field('coil').value().toString())
+
+            r    = float(model_5.record(i).field('r').value().toString())
+            #28.01
+            inom = float(model_5.record(i).field('secondcurrent').value().toString())
+            #inom = float(model_5.record(i).field('inom').value().toString())
+            
+            secondload = float(model_5.record(i).field('secondload').value().toString())
+            
+            
+            if coil != coil1:
+                coil = coil1
+                
+                #28.01
+                un   = self.calcNomVoltage(self.points, inom)                
+                K = self.calcK(inom, r, un, secondload)
+                
+                rating2 = model_5.record(i).field('rating2').value().toString()
+                classaccuracy = model_5.record(i).field('classaccuracy').value().toString()
+
+                try:
+                    fRating2 = float(rating2)
+                except Exception:
+                    fRating2 = None
+                                
+                # Округление коэффициента безопасности
+                #22.01                    
+                if (fRating2 == None or fRating2 < self.epsilon):
+                    if str(classaccuracy).find('P') == -1:
+                        #измерительная обмотка
+                        rating2 = round(5. * math.ceil(K/5))
+                    else:
+                        #защитная обмотка
+                        #4.02
+                        rating2 = 10
+                        #rating2 = round(10. * math.ceil(K/10))
+                #26.01
+                else:
+                    #1.02        
+                    #rating2 = round(fRating)
+                    rating2 = round(fRating2)
+                                                
+                sample = {'id':  checking_2, 'r':  r, 'k':  None, 'rating':  rating2, 'un': un, 'in': inom}
+                
+
+            #28.01
+            #K = self.calcK(inom, r, un, secondload) ???????????????
+                               
+            print 'sample', sample
+
+            if len(self.points) >= 1:            
+                self.calcNomAmperage(self.points, checking_2, sample, inom)
+                #21.12
+                #K = self.calcK(self.nomAmperage, r, un, secondload)
+                print {'id':  checking_2, 'r':  r,  'k':  K,  'rating':  rating2,  'un': un, 'in': self.nomAmperage}
+            else:
+                #un = None
+                self.nomAmperage = None
+                #K = None
+            #28.01
+#            K = self.calcK(inom, r, un, self.nomAmperage, secondload)
+#            K = self.calcK(inom, r, un, secondload)
+            K = self.calcK(self.nomAmperage, r, un, secondload)
+            print 'self.calcK(self.nomAmperage, r, un, secondload)', self.nomAmperage, r, un, secondload        
+            
+            # Сохранение Un, In, K в таблице
+            self.query_9.prepare('UPDATE checking_2 SET un=:un, inom=:inom, k=:k, rating=:rating WHERE id=:id')            
+            self.query_9.bindValue(":id", checking_2)
+            #26.01
+            #self.query_9.bindValue(":un", un)                
+            self.query_9.bindValue(":un", sample['un'])                
+            self.query_9.bindValue(":inom", self.nomAmperage)
+            self.query_9.bindValue(":k", K)
+            self.query_9.bindValue(":rating", sample['rating'])                
+            
+            self.query_9.exec_()
+            if self.query_9.lastError().isValid():
+                print self.query_9.lastError().text()
+                QMessageBox.warning(None, u"Предупреждение", u"Ошибка сохранения в БД", QMessageBox.Ok)
+                return None
+                                    
+        return True
+
+
+
+# Вспомогательная функция к отчету: BAX_coil1
+    def buildCoilsInfa(self, serial_number):
+        from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+        from PyQt4.QtGui import QMessageBox
+        import ReportsExcel
+#            QMessageBox.warning(self, u"Предупреждение", u"Отчет пока не готов", QMessageBox.Ok)
+#            return
+
+
+        self.query = QSqlQuery(self.env.db)
+        self.query_2 = QSqlQuery(self.env.db)
+        model = QSqlQueryModel()
+        model_2 = QSqlQueryModel()
+
+        print 'id=', id   
+        print 'serial_number1=', serial_number
+            #serial_number1 = 110006
+        strSQL = """
+select t1.id as checking_2, t1.item as itemID, t1.coil as coilID
+, t3.coilnumber
+, t3.tap
+, 'И' || cast(t3.coilnumber as varchar ) || 'И' || cast(t3.tap as varchar )  as coil
+, 1000 * t1.r as r            
+, round(t1.un, 4) as un              
+, round(t1.inom, 4) as inom                  
+, t1.k
+, t5.fio
+, t2.createdatetime::date as sdate
+from checking_2 t1, item t2, coil t3,
+test_map t4 LEFT OUTER JOIN operator t5 ON (t4.operator = t5.id)
+where t1.item = t2.id             
+and t1.coil = t3.id
+--and t1.stand = :stand
+and t2.test_map = t4.id
+--and t2.serial_number = :snID                                                                  
+--and t2.serial_number = 110006                                                                  
+and t2.serial_number = """ +  str(serial_number) + """                                                                  
+order by t3.coilnumber                            
+"""
+
+        print strSQL
+        self.query.prepare(strSQL)
+        if not self.query.exec_():
+            QMessageBox.warning(self, u"Предупреждение", u"ОООшибка выборки общих результатов испытания", QMessageBox.Ok)
+        else:    
+            model.setQuery(self.query)
+
+                 
+        coils = []
+        points = []
+        coilsInfa = []
+        for i in range(model.rowCount()):
+            checking_2 = int(model.record(i).field('checking_2').value().toString()) 
+            coilID = int(model.record(i).field('coilID').value().toString())
+            coilnumber = str(model.record(i).field('coilnumber').value().toString())
+            tap = str(model.record(i).field('tap').value().toString())
+                
+            coils +=  [[coilID,
+                        float(model.record(i).field('r').value().toString()), 
+                        float(model.record(i).field('un').value().toString()), 
+                        float(model.record(i).field('inom').value().toString()), 
+                        float(model.record(i).field('k').value().toString())]]
+
+            coilsInfa += [{}]
+            coilsInfa[i]['coilnumber'] = int(model.record(i).field('coilnumber').value().toString())
+###                coilsInfa[i]['coil'] = u'И' + coilnumber + u'И' + tap 
+            coilsInfa[i]['coil'] = coilnumber + u'И1' + '-' + coilnumber + u'И' + tap 
+            coilsInfa[i]['points'] = []
+                                                
+            strSQL = """
+select a, v
+from checking_2sp
+where checking_2 = :checking_2
+order by id"""
+
+            print 'checking_2=', checking_2 
+            self.query_2.prepare(strSQL)
+            self.query_2.bindValue(":checking_2", checking_2)
+            if not self.query_2.exec_():
+                QMessageBox.warning(self, u"Предупреждение", u"Ошибка выборки результатов испытания", QMessageBox.Ok)
+                break
+            else:    
+                model_2.setQuery(self.query_2)
+
+
+#            QMessageBox.warning(self, u"Предупреждение", str(model_2.rowCount()), QMessageBox.Ok)
+
+            for j in range(model_2.rowCount()):
+                points += [[coilID, 
+                            float(model_2.record(j).field('a').value().toString()), 
+                            float(model_2.record(j).field('v').value().toString())]]
+   
+                coilsInfa[i]['points'] += [[float(model_2.record(j).field('a').value().toString()), 
+                                            float(model_2.record(j).field('v').value().toString())]]
+   
+            print 'points =', points   
+        print 'points =', points
+            
+        print 'coilsInfa=', coilsInfa
+        for i in range(len(coilsInfa)): 
+            print coilsInfa[i]
+
+        return coilsInfa
+
+
+
+    def TestBase(self, db):
+        #return True        
+        query = QSqlQuery(db)
+        print u"Проверка наличия таблиц БД"
+        err_tbl = ""
+        query = QSqlQuery(db)
+        query.prepare("select un_ from checking_2")
+#        query.prepare("select rating from checking_2")
+#        query.prepare("select sample from checking_2")
+#        query.prepare("select un, inom, k from checking_2")
+        if not query.exec_(): err_tbl += "checking_2\n"
+          
+        if err_tbl != "":
+            r = QMessageBox.warning(self, u"Предупреждение", u"""В БД требуется произвести изменения,
+необходимые для работы приложения\n""" +
+u"Произвести изменения БД?", QMessageBox.Yes, QMessageBox.No)                        
+                        
+            if r == QMessageBox.Yes:
+                self.InitBase(db)
+                return True
+            else:
+                return False
+        return True
+                                 
+
+    def InitBase(self, db):
+        print u"Инициализация БД"        
+        query = QSqlQuery(db)
+
+        SQL = u"""
+ALTER TABLE checking_2 ADD column un_  numeric(16,10);
+COMMENT ON COLUMN checking_2.un_ IS 'Номинальное напряжение для наклеек';
+"""
+#        SQL = u"""
+#ALTER TABLE checking_2 ADD column rating numeric(6);
+#COMMENT ON COLUMN checking_2.K IS 'Расчетный коэффициент безопасности приборов вторичной обмотки';
+#COMMENT ON COLUMN checking_2.rating IS 'Номинальная или расчетная предельная кратность вторичной обмотки защиты';
+#"""
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка инициализации", QMessageBox.Ok)
+        else:
+            print "Инициализация выполнена!"
+            QMessageBox.warning(self, u"Предупреждение", u"Инициализация выполнена!", QMessageBox.Ok)            
+        return
+
+
+        SQL = u"""
+ALTER TABLE checking_2 ADD column Sample bool;
+COMMENT ON COLUMN checking_2.Sample IS 'Является образцом или нет';
+ALTER TABLE checking_2sp ALTER column a TYPE numeric(16,10);
+ALTER TABLE checking_2sp ALTER column v TYPE numeric(16,10);
+ALTER TABLE checking_2 ALTER column r TYPE numeric(16,10);
+ALTER TABLE checking_2 ALTER column un TYPE numeric(16,10);
+ALTER TABLE checking_2 ALTER column inom TYPE numeric(16,10);
+ALTER TABLE checking_2 ALTER column k TYPE numeric(16,10);
+"""
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка инициализации", QMessageBox.Ok)
+        else:
+            print "Инициализация выполнена!"
+            QMessageBox.warning(self, u"Предупреждение", u"Инициализация выполнена!", QMessageBox.Ok)            
+        return
+
+
+        SQL = u"""
+ALTER TABLE checking_2 ADD column Un numeric(8,4);
+ALTER TABLE checking_2 ADD column Inom numeric(8,4);
+ALTER TABLE checking_2 ADD column K numeric(8,4);
+COMMENT ON COLUMN checking_2.Un IS 'Номинальное напряжение';
+COMMENT ON COLUMN checking_2.Inom IS 'Номинальная сила тока';
+COMMENT ON COLUMN checking_2.K IS 'Коэффициент';
+"""
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка инициализации", QMessageBox.Ok)
+        else:
+            print "Инициализация выполнена!"
+            QMessageBox.warning(self, u"Предупреждение", u"Инициализация выполнена!", QMessageBox.Ok)            
+        return
+
+
+
+        SQL = u"""
+CREATE TABLE checking_2
+(
+  id serial PRIMARY KEY,
+  stand integer REFERENCES stand,
+  item integer REFERENCES item,
+  coil integer REFERENCES coil,
+  r numeric(8,4)
+);
+
+COMMENT ON TABLE checking_2 IS 'Результаты поверки обмоток трансформатора';
+COMMENT ON COLUMN checking_2.id IS 'Первичный ключ';
+COMMENT ON COLUMN checking_2.stand IS 'Ссылка на тип испытания';
+COMMENT ON COLUMN checking_2.item IS 'Ссылка на изделие';
+COMMENT ON COLUMN checking_2.coil IS 'Ссылка на испытываемую обмотку';
+COMMENT ON COLUMN checking_2.r IS 'Сопротивление';
+
+CREATE TABLE checking_2sp
+(
+  id serial NOT NULL,
+  checking_2 integer REFERENCES checking_2,
+  chektimestamp timestamp without time zone NOT NULL,
+  a numeric(8,4),
+  v numeric(8,4)
+);
+
+COMMENT ON TABLE checking_2sp IS 'Результаты поверки обмоток трансформатора';
+COMMENT ON COLUMN checking_2sp.id IS 'Первичный ключ';
+COMMENT ON COLUMN checking_2sp.checking_2 IS 'Ссылка на checking_2';
+COMMENT ON COLUMN checking_2sp.chektimestamp IS 'Временная метка измерения';
+COMMENT ON COLUMN checking_2sp.a IS 'Сила тока';
+COMMENT ON COLUMN checking_2sp.v IS 'Напряжение';
+"""
+
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+            QMessageBox.warning(self, u"Предупреждение", u"Ошибка инициализации", QMessageBox.Ok)
+        else:
+            print "Инициализация выполнена!"
+            QMessageBox.warning(self, u"Предупреждение", u"Инициализация выполнена!", QMessageBox.Ok)            
+        return
+
+    def checkBox_Click(self):
+        self.ui.horizontalSlider.setVisible(self.ui.checkBox.checkState())
+        #self.ui.radioButton.setVisible(self.ui.checkBox.checkState())
+        #self.ui.radioButton_2.setVisible(self.ui.checkBox.checkState())
+        self.ui.pushButton_2.setVisible(self.ui.checkBox.checkState())
+        self.ui.checkBox_2.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_12.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_13.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_14.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_15.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_16.setVisible(self.ui.checkBox.checkState())
+        self.ui.lineEdit_17.setVisible(self.ui.checkBox.checkState())
+        self.ui.label_12.setVisible(self.ui.checkBox.checkState())
+        self.ui.label_13.setVisible(self.ui.checkBox.checkState())
+        self.checkBox_2_Click()
+        
+        
+    def checkBox_2_Click(self):
+        return
+        self.ui.label_12.setVisible(self.ui.checkBox_2.checkState())
+        self.ui.label_13.setVisible(self.ui.checkBox_2.checkState())
+        self.ui.lineEdit_12.setVisible(self.ui.checkBox_2.checkState())
+        self.ui.lineEdit_13.setVisible(self.ui.checkBox_2.checkState())
+
+
+    '''
+    def report(self):
+             
+        try:
+            try:
+                xl = Dispatch('Excel.Application')
+            except:
+                QMessageBox.warning(self, u"Предупреждение", u"Не запускается Excel!", QMessageBox.Ok)
+                
+            print 11
+                
+            wb = xl.Workbooks.Add()
+            print 12
+            xl.Visible = True
+                              
+            print 1    
+            ws = wb.Worksheets(1)  
+            
+            
+                      
+            #ws.Name = u'Результаты поверки тока намагничивания вторичных обмоток'
+            ws.Name = u'Результаты поверки тока'
+
+            ws.PageSetup.Orientation = 2
+
+            ws.PageSetup.TopMargin = 28
+            ws.PageSetup.LeftMargin = 23
+            ws.PageSetup.RightMargin = 23
+            ws.PageSetup.BottomMargin = 42
+            ws.PageSetup.PrintTitleRows = "$4:$5"    # Для переноса малой шапки на следующие страницы
+
+            print 2    
+
+#            for i in range(10):            
+#                ws.Cells(1, i + 1).ColumnWidth = 9
+            ws.Cells(1, 1).ColumnWidth = 6            
+            ws.Cells(1, 2).ColumnWidth = 7            
+            ws.Cells(1, 3).ColumnWidth = 9            
+            ws.Cells(1, 4).ColumnWidth = 8            
+            ws.Cells(1, 5).ColumnWidth = 8            
+            ws.Cells(1, 6).ColumnWidth = 9            
+            ws.Cells(1, 7).ColumnWidth = 8            
+            ws.Cells(1, 8).ColumnWidth = 8            
+            ws.Cells(1, 9).ColumnWidth = 9            
+            ws.Cells(1, 10).ColumnWidth = 9            
+            ws.Cells(1, 11).ColumnWidth = 9            
+            ws.Cells(1, 12).ColumnWidth = 9            
+            ws.Cells(1, 13).ColumnWidth = 8            
+            print 3    
+
+            ws.Range('A1:L1').Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Результаты поверки тока намагничивания вторичных обмоток'
+#            print self.VerificationForm.ui.lbShortName.text()
+            ws.Range('A2:M2').Select()
+            xl.Selection.Merge()
+            print 4    
+            #print self.VerificationForm.ui.lbShortName.text()
+            xl.Selection.Value = u'Трансформатор: ' + unicode(self.VerificationForm.ui.lbShortName.text())
+            print 5    
+            
+#            xl.Selection.Value = u'Трансформатор: ' + '123'
+            ws.Range('A3:M3').Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Серия: ' + str(self.series)
+            ws.Range("A4:M5").Select()
+            xl.Selection.Borders(1).LineStyle = 1
+            xl.Selection.Borders(2).LineStyle = 1
+            xl.Selection.Borders(3).LineStyle = 1
+            xl.Selection.Borders(4).LineStyle = 1
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.WrapText = True
+
+            ws.Range("A4:A5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Зав.\n№'
+            
+            ws.Range("B4:B5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'№ обмот.'
+            
+            ws.Range("C4:E4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Сопротивление'
+            ws.Range("C5:C5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Величина'
+            ws.Range("D5:E5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Коридор (' + str(self.Devices.data['accuracy']['r']) + '%)' 
+
+            ws.Range("F4:H4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Ток намагничивания'
+            ws.Range("F5:F5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Величина'
+            ws.Range("G5:H5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Коридор (' + str(self.Devices.data['accuracy']['a']) + '%)'
+            ws.Range("I4:I5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Ном. напряж'
+            #4.02
+            ws.Range("J4:K4").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Коэфф. безопас'
+            
+            ws.Range("J5:J5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Расч-ый'
+            
+            ws.Range("K5:K5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Заданный'
+            
+                        
+            
+            ws.Range("L4:L5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Дата поверки'
+            ws.Range("M4:M5").Select()
+            xl.Selection.Merge()
+            xl.Selection.Value = u'Код тележки'
+                        
+            M = []
+            k = 0
+            print self.globalReport
+            for i in range(len(self.globalReport)):
+                if self.globalReport[i][1] == int(self.series):
+                    #M[i]=range(10)
+                    M += [self.globalReport[i][2:]]
+            print 'M=', M        
+#            ws.Range("A" + str(6) + ":J" + str(5 + len(self.globalReport))).Select()
+#            ws.Range("A" + str(6) + ":K" + str(5 + len(M))).Select()
+            ws.Range("A" + str(6) + ":M" + str(5 + len(M))).Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.Borders(1).LineStyle = 1
+            xl.Selection.Borders(2).LineStyle = 1
+            xl.Selection.Borders(3).LineStyle = 1
+            xl.Selection.Borders(4).LineStyle = 1
+            xl.Selection.Value = M
+                        
+            ws.Range("E" + str(6) + ":E" + str(5 + len(M))).Select()
+            xl.Selection.Borders(7).LineStyle = 0
+            ws.Range("H" + str(6) + ":H" + str(5 + len(M))).Select()
+            xl.Selection.Borders(7).LineStyle = 0
+                        
+            for i in range(len(M)):
+                # Подкраска ячеек, не входящих в коридор
+                if M[i][2] < M[i][3] or M[i][2] > M[i][4]:
+                    xl.ActiveSheet.Cells(i + 6, 3).Interior.Color = 255            
+                if M[i][5] < M[i][6] or M[i][5] > M[i][7]:
+                    xl.ActiveSheet.Cells(i + 6, 6).Interior.Color = 255
+                     
+                #4.02
+                if M[i][13] == 1:
+                    if M[i][9] > M[i][10]:
+                        xl.ActiveSheet.Cells(i + 6, 10).Interior.Color = 255 
+                if M[i][13] == 2:
+                    if M[i][9] < M[i][10]:
+                        xl.ActiveSheet.Cells(i + 6, 10).Interior.Color = 255 
+                    
+                # Группировка колонок
+                if i <> len(M) - 1:
+                    if M[i][1] == M[i + 1][1]:
+                        xl.ActiveSheet.Cells(i + 7, 2).Value = ''                        
+                        xl.ActiveSheet.Cells(i + 6, 2).Borders(4).LineStyle = 0
+                        xl.ActiveSheet.Cells(i + 7, 2).Borders(3).LineStyle = 0
+                        if i <> len(M) - 2:
+                            xl.ActiveSheet.Cells(i + 7, 2).Borders(4).LineStyle = 0
+                    if M[i][8] == M[i + 1][8]:
+                        xl.ActiveSheet.Cells(i + 7, 9).Value = ''                        
+                        xl.ActiveSheet.Cells(i + 6, 9).Borders(4).LineStyle = 0
+                        xl.ActiveSheet.Cells(i + 7, 9).Borders(3).LineStyle = 0
+                        #4.02
+                        #xl.ActiveSheet.Cells(i + 7, 10).Value = ''                        
+                        #xl.ActiveSheet.Cells(i + 6, 10).Borders(4).LineStyle = 0
+                        #xl.ActiveSheet.Cells(i + 7, 10).Borders(3).LineStyle = 0
+                        if i <> len(M) - 2:
+                            xl.ActiveSheet.Cells(i + 7, 9).Borders(4).LineStyle = 0
+                            #xl.ActiveSheet.Cells(i + 7, 10).Borders(4).LineStyle = 0
+                        
+        except:
+            print "Неопознанная ошибка ... "  
+                       
+        return
+'''
+
+
+                
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    
+    from dpframe.base.inits import db_connection_init   
+    from dpframe.base.envapp import checkenv
+    from dpframe.base.inits import json_config_init
+    from dpframe.base.inits import db_connection_init
+    from dpframe.base.inits import default_log_init
+    from electrolab.gui.inits import serial_devices_init
+   
+    
+    @serial_devices_init
+    @json_config_init
+    @db_connection_init
+    @default_log_init    
+    class ForEnv(QtGui.QWidget):
+        def getEnv(self):
+            return self.env
+    objEnv = ForEnv()
+    env = objEnv.getEnv()
+    db = env.db
+    path_ui = env.config.paths.ui + "/"
+
+    import os
+    if not os.path.exists(path_ui):        
+        path_ui = ""
+
+    rez = db.open();
+    if not rez:
+        QMessageBox.warning(None, u"Предупреждение",
+u"""Не установлено соединение с БД со следующими параметрами:
+host: """ + db.hostName() + """
+database: """ + db.databaseName() + """
+user: """ + db.userName() + """
+password: """ + db.password(),
+QMessageBox.Ok)
+                
+    else:
+        points = [[1,2],[3,4],[5,6]]                
+        points1 = [[0.1,0.2],[0.3,0.4],[0.5,0.6]]
+        
+        
+#        self.oItem = Item(self.env, None, self.oMap.iMapID, True)
+        
+        
+                        
+        wind = TestCoil(env, None, None, None, None, None)
+        wind.setEnabled(True)
+        #if wind.is_show: 
+        wind.show()
+        sys.exit(app.exec_())
+
+
+
+'''
+select *
+--select ordernumber, case when substring(ordernumber,1,1) = 'Б' then substring(ordernumber,2) else ordernumber end as ordernumber,
+--       series, case when substring(series,1,1) = 'Б' then substring(series,3) else series end as series
+from serial_number
+where ordernumber = 'Б16-07-1304'
+or ordernumber = '16-07-1304'
+'''

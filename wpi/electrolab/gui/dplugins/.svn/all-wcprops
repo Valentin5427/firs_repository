@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/680/trunk/electrolab/gui/dplugins
+END
+dpgridplugin.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/ElectroLab/!svn/ver/649/trunk/electrolab/gui/dplugins/dpgridplugin.py
+END
+ellipsiscomboboxplugin.py
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/ElectroLab/!svn/ver/332/trunk/electrolab/gui/dplugins/ellipsiscomboboxplugin.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ElectroLab/!svn/ver/244/trunk/electrolab/gui/dplugins/__init__.py
+END

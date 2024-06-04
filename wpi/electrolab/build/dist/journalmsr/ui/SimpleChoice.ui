@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>414</width>
+    <height>432</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="2">
+    <widget class="DPGrid" name="tvChoice">
+     <property name="buttonSize">
+      <number>70</number>
+     </property>
+     <property name="direction" stdset="0">
+      <number>2</number>
+     </property>
+     <property name="bHorisontalBtn" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DPGrid</class>
+   <extends>QWidget</extends>
+   <header>electrolab.gui.dpgrid</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="ico_64.qrc"/>
+ </resources>
+ <connections/>
+ <slots>
+  <slot>btn_ok_pressed()</slot>
+  <slot>btn_cancel_pressed()</slot>
+ </slots>
+</ui>

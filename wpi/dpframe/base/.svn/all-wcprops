@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/DPFrame/!svn/ver/221/trunk/dpframe/base
+END
+session.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/177/trunk/dpframe/base/session.py
+END
+agent.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/192/trunk/dpframe/base/agent.py
+END
+basedaemon.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DPFrame/!svn/ver/97/trunk/dpframe/base/basedaemon.py
+END
+envapp.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/178/trunk/dpframe/base/envapp.py
+END
+inits.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/221/trunk/dpframe/base/inits.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/9/trunk/dpframe/base/__init__.py
+END
+agentservice.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/97/trunk/dpframe/base/agentservice.py
+END
+application.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/103/trunk/dpframe/base/application.py
+END
+common.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/69/trunk/dpframe/base/common.py
+END
+migrate.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/143/trunk/dpframe/base/migrate.py
+END

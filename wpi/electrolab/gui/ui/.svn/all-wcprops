@@ -1,0 +1,395 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/ElectroLab/!svn/ver/934/trunk/electrolab/gui/ui
+END
+DlgClimat.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/686/trunk/electrolab/gui/ui/DlgClimat.ui
+END
+DlgDeviceCommands.ui
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ElectroLab/!svn/ver/478/trunk/electrolab/gui/ui/DlgDeviceCommands.ui
+END
+TestMapFilterDlg.ui
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/ElectroLab/!svn/ver/468/trunk/electrolab/gui/ui/TestMapFilterDlg.ui
+END
+DlgSerialNumber.ui
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/348/trunk/electrolab/gui/ui/DlgSerialNumber.ui
+END
+ico.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/452/trunk/electrolab/gui/ui/ico.qrc
+END
+qt_ru.qm
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/180/trunk/electrolab/gui/ui/qt_ru.qm
+END
+DlgStand.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/737/trunk/electrolab/gui/ui/DlgStand.ui
+END
+editGroup.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/editGroup.ui
+END
+ico_64_rc1.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/798/trunk/electrolab/gui/ui/ico_64_rc1.py
+END
+ico_64_rc.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/922/trunk/electrolab/gui/ui/ico_64_rc.py
+END
+DlgCoil.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/721/trunk/electrolab/gui/ui/DlgCoil.ui
+END
+ParamClimat.ui
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/606/trunk/electrolab/gui/ui/ParamClimat.ui
+END
+DlgTestType.ui
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/736/trunk/electrolab/gui/ui/DlgTestType.ui
+END
+Test_OLS.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/932/trunk/electrolab/gui/ui/Test_OLS.ui
+END
+ico_64.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/922/trunk/electrolab/gui/ui/ico_64.qrc
+END
+DlgTestItem.ui
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/247/trunk/electrolab/gui/ui/DlgTestItem.ui
+END
+gradeIron.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/ui/gradeIron.ui
+END
+Verification.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/949/trunk/electrolab/gui/ui/Verification.ui
+END
+DlgTransformer.ui
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ElectroLab/!svn/ver/352/trunk/electrolab/gui/ui/DlgTransformer.ui
+END
+DlgGOSTDetail.ui
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/725/trunk/electrolab/gui/ui/DlgGOSTDetail.ui
+END
+DlgExportProp.ui
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/758/trunk/electrolab/gui/ui/DlgExportProp.ui
+END
+FindSerialNumber.ui
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/ElectroLab/!svn/ver/943/trunk/electrolab/gui/ui/FindSerialNumber.ui
+END
+JournalMsr.ui
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/JournalMsr.ui
+END
+TestCoilReport.ui
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ElectroLab/!svn/ver/833/trunk/electrolab/gui/ui/TestCoilReport.ui
+END
+DlgGOSTQuadroload.ui
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ElectroLab/!svn/ver/715/trunk/electrolab/gui/ui/DlgGOSTQuadroload.ui
+END
+DlgDefect.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/348/trunk/electrolab/gui/ui/DlgDefect.ui
+END
+SelectingRef.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/220/trunk/electrolab/gui/ui/SelectingRef.ui
+END
+DlgTestMap.ui
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/605/trunk/electrolab/gui/ui/DlgTestMap.ui
+END
+HeartSettings.ui
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/888/trunk/electrolab/gui/ui/HeartSettings.ui
+END
+DlgGOST.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/712/trunk/electrolab/gui/ui/DlgGOST.ui
+END
+heart.ui
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/ui/heart.ui
+END
+ico_rc.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/452/trunk/electrolab/gui/ui/ico_rc.py
+END
+DlgForm.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/543/trunk/electrolab/gui/ui/DlgForm.ui
+END
+editAccuracy.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/editAccuracy.ui
+END
+DlgStandUser.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/712/trunk/electrolab/gui/ui/DlgStandUser.ui
+END
+editDeregist.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/editDeregist.ui
+END
+TestCoil.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/937/trunk/electrolab/gui/ui/TestCoil.ui
+END
+TestInfo.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/951/trunk/electrolab/gui/ui/TestInfo.ui
+END
+ClsTrans.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/940/trunk/electrolab/gui/ui/ClsTrans.ui
+END
+devices.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/919/trunk/electrolab/gui/ui/devices.ui
+END
+DlgRoom.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/476/trunk/electrolab/gui/ui/DlgRoom.ui
+END
+DlgDefectTestingType.ui
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/ElectroLab/!svn/ver/481/trunk/electrolab/gui/ui/DlgDefectTestingType.ui
+END
+QuitDialog.ui
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/161/trunk/electrolab/gui/ui/QuitDialog.ui
+END
+editGradeIron.ui
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/ui/editGradeIron.ui
+END
+SimpleChoice.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/649/trunk/electrolab/gui/ui/SimpleChoice.ui
+END
+editJournal.ui
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/773/trunk/electrolab/gui/ui/editJournal.ui
+END
+DlgTestingVoltage.ui
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ElectroLab/!svn/ver/336/trunk/electrolab/gui/ui/DlgTestingVoltage.ui
+END
+MasterDetailDlg.ui
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/212/trunk/electrolab/gui/ui/MasterDetailDlg.ui
+END
+FilterContainer.ui
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/330/trunk/electrolab/gui/ui/FilterContainer.ui
+END
+groupHeart.ui
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/ui/groupHeart.ui
+END
+editZav.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/editZav.ui
+END
+utility1.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/929/trunk/electrolab/gui/ui/utility1.ui
+END
+editType.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/661/trunk/electrolab/gui/ui/editType.ui
+END
+ClsMsr.ui
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/760/trunk/electrolab/gui/ui/ClsMsr.ui
+END
+editMsr.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/760/trunk/electrolab/gui/ui/editMsr.ui
+END
+Archive.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/952/trunk/electrolab/gui/ui/Archive.ui
+END
+ReportGraphTestMsr.ui
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/ElectroLab/!svn/ver/785/trunk/electrolab/gui/ui/ReportGraphTestMsr.ui
+END
+DigitalKeyboard.ui
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/551/trunk/electrolab/gui/ui/DigitalKeyboard.ui
+END
+editHeart.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/888/trunk/electrolab/gui/ui/editHeart.ui
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/161/trunk/electrolab/gui/ui/__init__.py
+END
+Connect_Form.ui
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/161/trunk/electrolab/gui/ui/Connect_Form.ui
+END
+editCoil.ui
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/941/trunk/electrolab/gui/ui/editCoil.ui
+END
+testHeart.ui
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/805/trunk/electrolab/gui/ui/testHeart.ui
+END
+editGroupHeart.ui
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/ui/editGroupHeart.ui
+END
+DlgOper.ui
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/819/trunk/electrolab/gui/ui/DlgOper.ui
+END

@@ -1,0 +1,1 @@
+hiddenimports = ['ui.ico_64_rc', 'slots', 'electrolab.gui.dplugins', 'electrolab.gui.dpgrid']

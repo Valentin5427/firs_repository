@@ -1,0 +1,8 @@
+{
+    "db": {
+        "host": "localhost",
+        "database": "dpframe",
+        "user": "dpframe",
+        "password": "dpframe"
+    }
+}

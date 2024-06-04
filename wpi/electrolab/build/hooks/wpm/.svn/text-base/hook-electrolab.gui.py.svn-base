@@ -1,0 +1,1 @@
+hiddenimports = ['ui.ico_rc', 'slots']

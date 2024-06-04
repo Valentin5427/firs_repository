@@ -1,0 +1,1 @@
+{"devices": {"0": {"ind_measure": 0, "ind_name": 0, "activ": true, "ind_type": 0, "address": 1}, "1": {"ind_measure": 0, "ind_name": 0, "activ": true, "ind_type": 0, "address": 2}, "2": {"ind_measure": 0, "ind_name": 0, "activ": true, "ind_type": 0, "address": 3}}, "accuracy": {"a": 14.0, "r": 5.0}}

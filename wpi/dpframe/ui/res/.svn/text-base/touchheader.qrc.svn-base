@@ -1,0 +1,7 @@
+<RCC>
+  <qresource>
+    <file alias="up">arrow_up.png</file>
+    <file alias="close">close.png</file>
+    <file alias="home">home.png</file>
+  </qresource>
+</RCC>

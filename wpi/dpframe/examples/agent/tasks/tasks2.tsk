@@ -1,0 +1,31 @@
+[
+    {
+        "name": "Задача 2",
+        "display_name": "Задача 2",
+        "active": true,
+        "schedule": {
+            "cron": "0 0 * * *"
+        },
+        "executable": {
+            "module": "dpframe.examples.agent.tasks",
+            "func": "task2"
+        },
+        "sys_log": true
+    },
+    {
+        "name": "Задача 3",
+        "display_name": "Задача 3",
+        "active": true,
+        "schedule": {
+            "cron": "0 * * * *"
+        },
+        "executable": {
+            "module": "dpframe.examples.agent.tasks",
+            "func": "task3"
+        },
+        "sys_log": true
+    },
+    {
+        
+    }
+]

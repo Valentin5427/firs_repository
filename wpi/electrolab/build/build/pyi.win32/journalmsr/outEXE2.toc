@@ -1,0 +1,10 @@
+('D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build/pyi.win32/journalmsr\\journalmsr.exe',
+ False,
+ False,
+ None,
+ None,
+ [],
+ False,
+ True,
+ 0,
+ 1574944037L)

@@ -1,0 +1,1 @@
+{"CoefVoltmeter": "45.0", "pause": 0.01, "ControlLoops": "5.0", "id_heart": "388", "devices": {"1": {"ind_type": 0, "ind_measure": 0, "coeff": 1.0, "min_value": 0.01, "activ": true, "ind_name": 0, "address": 2}, "0": {"ind_type": 0, "ind_measure": 0, "coeff": 1.0, "min_value": 0.01, "activ": true, "ind_name": 0, "address": 1}}}

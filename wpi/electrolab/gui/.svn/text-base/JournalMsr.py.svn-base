@@ -1,0 +1,1540 @@
+# -*- coding: UTF-8 -*-
+#
+from PyQt4 import QtCore, QtGui, uic
+from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+from PyQt4.QtCore import QModelIndex
+from PyQt4.QtGui import QMessageBox, QDateEdit, QIcon, QCheckBox, QColor
+from PyQt4.QtGui import QStandardItemModel, QStandardItem, QLineEdit
+import sys
+import datetime
+import ui.ico_64_rc
+#import electrolab.gui.ui.ico_64_rc
+import os
+
+from ReportsMsr import *
+from dpframe.base.inits import json_config_init
+
+selectMsr = "SELECT * FROM msr WHERE id_group=:ID ORDER BY name_msr"
+selectJournalChecking = "SELECT id, checking_date, view_date, sertificate FROM journal_checking WHERE id_zav=:ID ORDER BY checking_date"
+
+id_msr = ''
+id_zav = ''
+id_journal = ''
+tempDate = datetime.date.today()
+
+modelTree = QStandardItemModel()
+model = QSqlQueryModel()
+model2 = QSqlQueryModel()
+model3 = QSqlQueryModel()
+model4 = QSqlQueryModel()
+
+withCol1 = 200
+withCol2 = 100
+withCol3 = 100
+
+withCol4 = 200
+withCol5 = 100
+withCol6 = 100                        
+withCol7 = 100                       
+
+withCol8 = 100                        
+withCol81 = 100                        
+withCol9 = 200                        
+
+withCol10 = 100                        
+withCol11 = 100                        
+withCol12 = 100                        
+
+VSB1 = False
+VSB2 = False
+VSB3 = False
+VSB4 = False
+class MyFilter(QtCore.QObject):
+    def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
+    def widthArea(self, tableView):
+        # Возвращает ширину свободной области таблицы tableView
+        HSWidth = tableView.verticalHeader().width() + 4
+        if tableView.verticalScrollBar().width() < 100 and tableView.verticalScrollBar().isVisible():
+            HSWidth += tableView.verticalScrollBar().width()
+        return tableView.width() - HSWidth    
+    def eventFilter(self, obj, e):
+        #return False
+        #print obj
+        #print obj.verticalScrollBar().isVisible()
+        #print e
+        
+        #print "eventFilter"
+        #if e == QtCore.QEvent.Show:
+        #print obj.objectName()
+        '''
+        try:
+            if e.type() <> QtCore.QEvent.Resize:
+                return False
+        except:
+            return True    
+        print "RESIZE"
+        '''        
+        # try, Чтобы не ругалась при выходе из приложения   
+        try:
+            QtCore.QEvent.Resize
+        except:
+            return True    
+        global VSB1, VSB2, VSB3, VSB4
+        
+#        self.tableView.setColumnWidth(1, koef * self.withCol1)
+#        self.tableView.setColumnWidth(2, koef * self.withCol2)
+
+        '''
+        if id_category == 1:
+            withCol3 = 0
+        else:    
+            withCol3 = self.withCol3            
+
+        koef = (1.0 * (self.tableView_3.width() - 20) / (self.withCol1 + self.withCol2 + withCol3))
+        self.tableView_3.setColumnWidth(2, koef * self.withCol1)
+        self.tableView_3.setColumnWidth(3, koef * self.withCol2)
+        self.tableView_3.setColumnWidth(4, koef * withCol3)
+        '''
+
+
+#        print 'id_category=', id_category
+        if id_category == '1':
+            withCol3_ = 0
+            withCol81_ = 0
+        else:    
+            withCol3_ = withCol3            
+            withCol81_ = withCol81            
+#        print 'withCol3_=', withCol3_
+#        print 'obj.objectName()=', obj.objectName()        
+#        if obj.objectName() == 'tv1':
+        if obj.objectName() == 'tv1' and (e.type() <> QtCore.QEvent.Resize or VSB1 <> obj.verticalScrollBar().isVisible()):
+#       if (obj.objectName() == 'tv1' or obj.objectName() == 'tv2') and (e.type() <> QtCore.QEvent.Resize or VSB1 <> obj.verticalScrollBar().isVisible()):
+#        if True:
+#            print 'obj.objectName()=', obj.objectName()        
+            koef = (1.0 * (self.widthArea(obj)) / (withCol1 + withCol2 + withCol3_))
+            obj.setColumnWidth(1, koef * withCol1)
+            obj.setColumnWidth(2, koef * withCol2)
+            obj.setColumnWidth(3, koef * withCol3_)
+            VSB1 = obj.verticalScrollBar().isVisible()
+                
+        if obj.objectName() == 'tv2' and (e.type() <> QtCore.QEvent.Resize or VSB2 <> obj.verticalScrollBar().isVisible()):        
+            koef = (1.0 * (self.widthArea(obj)) / (withCol4 + withCol5 + withCol6 + withCol7))
+            obj.setColumnWidth(2, koef * withCol4)
+            obj.setColumnWidth(3, koef * withCol5)
+            obj.setColumnWidth(4, koef * withCol6)
+            obj.setColumnWidth(5, koef * withCol7)
+            VSB2 = obj.verticalScrollBar().isVisible()    
+                
+        if obj.objectName() == 'tv3' and (e.type() <> QtCore.QEvent.Resize or VSB3 <> obj.verticalScrollBar().isVisible()):        
+            koef = (1.0 * (self.widthArea(obj)) / (withCol8 + withCol81_ + withCol9))
+            obj.setColumnWidth(1, koef * withCol8)
+            obj.setColumnWidth(2, koef * withCol81_)
+            obj.setColumnWidth(3, koef * withCol9)
+            VSB3 = obj.verticalScrollBar().isVisible()    
+                
+        if obj.objectName() == 'tv4' and (e.type() <> QtCore.QEvent.Resize or VSB4 <> obj.verticalScrollBar().isVisible()):        
+            koef = (1.0 * (self.widthArea(obj)) / (withCol10 + withCol11 + withCol12))
+            obj.setColumnWidth(1, koef * withCol10)
+            obj.setColumnWidth(2, koef * withCol11)
+            obj.setColumnWidth(3, koef * withCol12)
+            VSB4 = obj.verticalScrollBar().isVisible()    
+            #print "RESIZE4"    
+                
+                
+#        except:
+#            pass        
+#        if e.type() == QtCore.QEvent.Show:
+#            print "GraphicsSceneResize"
+        return False
+    
+        '''            
+        if VSB1 == obj.verticalScrollBar().isVisible():
+            #print "11111111111111"
+            return False
+        else:
+            print "22222222222222"
+            VSB1 = not VSB1 
+            self.resizeEvent(None)
+         '''   
+                
+#        if VSB1 == obj.verticalScrollBar().isVisible():
+#            return False
+#        else:
+#            VSB1 = not VSB1 
+                
+        '''
+        if VSB == True and obj.verticalScrollBar().isVisible() == False:
+            VSB = False
+            print False
+        if VSB == False and obj.verticalScrollBar().isVisible() == True:
+            VSB = True
+            print True
+        '''
+        
+        return False
+
+
+
+def MyLoadUi(UiDir, UiFile, wnd):
+    try:
+        uidir = UiDir           
+        if not os.path.exists(uidir + UiFile):        
+            uidir = ""
+            
+        uic.loadUi(uidir + UiFile, wnd)
+#        uic.loadUi(UiFile, wnd)
+        wnd.tag = 1
+        return True
+    except:    
+        wnd.tag = 0
+        QMessageBox.warning(None, u"Предупреждение", u"Проблемы с загрузкой файла: " + UiFile + u".\nПродолжение невозможно!", QMessageBox.Ok)
+        return False
+
+class classJournal(QtGui.QMainWindow):
+    def __init__(self, *args):
+        QtGui.QDialog.__init__(self, *args)
+        self.is_show = True
+        if not MyLoadUi(path_ui, "journalmsr.ui", self):
+            self.is_show = False
+            return
+                
+        self.resize(1000,600)
+        self.splitter.setStretchFactor(0,1)
+
+        self.dateEdit.setCalendarPopup(1)
+        
+        # Временно
+        self.checkBox.setChecked(True)
+        self.lineEdit.setEnabled(False)
+        self.dateEdit.setEnabled(False)        
+        self.is_show = True 
+        if not self.TestBase():
+            self.is_show = False 
+            return
+
+        self.dateEdit.setDate(datetime.date.today())        
+ 
+        self.pushButton.setIcon(QIcon(u':/ico/ico/plus_64.png'))
+        self.pushButton_2.setIcon(QIcon(u':/ico/ico/trash_64.png'))
+        self.pushButton_3.setIcon(QIcon(u':/ico/ico/pencil_64.png'))
+        self.pushButton_4.setIcon(QIcon(u':/ico/ico/plus_64.png'))
+        self.pushButton_5.setIcon(QIcon(u':/ico/ico/trash_64.png'))
+        self.pushButton_6.setIcon(QIcon(u':/ico/ico/pencil_64.png'))
+        self.pushButton_7.setIcon(QIcon(u':/ico/ico/block_64.png'))
+
+        self.checkBox.toggled.connect(self.checkBox_Toggle)
+        self.checkBox_2.toggled.connect(self.checkBox_2_Toggle)
+        self.checkBox_3.toggled.connect(self.checkBox_3_Toggle)
+        self.lineEdit.textChanged.connect(self.lineEdit_textChanged)
+        self.checkBox_4.toggled.connect(self.checkBox_4_Toggle)
+        self.dateEdit.dateChanged.connect(self.dateEdit_textChanged)
+        
+        self.pushButton.clicked.connect(self.pushButton_Click)
+        self.pushButton_2.clicked.connect(self.pushButton2_Click)
+        self.pushButton_3.clicked.connect(self.pushButton3_Click)
+        self.pushButton_4.clicked.connect(self.pushButton4_Click)
+        self.pushButton_5.clicked.connect(self.pushButton5_Click)
+        self.pushButton_6.clicked.connect(self.pushButton6_Click)
+        self.pushButton_7.clicked.connect(self.pushButton7_Click)
+
+        ###self.connect(self.splitter, QtCore.SIGNAL('splitterMoved(int,int)'), self.splitMoved)
+        ###self.connect(self.splitter_2, QtCore.SIGNAL('splitterMoved(int,int)'), self.splitMoved)
+        ###self.connect(self.splitter_4, QtCore.SIGNAL('splitterMoved(int,int)'), self.splitMoved)
+            
+#???        self.connect(self.action, QtCore.SIGNAL('triggered()'), self.InitBase)
+        self.connect(self.action_2, QtCore.SIGNAL('triggered()'), self.StartClsMsr)
+        self.connect(self.action_3, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+        self.connect(self.action_4, QtCore.SIGNAL('triggered()'), self.StartRep1)
+
+        self.treeView.setModel(modelTree)        
+        self.selModelTree = self.treeView.selectionModel()        
+        self.connect(self.selModelTree, QtCore.SIGNAL("currentChanged(const QModelIndex &, const QModelIndex &)"), self.selectionChangedTree)
+
+        self.tableView.setModel(model)
+        self.selModel = self.tableView.selectionModel()
+        self.connect(self.selModel, QtCore.SIGNAL("currentChanged(const QModelIndex &, const QModelIndex &)"), self.selectionChanged1)
+        
+        self.tableView_2.setModel(model2)
+        self.selModel2 = self.tableView_2.selectionModel()
+        self.connect(self.selModel2, QtCore.SIGNAL("currentChanged(const QModelIndex &, const QModelIndex &)"), self.selectionChanged2)
+
+        self.tableView_3.setModel(model3)
+        self.selModel3 = self.tableView_3.selectionModel()
+        self.connect(self.selModel3, QtCore.SIGNAL("currentChanged(const QModelIndex &, const QModelIndex &)"), self.selectionChanged3)
+        
+        self.tableView_4.setModel(model4)
+
+        self.tableView.setObjectName('tv1')
+        self.tableView_2.setObjectName('tv2')
+        self.tableView_3.setObjectName('tv3')
+        self.tableView_4.setObjectName('tv4')
+        
+        '''
+        self.withCol1 = 200
+        self.withCol2 = 100
+        self.withCol3 = 100                        
+
+        self.withCol4 = 200
+        self.withCol5 = 100
+        self.withCol6 = 100                        
+        self.withCol7 = 100                        
+
+        self.withCol8 = 100                        
+        self.withCol9 = 200                        
+
+        self.withCol10 = 100                        
+        self.withCol11 = 100                        
+        self.withCol12 = 100                        
+        '''
+        
+        # Удаление горизонтальных полос прокрутки
+        self.tableView.setHorizontalScrollBarPolicy(1)
+        self.tableView_2.setHorizontalScrollBarPolicy(1)
+        self.tableView_3.setHorizontalScrollBarPolicy(1)
+        self.tableView_4.setHorizontalScrollBarPolicy(1)
+
+        self.tableView.installEventFilter(MyFilter(self.tableView))
+        self.tableView_2.installEventFilter(MyFilter(self.tableView_2))
+        self.tableView_3.installEventFilter(MyFilter(self.tableView_3))
+        self.tableView_4.installEventFilter(MyFilter(self.tableView_4))
+        
+#        tvv = QtGui.QTableView.ev
+#        QtGui.QTableView.resizeEvent()
+
+#        QtGui.QTableView.removeEventFilter(MyFilter(self.tableView))
+
+        self.FillTree()
+        
+###    def splitMoved(self, x, y):
+###        self.resizeEvent(None)
+        
+    def StartClsMsr(self):
+        from ClsMsr import classMsr
+        wind = classMsr(env)
+        if wind.tag <> 0:
+             # Команды: show(),close() необходимы лишь для того, что бы сработала "resizeEvent"
+             # Бред какой-то        
+            wind.show()
+            wind.resizeEvent(None)
+            wind.close()                
+            wind.exec_()
+        
+        self.FillTree()
+
+    def StartRep1(self):
+        #QtGui.QTableView.repaint()
+#        self.tableView.repaint()
+#        self.tableView_3.resizeEvent(None)
+#        return
+        
+        from ReportsMsr import GraphTestMsr
+        wind = GraphTestMsr(env)        
+        wind.exec_()        
+             
+    def FillTree(self):
+# Заполнение модели двумя уровнями данных из запросов
+        modelTree.clear()        
+        modelTree.reset()        
+        grandparent = QStandardItem(u"СРЕДСТВА ИЗМЕРЕНИЯ (весь перечень)")
+        grandparent.setData(1)
+        modelTree.appendRow(grandparent)
+#        SQL1 = "select id, name_type from type_msr order by name_type"
+        SQL1 = "select id, name_type from type_msr where id_category = 1 order by name_type"
+        query1 = QSqlQuery(SQL1, db)
+        SQL2 = "select id, name_group from group_msr where id_type=:id_type order by name_group"
+        query2 = QSqlQuery(db)
+        query2.prepare(SQL2)
+        i = 0            
+        while query1.next():
+            parent = QStandardItem(query1.value(1).toString())
+            parent.setData(query1.value(0).toString())
+            grandparent.setChild(i, parent)
+            query2.bindValue(":id_type", query1.value(0));
+            query2.exec_()
+            i += 1
+            j = 0
+            while query2.next():
+                item = QStandardItem(query2.value(1).toString())
+                item.setData(query2.value(0).toString())
+                parent.setChild(j, item)
+                j += 1
+                        
+        grandparent = QStandardItem(u"СРЕДСТВА ЗАЩИТЫ (весь перечень)")
+        grandparent.setData(2)
+        modelTree.appendRow(grandparent)
+#        SQL1 = "select id, name_type from type_msr order by name_type"
+        SQL1 = "select id, name_type from type_msr where id_category = 2 order by name_type"
+        query1 = QSqlQuery(SQL1, db)
+        SQL2 = "select id, name_group from group_msr where id_type=:id_type order by name_group"
+        query2 = QSqlQuery(db)
+        query2.prepare(SQL2)
+        i = 0            
+        while query1.next():
+            parent = QStandardItem(query1.value(1).toString())
+            parent.setData(query1.value(0).toString())
+            grandparent.setChild(i, parent)
+            query2.bindValue(":id_type", query1.value(0));
+            query2.exec_()
+            i += 1
+            j = 0
+            while query2.next():
+                item = QStandardItem(query2.value(1).toString())
+                item.setData(query2.value(0).toString())
+                parent.setChild(j, item)
+                j += 1                        
+            
+        self.treeView.expandAll()
+        first = modelTree.index(0, 0, QModelIndex());
+        self.treeView.setCurrentIndex(first)
+
+
+    def ViewMsr(self, id_search):
+#        print 'modelTree.Data=', modelTree.data(self.selModelTree.currentIndex()).toString()
+#        modelTree.
+        #self.lineEdit_2.setText("")
+        #self.lineEdit_3.setText("")
+        #self.lineEdit_4.setText("")
+        row = self.selModelTree.currentIndex().row()
+        row1 = self.selModelTree.currentIndex().parent().row()
+        interId = self.selModelTree.currentIndex().internalId()
+        parentitem = modelTree.itemFromIndex(self.selModelTree.currentIndex()).parent()
+        query = QSqlQuery(db)
+        if parentitem == None:
+            
+            #selectMsr = "SELECT id, name_msr, period FROM msr ORDER BY name_msr"
+            
+            selectMsr = """SELECT msr.id, name_msr, period, period_view FROM msr, group_msr, type_msr
+                           WHERE msr.id_group = group_msr.id
+                           AND group_msr.id_type = type_msr.id
+                           AND type_msr.id_category = :ID_CATEGORY
+                           ORDER BY name_msr"""                        
+            
+            query.prepare(selectMsr)
+            global id_category                       
+            id_category = modelTree.itemFromIndex(self.selModelTree.currentIndex()).data().toString()
+            query.bindValue(":id_category", id_category)          
+        elif parentitem.parent() == None:
+            id_category = modelTree.itemFromIndex(self.selModelTree.currentIndex()).parent().data().toString()
+            selectMsr = """SELECT msr.id, name_msr, period, period_view FROM msr, group_msr
+                           WHERE msr.id_group = group_msr.id
+                           AND group_msr.id_type = :ID_TYPE
+                           ORDER BY name_msr"""
+            query.prepare(selectMsr)
+            id_type = modelTree.itemFromIndex(self.selModelTree.currentIndex()).data().toString()
+            query.bindValue(":id_type", id_type)          
+        else:
+            id_category = modelTree.itemFromIndex(self.selModelTree.currentIndex()).parent().parent().data().toString()
+            selectMsr = """SELECT id, name_msr, period, period_view FROM msr
+                           WHERE id_group = :ID_GROUP
+                           ORDER BY name_msr"""
+            query.prepare(selectMsr)
+            id_group = modelTree.itemFromIndex(self.selModelTree.currentIndex()).data().toString()
+            #print id_group
+#            print modelTree.itemFromIndex(self.selModelTree.currentIndex()).text()
+#            print 'modelTree.Data=', modelTree.data(self.selModelTree.currentIndex()).toString()
+#            self.lineEdit_2.setText(modelTree.data(self.selModelTree.currentIndex()).toString())
+            query.bindValue(":id_group", id_group)
+        query.exec_()
+
+#        '''        
+        if not self.checkBox_3.isChecked() and not self.checkBox_4.isChecked():   
+            model4.clear() ###        
+            model4.reset() ###       
+            model3.clear()        
+            model3.reset()        
+            model2.clear()        
+            model2.reset()        
+            model.clear()                
+#        '''
+        
+        model.setQuery(query)
+        
+        if model.query().size() < 1:
+            self.lineEdit_2.setText("")
+            self.lineEdit_3.setText("")
+            self.lineEdit_4.setText("")
+            self.pushButton.setEnabled(False)
+            self.pushButton_2.setEnabled(False)
+            self.pushButton_3.setEnabled(False)
+            self.pushButton_4.setEnabled(False)
+            self.pushButton_5.setEnabled(False)
+            self.pushButton_6.setEnabled(False)
+            self.pushButton_7.setEnabled(False)       
+                
+        if id_category == '1':
+            model.setHeaderData(1, QtCore.Qt.Horizontal, u"Наименование средства измерения")
+        if id_category == '2':
+            model.setHeaderData(1, QtCore.Qt.Horizontal, u"Наименование средства защиты")
+        ##model.setHeaderData(2, QtCore.Qt.Horizontal, u"Диапазон измерения")
+        model.setHeaderData(2, QtCore.Qt.Horizontal, u"Периодичность поверки")
+        model.setHeaderData(3, QtCore.Qt.Horizontal, u"Периодичность осмотра")
+        #print u'Периодичность осмотра' 
+                     
+        self.tableView.setColumnHidden(0, True)        
+        self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
+        
+        self.searchInModel(0, self.tableView, model)
+        self.pushButton.setEnabled(self.selModel.currentIndex().row() >= 0)
+        ###self.resizeEvent(None)
+        self.tableView.repaint()
+
+
+    def ViewAccuracy(self, id_search):
+        query9 = QSqlQuery(db)
+        selectAccuracy = """SELECT id, name_vid, range_msr, classaccuracy FROM accuracy_msr
+                            WHERE id_msr=:ID
+                            ORDER BY name_vid, range_msr"""
+        query9.prepare(selectAccuracy)                        
+        query9.bindValue(":id", id_msr)            
+        query9.exec_()
+                
+        model4.setQuery(query9)
+                
+        model4.setHeaderData(1, QtCore.Qt.Horizontal, u"Вид измерения")
+        model4.setHeaderData(2, QtCore.Qt.Horizontal, u"Диапазон измерения")
+        model4.setHeaderData(3, QtCore.Qt.Horizontal, u"Класс точности")
+            
+        self.tableView_4.setColumnHidden(0, True)        
+        self.tableView_4.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
+        
+        ###self.resizeEvent(None)
+        
+
+    def ViewZavMsr(self, id_search, id_msr, zav_num):
+        # id_search - идентификатор поиска
+        # id_msr - идентификатор фильтра по конкретному средству измерения
+        # zav_num - фильтр по заводским номерам (работает только при id_msr=-1)
+
+#        self.lineEdit_2.setText("")
+#        self.lineEdit_3.setText("")
+#        self.lineEdit_4.setText("")
+
+        prov_spis = ""
+        if self.checkBox.isChecked() and not self.checkBox_2.isChecked():
+            prov_spis = "AND finish_date IS NULL"
+        if not self.checkBox.isChecked() and self.checkBox_2.isChecked():
+            prov_spis = "AND finish_date IS NOT NULL"
+        
+        query9 = QSqlQuery(db)
+        
+        if id_msr <> -1:
+            query9.prepare("""SELECT id, id_msr, zav_num, first_checking, start_date, finish_date
+                              FROM zav_msr WHERE id_msr=:ID """ + prov_spis + """ ORDER BY zav_num""")
+            query9.bindValue(":id", id_msr)            
+        else:
+            
+            if self.checkBox_4.isChecked():
+                # Старый вариант без средств защиты
+#                '''
+                SQL = """
+SELECT id, id_msr, zav_num, first_checking, start_date, finish_date FROM
+(
+SELECT t1.id, t1.id_msr, t1.zav_num, t1.first_checking, t1.start_date, t1.finish_date,
+t2.checking_date,
+t3.name_msr, t3.period,
+t4.name_group,
+CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END AS last_checking_date,
+--AGE(timestamp '2013-04-30', CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END) AS period_age
+AGE(timestamp  '""" + self.dateEdit.date().toString("yyyy-MM-dd") + """', CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END) AS period_age
+FROM
+zav_msr t1 LEFT OUTER JOIN 
+(
+  select id_zav, MAX(checking_date) AS checking_date 
+  FROM journal_checking GROUP BY id_zav
+) t2
+ON (t1.id = t2.id_zav),
+msr t3,
+group_msr t4
+WHERE t1.id_msr = t3.id
+AND t3.id_group = t4.id
+AND finish_date IS NULL
+) AS t
+WHERE last_checking_date IS NULL
+OR 12 * EXTRACT(YEAR FROM period_age) + EXTRACT(MONTH FROM period_age) > period - 1
+ORDER BY zav_num
+"""
+#'''
+                            
+                # Новый вариант с средствами защиты
+#                '''
+                SQL = """
+SELECT id, id_msr, zav_num, first_checking, start_date, finish_date FROM
+(
+SELECT t1.id, t1.id_msr, t1.zav_num, t1.first_checking, t1.start_date, t1.finish_date, t5.id_category,
+t2.checking_date,
+t3.name_msr, t3.period, t3.period_view,
+t4.name_group,
+CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END AS last_checking_date,
+CASE WHEN (t2.view_date IS NULL) THEN t1.first_checking ELSE t2.view_date END AS last_view_date,
+AGE(timestamp '""" + self.dateEdit.date().toString("yyyy-MM-dd") + """', CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END) AS period_age,
+AGE(timestamp '""" + self.dateEdit.date().toString("yyyy-MM-dd") + """', CASE WHEN (t2.view_date IS NULL) THEN t1.first_checking ELSE t2.view_date END) AS view_period_age
+FROM
+zav_msr t1 LEFT OUTER JOIN 
+(
+  select id_zav, MAX(checking_date) AS checking_date, MAX(view_date) AS view_date 
+  FROM journal_checking GROUP BY id_zav
+) t2
+ON (t1.id = t2.id_zav),
+msr t3,
+group_msr t4,
+type_msr t5
+WHERE t1.id_msr = t3.id
+AND t3.id_group = t4.id
+AND t4.id_type = t5.id
+AND finish_date IS NULL
+) AS t
+WHERE
+(
+  t.id_category = 1 and
+  (last_checking_date IS NULL OR 12 * EXTRACT(YEAR FROM period_age) + EXTRACT(MONTH FROM period_age) > period - 1)
+) OR
+(
+  t.id_category = 2 and
+  (
+    (last_checking_date IS NULL OR 12 * EXTRACT(YEAR FROM period_age) + EXTRACT(MONTH FROM period_age) > period - 1) or
+    (last_view_date IS NULL OR 12 * EXTRACT(YEAR FROM view_period_age) + EXTRACT(MONTH FROM view_period_age) > period_view - 1)
+  )
+)
+ORDER BY zav_num
+"""
+#'''
+ 
+                #QMessageBox.warning(None, u"Предупреждение", SQL, QMessageBox.Ok)
+                            
+                query9.prepare(SQL)            
+            else:
+                if zav_num == "":
+                    query9.prepare("""SELECT id, id_msr, zav_num, first_checking, start_date, finish_date
+                                      FROM zav_msr WHERE true """ + prov_spis + """ ORDER BY zav_num""")
+                else:
+                    query9.prepare("""SELECT id, id_msr, zav_num, first_checking, start_date, finish_date
+                                      FROM zav_msr WHERE zav_num LIKE :zav_num """ + prov_spis + """ ORDER BY zav_num""")
+                    query9.bindValue(":zav_num", zav_num + "%")
+                
+                
+        query9.exec_()        
+        
+        model3.clear()        
+        model3.reset()        
+        model2.clear()        
+        model2.setQuery(query9)
+
+        model2.setHeaderData(2, QtCore.Qt.Horizontal, u"Заводской номер")
+        model2.setHeaderData(3, QtCore.Qt.Horizontal, u"Дата первичной поверки")
+        model2.setHeaderData(4, QtCore.Qt.Horizontal, u"Дата ввода в эксплуатацию")
+        model2.setHeaderData(5, QtCore.Qt.Horizontal, u"Дата списания")
+            
+        self.tableView_2.setColumnHidden(0, True)        
+        self.tableView_2.setColumnHidden(1, True)        
+        self.tableView_2.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
+                
+        self.searchInModel(id_search, self.tableView_2, model2)
+        self.viewButtons(1, self.pushButton_2, self.pushButton_3, self.pushButton_7, self.pushButton_4, self.selModel2)
+
+        ###self.resizeEvent(None)
+
+
+    def ViewJournalChecking(self, id_search, id_zav):
+        query9 = QSqlQuery(db)
+        query9.prepare(selectJournalChecking)
+        query9.bindValue(":id", id_zav)
+        query9.exec_()        
+        
+        model3.clear()        
+        model3.setQuery(query9)
+        model3.setHeaderData(1, QtCore.Qt.Horizontal, u"Дата поверки")
+        model3.setHeaderData(2, QtCore.Qt.Horizontal, u"Дата осмотра")
+        model3.setHeaderData(3, QtCore.Qt.Horizontal, u"Номер свидетельства о поверке")
+        self.tableView_3.setColumnHidden(0, True)
+        self.tableView_3.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
+         
+        self.searchInModel(id_search, self.tableView_3, model3)
+        self.viewButtons(2, self.pushButton_5, self.pushButton_6, self.pushButton_6, self.pushButton_6, self.selModel3)
+
+
+    # Поиск в модели по идентификатору: id_search и позиционирование на соответствующую позицию в гриде 
+    def searchInModel(self, id_search, tableView, model):
+        #print 'id_search=', id_search
+        if id_search == -1:  # При удалении записи
+            return
+        if id_search == 0:
+            if int(model.query().size()) > 0:   # Грубая защита от ошибки позиционирования ???????????????
+                tableView.selectRow(0)
+        else:
+            if int(model.query().size()) < 1:  # Грубая защита от зацикливания
+                return
+            # Навигация на измененную позицию
+            model.query().first();
+            i = 0
+            while model.query().value(0).toString() != id_search:
+                #print model.query().value(0).toString()
+                model.query().next()
+                if i + 1 == int(model.query().size()):
+                    break
+                i += 1
+            tableView.selectRow(i)
+
+
+    def selectionChangedTree(self):
+        self.ViewMsr(0)        
+
+    def selectionChanged1(self):
+        global id_msr
+        row = self.selModel.currentIndex().row()
+        if row == -1:
+            return
+        
+        id_msr = model.record(row).field('id').value().toString()
+                        
+        SQL1 = """select name_group, name_msr, group_msr.id as id_group, msr.id as id_msr
+                  from group_msr, msr
+                  where group_msr.id = msr.id_group
+                  and msr.id = :id_msr"""
+        query1 = QSqlQuery(db)
+        query1.prepare(SQL1)
+        query1.bindValue(":id_msr", id_msr);
+        query1.exec_()
+        query1.next()
+        self.lineEdit_2.setText(query1.value(0).toString())
+        
+        self.lineEdit_3.setText(model.record(row).field('name_msr').value().toString())
+                        
+        if not self.checkBox_3.isChecked() and not self.checkBox_4.isChecked():   
+            self.ViewZavMsr(0, id_msr, None)
+        self.ViewAccuracy(id_msr)
+
+                 
+    def selectionChanged2(self):
+#        QMessageBox.warning(None, u"Предупреждение", u"1", QMessageBox.Ok)
+        global id_zav, tempDate        
+        row = self.selModel2.currentIndex().row()
+        if row == -1:
+            return
+        id_zav = model2.record(row).field('id').value().toString()   
+        tempDate = model2.record(row).field('first_checking').value().toDate()
+        self.ViewJournalChecking(0, id_zav)
+                
+        SQL1 = """select name_group, name_msr, group_msr.id as id_group, msr.id as id_msr
+                  from group_msr, msr
+                  where group_msr.id = msr.id_group
+                  and msr.id = :id_msr"""
+        query1 = QSqlQuery(db)
+        query1.prepare(SQL1)
+        query1.bindValue(":id_msr", model2.record(row).field('id_msr').value().toString());
+        query1.exec_()
+        query1.next()
+        self.lineEdit_2.setText(query1.value(0).toString())
+#        self.lineEdit_2.setText(query1.field('name_group').toString())
+        self.lineEdit_2.setCursorPosition(0)
+        self.lineEdit_2.setStyleSheet("color: blue; background-color: lightgray")
+        self.lineEdit_3.setText(query1.value(1).toString())
+        self.lineEdit_3.setCursorPosition(0)
+        self.lineEdit_3.setStyleSheet("color: blue; background-color: lightgray")
+        self.lineEdit_4.setText(model2.record(row).field('zav_num').value().toString())
+        self.lineEdit_4.setCursorPosition(0)
+        self.lineEdit_4.setStyleSheet("color: blue; background-color: lightgray")
+        self.lineEdit_5.setVisible(False) 
+
+        if self.checkBox_3.isChecked() or self.checkBox_4.isChecked() :
+            # поиск в дереве
+            for e in range(2):
+                for i in range(modelTree.item(e).rowCount()):
+#                print 'i=', i
+                    for j in range(modelTree.item(e).child(i).rowCount()):
+                        if query1.value(2).toString() == modelTree.item(e).child(i).child(j).data().toString():
+                            self.treeView.setCurrentIndex(modelTree.indexFromItem(modelTree.item(e).child(i).child(j)))
+
+            # поиск в средствах измерения
+            self.searchInModel(query1.value(3).toString(), self.tableView, model)
+         
+    def selectionChanged3(self):
+        global id_journal        
+        row = self.selModel3.currentIndex().row()
+        if row == -1:
+            return
+        id_journal = model3.record(row).field('id').value().toString()   
+
+
+    def checkBox_Toggle(self, check):
+        if not check and not self.checkBox_2.isChecked():
+            self.checkBox_2.setChecked(True)
+        if self.checkBox_3.isChecked():
+            self.ViewZavMsr(0, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(0, id_msr, None)
+
+    def checkBox_2_Toggle(self, check):
+        if not check and not self.checkBox.isChecked():
+            self.checkBox.setChecked(True)
+        if self.checkBox_3.isChecked():
+            self.ViewZavMsr(0, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(0, id_msr, None)
+
+    def checkBox_3_Toggle(self, check):
+        self.lineEdit.setEnabled(check)        
+        self.checkBox_4.setEnabled(not check)
+        self.treeView.setEnabled(not check)
+        self.tableView.setEnabled(not check)
+        self.tableView_4.setEnabled(not check)
+        if check:            
+            self.ViewZavMsr(0, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(0, id_msr, None)
+
+    def lineEdit_textChanged(self):
+        self.ViewZavMsr(0, -1, self.lineEdit.text())
+
+    def checkBox_4_Toggle(self, check):
+        self.dateEdit.setEnabled(check)
+        self.checkBox.setEnabled(not check)
+        self.checkBox_2.setEnabled(not check)
+        self.checkBox_3.setEnabled(not check)
+        self.treeView.setEnabled(not check)
+        self.tableView.setEnabled(not check)
+        self.tableView_4.setEnabled(not check)
+        if check:
+            self.ViewZavMsr(0, -1, None)
+        else:
+            self.ViewZavMsr(0, id_msr, None)
+
+    def dateEdit_textChanged(self):
+        self.ViewZavMsr(0, -1, None)
+
+
+# Редактирование заводских номеров (начало кода)        
+        
+    def warn1(self):
+#        if self.checkBox_3.isChecked() or self.checkBox_4.isChecked():
+#            QMessageBox.warning(self, u"Предупреждение", u"Отключи фильтр по заводскому номеру либо по средствам измерения, которые необходимо поверить!", QMessageBox.Ok)
+        if self.checkBox_4.isChecked():
+            QMessageBox.warning(self, u"Предупреждение", u"Отключи фильтр по средствам измерения, которые необходимо поверить!", QMessageBox.Ok)
+            return True
+        else:
+            return False          
+                
+    def pushButton_Click(self):       
+        if not self.checkBox.isChecked():
+            QMessageBox.warning(self, u"Предупреждение", u"Установи галочку 'Рабочие средства измерения'!", QMessageBox.Ok)
+            return        
+        if self.warn1():
+            return        
+        self.wind1 = self.editZav()
+        if self.wind1.tag == 0:
+            return
+                        
+        self.wind1.setWindowTitle(u'Добавление нового заводского номера')
+        self.wind1.label_4.setVisible(False)        
+        self.wind1.dateEdit_3.setVisible(False)        
+        self.wind1.exec_()
+        if self.checkBox_3.isChecked() or self.checkBox_4.isChecked():
+            self.lineEdit.textChanged.disconnect(self.lineEdit_textChanged)
+            self.lineEdit.setText("")
+            self.lineEdit.textChanged.connect(self.lineEdit_textChanged)
+            self.ViewZavMsr(id_zav, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(id_zav, id_msr, None)
+
+                
+    def pushButton2_Click(self):
+#        QtGui.QTableView.removeEventFilter(MyFilter(self.tableView))
+        #self.tableView_2.removeEventFilter(MyFilter(self.tableView))
+        #return
+        
+        if self.warn1():
+            return
+        if model3.rowCount() > 0:
+            QMessageBox.warning(self, u"Предупреждение", u"Удаление текущей позиции невозможно,\n\r поскольку она содержит плановые поверки!", QMessageBox.Ok)
+            return
+        r = QMessageBox.warning(self, u"Предупреждение", u"Вы действительно желаете удалить текущую запись?", QMessageBox.Yes, QMessageBox.No)            
+        if r == QMessageBox.Yes:            
+            query = QSqlQuery(db)
+            query.prepare("DELETE FROM zav_msr WHERE id = :ID")
+            row = self.selModel2.currentIndex().row()                
+            query.bindValue(":id", model2.record(row).field('id').value().toString());
+            query.exec_()
+
+            if self.checkBox_3.isChecked() or self.checkBox_4.isChecked():
+                self.ViewZavMsr(-1, -1, self.lineEdit.text())
+            else:    
+                self.ViewZavMsr(-1, id_msr, None)
+
+            # Навигация на предыдущую позицию
+            if row > 0:
+                row -= 1
+            self.tableView_2.selectRow(row)                                    
+            self.viewButtons(1, self.pushButton_2, self.pushButton_3, self.pushButton_7, self.pushButton_4, self.selModel2)
+            
+    def pushButton3_Click(self):
+        if self.warn1():
+            return
+        global id_zav, id_msr    #, name_type
+        self.wind1 = self.editZav()
+        if self.wind1.tag == 0:
+            return
+        self.wind1.tag = 2
+        self.wind1.setWindowTitle(u'Редактирование текущего заводского номера')
+        self.wind1.label_4.setVisible(False)        
+        self.wind1.dateEdit_3.setVisible(False)        
+        row = self.selModel2.currentIndex().row()
+        self.wind1.lineEdit.setText(model2.record(row).field('zav_num').value().toString())
+        self.wind1.dateEdit.setDate(model2.record(row).field('first_checking').value().toDate())
+        self.wind1.dateEdit_2.setDate(model2.record(row).field('start_date').value().toDate())
+        self.wind1.exec_()
+        if self.checkBox_3.isChecked():
+            self.ViewZavMsr(id_zav, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(id_zav, id_msr, None)
+
+                        
+    class editZav(QtGui.QDialog):    
+        def __init__(self, *args):
+            QtGui.QDialog.__init__(self, *args)
+
+            """
+            self.tag = 1
+            try:                
+                uic.loadUi(path_ui + "editZav.ui", self)
+            except:    
+                QMessageBox.warning(self, u"Предупреждение", u"Проблемы с загрузкой файла: " + path_ui + u"editZav.ui. \nПродолжение невозможно!", QMessageBox.Ok)
+                self.tag = 0
+                return
+            """
+
+            if not MyLoadUi(path_ui, "editZav.ui", self):
+                return
+
+            self.dateEdit.setCalendarPopup(1)
+            self.dateEdit_2.setCalendarPopup(1)
+            
+            self.pushButton.setIcon(QIcon(u':/ico/ico/tick_64.png'))
+            self.pushButton_2.setIcon(QIcon(u':/ico/ico/delete_64.png'))
+            
+            self.pushButton.clicked.connect(self.pushButton1_Click)
+        
+        def pushButton1_Click(self):
+            if self.lineEdit.text().trimmed() == "":
+                QMessageBox.warning(self, u"Предупреждение", u"Введите заводской номер", QMessageBox.Ok)
+                self.lineEdit.setFocus(True)
+                return
+                
+            global id_zav            
+            query = QSqlQuery(db)
+            if self.tag == 1:            
+                query.prepare("SELECT CASE WHEN (MAX(id) IS NULL) THEN 1 ELSE MAX(id) + 1 END FROM zav_msr");
+                query.exec_()
+                query.next()
+                id_zav = query.value(0).toString()
+                query.prepare("INSERT INTO zav_msr (id_msr, zav_num, first_checking, start_date, id) VALUES (:id_msr, :zav_num, :first_checking, :start_date, :id)")
+            else:
+                query.prepare("UPDATE zav_msr SET id_msr = :id_msr, zav_num = :zav_num, first_checking = :first_checking, start_date = :start_date WHERE id = :id")
+            query.bindValue(":id", id_zav);
+            query.bindValue(":id_msr", id_msr);
+            query.bindValue(":zav_num", self.lineEdit.text())
+            if self.dateEdit.date() > datetime.date(2000, 1, 1):
+                query.bindValue(":first_checking", self.dateEdit.date().toString("dd.MM.yyyy"))
+            if self.dateEdit_2.date() > datetime.date(2000, 1, 1):
+                query.bindValue(":start_date", self.dateEdit_2.date().toString("dd.MM.yyyy"))
+            if self.dateEdit_3.date() > datetime.date(2000, 1, 1):
+                query.bindValue(":finish_date", self.dateEdit_3.date().toString("dd.MM.yyyy"))
+                    
+            if not query.exec_():
+                QMessageBox.warning(self, u"Предупреждение", u"Ошибка сохранения", QMessageBox.Ok)
+                id_zav = 0            
+                                    
+            self.close()
+            
+# Редактирование видов измерения (конец кода)        
+
+# Редактирование списания (начало кода)
+        
+    def pushButton7_Click(self):
+        if self.warn1():
+            return
+        
+        if not self.checkBox_2.isChecked():
+            QMessageBox.warning(self, u"Предупреждение", u"Для списания необходимо в условиях фильтра\nвключить списанные средства измерения", QMessageBox.Ok)
+            self.checkBox_2.setFocus(True)
+            return
+        global id_zav, id_msr    #, name_type
+        self.wind1 = self.editDeregist()
+        if self.wind1.tag == 0:
+            return
+                
+        row = self.selModel2.currentIndex().row()        
+        
+        if model2.record(row).field('finish_date').value().toDate().toString() == "":
+            self.wind1.dateEdit.setDate(datetime.date.today())
+            self.wind1.checkBox.setEnabled(False)
+        else:    
+            self.wind1.dateEdit.setDate(model2.record(row).field('finish_date').value().toDate())
+        self.wind1.exec_()
+        if self.checkBox_3.isChecked():
+            self.ViewZavMsr(id_zav, -1, self.lineEdit.text())
+        else:    
+            self.ViewZavMsr(id_zav, id_msr, None)
+
+
+    class editDeregist(QtGui.QDialog):    
+        def __init__(self, *args):
+            QtGui.QDialog.__init__(self, *args)
+                        
+            """            
+            self.tag = 1
+            try:                
+                uic.loadUi(path_ui + "editDeregist.ui", self)
+            except:    
+                QMessageBox.warning(self, u"Предупреждение", u"Проблемы с загрузкой файла: " + path_ui + u"editDeregist.ui. \nПродолжение невозможно!", QMessageBox.Ok)
+                self.tag = 0
+                return
+            """    
+
+#            self.tag = 1
+            if not MyLoadUi(path_ui, "editDeregist.ui", self):
+#                self.tag = 0
+                return
+                        
+            self.dateEdit.setCalendarPopup(1)
+            
+            self.pushButton.setIcon(QIcon(u':/ico/ico/tick_64.png'))
+            self.pushButton_2.setIcon(QIcon(u':/ico/ico/delete_64.png'))
+            
+            self.pushButton.clicked.connect(self.pushButton1_Click)
+        
+        def pushButton1_Click(self):
+            if id_category == '1':
+                if self.dateEdit.date() <= datetime.date(2000, 1, 1) and self.checkBox.checkState() == 0:
+                    QMessageBox.warning(self, u"Предупреждение", u"Введите правильно дату поверки", QMessageBox.Ok)
+                    self.dateEdit.setFocus(True)
+                    return
+                
+            if id_category == '2':
+                if self.dateEdit.date() <= datetime.date(2000, 1, 1) and self.checkBox.checkState() == 0:
+                    QMessageBox.warning(self, u"Предупреждение", u"Введите правильно дату поверки", QMessageBox.Ok)
+                    self.dateEdit.setFocus(True)
+                    return
+                
+            global id_zav            
+            query = QSqlQuery(db)
+            query.prepare("UPDATE zav_msr SET finish_date = :finish_date WHERE id = :id")
+            if self.checkBox.checkState() == 0:
+                query.bindValue(":first_checking", self.dateEdit.date().toString("dd.MM.yyyy"))
+            query.bindValue(":id", id_zav);
+                    
+            if not query.exec_():
+                QMessageBox.warning(self, u"Предупреждение", u"Ошибка сохранения", QMessageBox.Ok)
+                id_zav = 0            
+                                    
+            self.close()
+
+# Редактирование списания (конец кода)
+
+
+# Редактирование журнала поверки (начало кода)        
+              
+    def pushButton4_Click(self):
+        global id_journal, id_zav
+        self.wind2 = self.editJournal()
+        if self.wind2.tag == 0:
+            return
+        
+        self.wind2.setWindowTitle(u'Добавление новой поверки')
+        self.wind2.dateEdit.setDate(datetime.date.today())        
+        self.wind2.dateEdit_2.setDate(datetime.date.today())        
+        self.wind2.exec_()
+        self.ViewJournalChecking(id_journal, id_zav)
+
+                
+    def pushButton5_Click(self):        
+        global id_zav
+        r = QMessageBox.warning(self, u"Предупреждение", u"Вы действительно желаете удалить текущую запись?", QMessageBox.Yes, QMessageBox.No)
+        if r == QMessageBox.Yes:            
+            query = QSqlQuery(db)
+            query.prepare("DELETE FROM journal_checking WHERE id = :ID")
+            row = self.selModel3.currentIndex().row()                
+            query.bindValue(":id", model3.record(row).field('id').value().toString());
+            query.exec_()
+            self.ViewJournalChecking(-1, id_zav)
+
+            # Навигация на предыдущую позицию
+            if row > 0:
+                row -= 1
+            self.tableView_3.selectRow(row)                                    
+            self.viewButtons(2, self.pushButton_5, self.pushButton_6, self.pushButton_6, self.pushButton_6, self.selModel3)
+            
+    def pushButton6_Click(self):
+        global id_journal, id_zav    #, name_type
+        self.wind2 = self.editJournal()
+        if self.wind2.tag == 0:
+            return
+        self.wind2.tag = 2
+        self.wind2.setWindowTitle(u'Редактирование текущей поверки')
+        row = self.selModel3.currentIndex().row()
+        self.wind2.lineEdit.setText(model3.record(row).field('sertificate').value().toString())
+        self.wind2.dateEdit.setDate(model3.record(row).field('checking_date').value().toDate())
+        self.wind2.dateEdit_2.setDate(model3.record(row).field('view_date').value().toDate())
+        self.wind2.exec_()
+        self.ViewJournalChecking(id_journal, id_zav)
+                        
+                                                
+    class editJournal(QtGui.QDialog):    
+        def __init__(self, *args):
+            QtGui.QDialog.__init__(self, *args)
+#            uic.loadUi(path_ui + "editJournal.ui", self)
+            """
+            self.tag = 1
+            try:                
+                uic.loadUi(path_ui + "editJournal.ui", self)
+            except:    
+                QMessageBox.warning(self, u"Предупреждение", u"Проблемы с загрузкой файла: " + path_ui + u"editJournal.ui. \nПродолжение невозможно!", QMessageBox.Ok)
+                self.tag = 0
+                return
+            """    
+#            self.tag = 1
+            if not MyLoadUi(path_ui, "editJournal.ui", self):
+#                self.tag = 0
+                return
+                        
+            self.dateEdit.setCalendarPopup(1)
+            self.dateEdit_2.setCalendarPopup(1)
+            self.pushButton.clicked.connect(self.pushButton1_Click)
+            
+            self.checkBox.toggled.connect(self.checkBox_Toggle)
+            
+            self.label_3.setVisible(id_category == '2')
+            self.dateEdit_2.setVisible(id_category == '2')
+            self.checkBox.setVisible(id_category == '2')
+        
+        
+        def pushButton1_Click(self):
+
+            if id_category == '1':
+                if self.dateEdit.date() <= datetime.date(2000, 1, 1):
+                    QMessageBox.warning(self, u"Предупреждение", u"Введите корректную дату поверки", QMessageBox.Ok)
+                    self.dateEdit.setFocus(True)
+                    return
+                        
+            if id_category == '2':
+                if (self.dateEdit.date() <= datetime.date(2000, 1, 1) and
+                    self.dateEdit_2.date() <= datetime.date(2000, 1, 1)):
+                    QMessageBox.warning(self, u"Предупреждение", u"Введите корректную дату поверки/осмотра", QMessageBox.Ok)
+                    self.dateEdit.setFocus(True)
+                    return
+                if (self.dateEdit.date() > datetime.date(2000, 1, 1) and
+                    self.dateEdit.date() != self.dateEdit_2.date()):
+                    QMessageBox.warning(self, u"Предупреждение", u"Даты поверки и осмотра должны совпадать в данной ситуации", QMessageBox.Ok)
+                    self.dateEdit.setFocus(True)
+                    return
+                        
+            global id_journal
+            query = QSqlQuery(db)
+                        
+            if self.tag == 1:
+                # Проверка на превышение последней даты поверки
+                SQL = """SELECT MAX(checking_date) AS max_checking_date, MAX(view_date) AS max_view_date 
+                         FROM journal_checking WHERE id_zav = """ + id_zav
+                query.prepare(SQL);
+                query.exec_()
+                query.next()
+
+                if id_category == '1':
+                    if self.dateEdit.date() <= max(tempDate, query.value(0).toDate()):
+                        QMessageBox.warning(self, u"Предупреждение", u"Дата текущей поверки должна превышать дату предыдущей поверки", QMessageBox.Ok)
+                        self.dateEdit.setFocus(True)
+                        return            
+                            
+                if id_category == '2':
+                    if self.dateEdit.date() <= datetime.date(2000, 1, 1):
+                        if self.dateEdit_2.date() <= max(tempDate, query.value(1).toDate()):
+                            QMessageBox.warning(self, u"Предупреждение", u"Дата текущей осмотра должна превышать дату предыдущей осмотра", QMessageBox.Ok)
+                            self.dateEdit.setFocus(True)
+                            return            
+                    if self.dateEdit.date() > datetime.date(2000, 1, 1):
+                        if (self.dateEdit.date() <= max(tempDate, query.value(0).toDate()) or
+                            self.dateEdit_2.date() <= max(tempDate, query.value(1).toDate())):
+                            QMessageBox.warning(self, u"Предупреждение", u"Дата текущей поверки/осмотра должна превышать дату предыдущей поверки/осмотра", QMessageBox.Ok)
+                            self.dateEdit.setFocus(True)
+                            return            
+                            
+                query.prepare("SELECT CASE WHEN (MAX(id) IS NULL) THEN 1 ELSE MAX(id) + 1 END FROM journal_checking");
+                query.exec_()
+                query.next()
+                id_journal = query.value(0).toString()
+                query.prepare("INSERT INTO journal_checking (id, id_zav, checking_date, view_date, sertificate) VALUES (:id, :id_zav, :checking_date, :view_date, :sertificate)")
+            else:
+                query.prepare("UPDATE journal_checking SET id_zav = :id_zav, checking_date = :checking_date, view_date = :view_date, sertificate = :sertificate WHERE id = :id")
+            query.bindValue(":id", id_journal);
+            query.bindValue(":id_zav", id_zav);
+#            query.bindValue(":checking_date", self.dateEdit.date().toString("dd.MM.yyyy"))
+#            query.bindValue(":view_date", self.dateEdit_2.date().toString("dd.MM.yyyy"))
+            if self.dateEdit.date() > datetime.date(2000, 1, 1):
+                query.bindValue(":checking_date", self.dateEdit.date().toString("dd.MM.yyyy"))
+            if self.dateEdit_2.date() > datetime.date(2000, 1, 1):
+                query.bindValue(":view_date", self.dateEdit_2.date().toString("dd.MM.yyyy"))
+            
+#            if self.dateEdit.date() > datetime.date(2000, 1, 1):
+#                query.bindValue(":first_checking", self.dateEdit.date().toString("dd.MM.yyyy"))
+            
+            
+            query.bindValue(":sertificate", self.lineEdit.text())
+                        
+            if not query.exec_():
+                QMessageBox.warning(self, u"Предупреждение", u"Ошибка сохранения", QMessageBox.Ok)            
+                                    
+            self.close()
+
+        def checkBox_Toggle(self, check):
+            if check:
+                self.dateEdit.setDate(datetime.date(2000, 1, 1))        
+            else:
+                self.dateEdit.setDate(self.dateEdit_2.date())        
+
+            
+# Редактирование журнала поверки (конец кода)        
+
+    def viewButtons(self, n, button1, button2, button3, button4, selModel):
+        enab = selModel.currentIndex().row() >= 0
+        button1.setEnabled(enab)
+        button2.setEnabled(enab)
+        button3.setEnabled(enab)
+        button4.setEnabled(enab)
+        
+        if enab == False:
+            if n < 2:
+                self.pushButton_4.setEnabled(False)
+                self.pushButton_5.setEnabled(False)
+                self.pushButton_6.setEnabled(False)
+
+        if self.pushButton.isEnabled():                
+            self.pushButton.setToolTip(u'добавить учетную запись')
+        else:    
+            self.pushButton.setToolTip(u'')
+        if self.pushButton_3.isEnabled():                
+            self.pushButton_3.setToolTip(u'редактировать учетную запись')
+        else:    
+            self.pushButton_3.setToolTip(u'')
+        if self.pushButton_2.isEnabled():                
+            self.pushButton_2.setToolTip(u'удалить учетную запись')
+        else:    
+            self.pushButton_2.setToolTip(u'')
+        if self.pushButton_4.isEnabled():                
+            self.pushButton_4.setToolTip(u'добавить поверку')
+        else:    
+            self.pushButton_4.setToolTip(u'')
+        if self.pushButton_6.isEnabled():                
+            self.pushButton_6.setToolTip(u'редактировать поверку')
+        else:    
+            self.pushButton_6.setToolTip(u'')
+        if self.pushButton_5.isEnabled():                
+            self.pushButton_5.setToolTip(u'удалить поверку')
+        else:    
+            self.pushButton_5.setToolTip(u'')
+        if self.pushButton_7.isEnabled():                
+            self.pushButton_7.setToolTip(u'Списание средства измерения')
+        else:    
+            self.pushButton_7.setToolTip(u'')
+        
+        
+    def widthArea(self, tableView):
+        # Возвращает ширину свободной области таблицы tableView
+        HSWidth = tableView.verticalHeader().width() + 4
+        if tableView.verticalScrollBar().width() < 100 and tableView.verticalScrollBar().isVisible():
+            HSWidth += tableView.verticalScrollBar().width()
+        return tableView.width() - HSWidth    
+    
+    '''        
+    def resizeEvent( self, event ):
+        return
+        HSWidth = self.tableView.verticalHeader().width() +  self.tableView.verticalScrollBar().width() + 4
+        #print "HSWidth=", HSWidth
+        #print self.tableView.verticalHeader().width(), self.tableView.verticalScrollBar().width()
+#        SBWidth = 0
+        koef = (1.0 * (self.tableView.width() - HSWidth) / (self.withCol1 + self.withCol2))
+#        koef = (1.0 * (self.tableView.widthMM() - 20) / (self.withCol1 + self.withCol2))
+        self.tableView.setColumnWidth(1, koef * self.withCol1)
+        self.tableView.setColumnWidth(2, koef * self.withCol2)
+        
+#        HSWidth2 = self.tableView_2.verticalHeader().width() +  self.tableView_2.verticalScrollBar().width() + 4
+        #print "HSWidth2=", HSWidth2
+        #print self.tableView_2.verticalHeader().width(),  self.tableView_2.verticalScrollBar().width()
+#        print self.tableView_2.width()
+#        print self.widthArea(self.tableView_2)
+#        koef = (1.0 * (self.widthArea(self.tableView_2)) / (self.withCol4 + self.withCol5 + self.withCol6 + self.withCol7))
+#        self.tableView_2.setColumnWidth(2, koef * self.withCol4)
+#        self.tableView_2.setColumnWidth(3, koef * self.withCol5)
+#        self.tableView_2.setColumnWidth(4, koef * self.withCol6)
+#        self.tableView_2.setColumnWidth(5, koef * self.withCol7)
+
+        HSWidth = self.tableView_3.verticalHeader().width() +  self.tableView_3.verticalScrollBar().width() + 4
+        koef = (1.0 * (self.tableView_3.width() - HSWidth) / (self.withCol8 + self.withCol9))
+        self.tableView_3.setColumnWidth(1, koef * self.withCol8)
+        self.tableView_3.setColumnWidth(2, koef * self.withCol9)
+
+        HSWidth = self.tableView_4.verticalHeader().width() +  self.tableView_4.verticalScrollBar().width() + 4
+        koef = (1.0 * (self.tableView_4.width() - HSWidth) / (self.withCol10 + self.withCol11 + self.withCol12))
+        self.tableView_4.setColumnWidth(1, koef * self.withCol10)
+        self.tableView_4.setColumnWidth(2, koef * self.withCol11)
+        self.tableView_4.setColumnWidth(3, koef * self.withCol12)
+    '''
+
+    def TestBase(self):
+        query = QSqlQuery(db)
+        print u"Проверка наличия таблиц БД"
+        err_tbl = ""
+        query = QSqlQuery(db)
+        query.prepare("select id_category from type_msr")
+        if not query.exec_(): err_tbl += "type_msr\n"
+        
+
+        if err_tbl != "":
+            print err_tbl  
+            r = QMessageBox.warning(self, u"Предупреждение", u"""Для учета средств защиты программа запускается впервые
+\n""" + 
+u"Внести воответствующие изменения в БД?", QMessageBox.Yes, QMessageBox.No)                        
+                 
+#            r = QMessageBox.No
+                        
+            if r == QMessageBox.Yes:
+                self.InitBase()
+                return True
+            else:
+                return False
+        
+        return True        
+        query = QSqlQuery(db)
+        SQL = u"""        
+ALTER TABLE zav_msr DROP CONSTRAINT zav_msr_zav_num_key                
+"""        
+        
+        print u"Проверка наличия таблиц БД"
+        err_tbl = ""
+        query = QSqlQuery(db)
+        query.prepare("select * from type_msr")
+        if not query.exec_(): err_tbl += "type_msr\n"
+        query.prepare("select * from group_msr")
+        if not query.exec_(): err_tbl += "group_msr\n"
+        query.prepare("select * from msr")
+        if not query.exec_(): err_tbl += "msr\n"
+        query.prepare("select * from accuracy_msr")
+        if not query.exec_(): err_tbl += "accuracy_msr\n"
+        query.prepare("select * from zav_msr")
+        if not query.exec_(): err_tbl += "zav_msr\n"
+        query.prepare("select * from journal_checking")
+        if not query.exec_(): err_tbl += "journal_checking\n"
+          
+        if err_tbl != "":
+            print err_tbl  
+            r = QMessageBox.warning(self, u"Предупреждение", u"""В БД отсутствут следующие таблицы,
+необходимые для работы приложения:\n""" + err_tbl +
+u"Произвести инициализацию БД?", QMessageBox.Yes, QMessageBox.No)                        
+                 
+#            r = QMessageBox.No
+                        
+            if r == QMessageBox.Yes:
+                self.InitBase()
+                return True
+            else:
+                return False
+        return True
+                       
+          
+#if (!query.exec("...")) {
+#//сообщение об ошибке и все что нашей душе угодно
+#…
+#}        
+
+
+    def InitBase(self):
+        print u"Инициализация БД"        
+        query = QSqlQuery(db)
+        
+        SQL = u"""
+ALTER TABLE type_msr
+ADD column id_category integer;
+COMMENT ON COLUMN type_msr.id_category IS 'Категория средств';
+UPDATE type_msr SET id_category=1;
+ALTER TABLE msr
+ADD column period_view integer;
+COMMENT ON COLUMN msr.period_view IS 'Период осмотра для средств защиты';
+ALTER TABLE journal_checking
+ADD column view_date date;
+COMMENT ON COLUMN journal_checking.view_date IS 'Дата осмотра';
+ALTER TABLE journal_checking
+ALTER column checking_date DROP NOT NULL;
+"""
+
+        print SQL
+        
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+        else:
+            print "Инициализация выполнена!"
+        
+        return
+        
+        SQL = """
+drop table journal_checking;        
+drop table zav_msr;
+drop table accuracy_msr;
+drop table msr;
+drop table group_msr;
+drop table type_msr;
+"""
+      #  print SQL
+        if not query.exec_(SQL):
+            print "Ошибка удаления"
+        else:
+            print "Удаление выполнено!"
+            
+        SQL = """
+CREATE TABLE type_msr
+(
+  id serial PRIMARY KEY,
+  name_type character varying(100) NOT NULL
+);
+COMMENT ON TABLE type_msr IS 'Справочник видов измерения';
+COMMENT ON COLUMN type_msr.id IS 'Идентификатор записи';
+COMMENT ON COLUMN type_msr.name_type IS 'Наименование вида';
+
+CREATE TABLE group_msr
+(
+  id serial PRIMARY KEY,
+  id_type integer REFERENCES type_msr,
+  name_group character varying(200) NOT NULL
+);
+COMMENT ON TABLE group_msr IS 'Справочник групп средств измерения';
+COMMENT ON COLUMN group_msr.id IS 'Идентификатор записи';
+COMMENT ON COLUMN group_msr.id_type IS 'Внешний ключ к type_msr';
+COMMENT ON COLUMN group_msr.name_group IS 'Наименование группы';
+
+CREATE TABLE msr
+(
+  id serial PRIMARY KEY,
+  id_group integer REFERENCES group_msr,
+  name_msr character varying(200) NOT NULL,
+  period integer CHECK (period > 0)
+);
+COMMENT ON TABLE msr IS 'Классификатор средств измерения';
+COMMENT ON COLUMN msr.id IS 'Идентификатор записи';
+COMMENT ON COLUMN msr.id_group IS 'Внешний ключ к group_msr';
+COMMENT ON COLUMN msr.name_msr IS 'Наименование, тип средства измерения';
+COMMENT ON COLUMN msr.period IS 'Периодичность поверки';
+
+CREATE TABLE accuracy_msr
+(
+  id serial PRIMARY KEY,
+  id_msr integer REFERENCES msr,
+  name_vid character varying(100),
+  range_msr character varying(50),
+  classaccuracy character varying(100)
+);
+COMMENT ON TABLE accuracy_msr IS 'Классы точности средств измерения';
+COMMENT ON COLUMN accuracy_msr.id IS 'Идентификатор записи';
+COMMENT ON COLUMN accuracy_msr.id_msr IS 'Внешний ключ к msr';
+COMMENT ON COLUMN accuracy_msr.name_vid IS 'Вид измерения';
+COMMENT ON COLUMN accuracy_msr.range_msr IS 'Диапазон измерения';
+COMMENT ON COLUMN accuracy_msr.classaccuracy IS 'Класс точности';
+
+CREATE TABLE zav_msr
+(
+  id serial PRIMARY KEY,
+  id_msr integer REFERENCES msr,
+  zav_num character varying(20),
+  first_checking date,
+  start_date date,
+  finish_date date
+);
+COMMENT ON TABLE zav_msr IS 'Заводской справочник средств измерения';
+COMMENT ON COLUMN zav_msr.id IS 'Идентификатор записи';
+COMMENT ON COLUMN zav_msr.id_msr IS 'Внешний ключ к msr';
+COMMENT ON COLUMN zav_msr.zav_num IS 'Заводской номер';
+COMMENT ON COLUMN zav_msr.first_checking IS 'Дата первичной поверки';
+COMMENT ON COLUMN zav_msr.start_date IS 'Дата ввода в эксплуатацию';
+COMMENT ON COLUMN zav_msr.finish_date IS 'Дата списания';
+
+CREATE TABLE journal_checking
+(
+  id serial PRIMARY KEY,
+  id_zav integer REFERENCES zav_msr,
+  checking_date date NOT NULL,
+  sertificate character varying(20)
+);
+COMMENT ON TABLE journal_checking IS ' Журнал поверки средств измерения';
+COMMENT ON COLUMN journal_checking.id IS 'Идентификатор записи';
+COMMENT ON COLUMN journal_checking.id_zav IS 'Внешний ключ к zav_msr';
+COMMENT ON COLUMN journal_checking.checking_date IS 'Дата поверки';
+COMMENT ON COLUMN journal_checking.sertificate IS 'Номер свидетельства о поверке';
+"""
+        
+        if not query.exec_(SQL):
+            print "Ошибка инициализации"
+        else:
+            print "Инициализация выполнена!"
+
+#  first_checking timestamp without time zone NOT NULL,        
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+#    db = QSqlDatabase("QPSQL")
+#    db.setHostName("localhost");
+#    db.setDatabaseName("electrolab");
+#    db.setUserName("electrolab");
+#    db.setPassword("electrolab");
+    
+    from dpframe.base.inits import db_connection_init
+    @json_config_init
+    @db_connection_init
+    class ForEnv(QtGui.QWidget):
+        def getEnv(self):
+            return self.env
+    objEnv = ForEnv()
+    env = objEnv.getEnv()
+    db = env.db
+    path_ui = env.config.paths.ui + "/"
+
+    if not os.path.exists(path_ui):        
+        path_ui = ""
+
+    rez = db.open();
+    if not rez:
+        QMessageBox.warning(None, u"Предупреждение",
+u"""Не установлено соединение с БД со следующими параметрами:
+host: """ + db.hostName() + """
+database: """ + db.databaseName() + """
+user: """ + db.userName() + """
+password: """ + db.password(),
+QMessageBox.Ok)
+                
+    else:                
+        # Установка формата даты в БД
+#        query = QSqlQuery(db)        
+#        SQL = "set datestyle = 'ISO, DMY'"
+#        if not query.exec_(SQL):
+#            print "Ошибка SQL"
+#        else:
+#            print "SQL выполнено!"
+                        
+        wind = classJournal()
+        if wind.is_show: 
+            wind.show()
+            ###wind.resizeEvent(None)
+        sys.exit(app.exec_())
+
+
+#set datestyle = 'ISO, DMY'
+#show datestyle
+
+'''
+ALTER TABLE type_msr
+DROP column id_category;
+ALTER TABLE msr
+DROP column period_view;
+ALTER TABLE journal_checking
+DROP column view_date;
+ALTER TABLE journal_checking
+ALTER column checking_date SET NOT NULL;
+'''
+        
+

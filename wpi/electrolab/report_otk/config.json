@@ -1,0 +1,13 @@
+{
+   "db": {
+      "host": "10.5.5.214",
+      "user": "electrolab",
+      "password": "electrolab",
+      "database": "electrolab"
+   },
+   "devices": {
+      "scanner": "COM3"
+   },
+   "reports": [],
+   "mode": "auto"
+}

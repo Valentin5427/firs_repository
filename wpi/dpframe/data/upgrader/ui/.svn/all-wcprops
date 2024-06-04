@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DPFrame/!svn/ver/168/trunk/dpframe/data/upgrader/ui
+END
+SQLConnectPage.ui
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/DPFrame/!svn/ver/168/trunk/dpframe/data/upgrader/ui/SQLConnectPage.ui
+END
+SelectMetadataPage.ui
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/DPFrame/!svn/ver/168/trunk/dpframe/data/upgrader/ui/SelectMetadataPage.ui
+END
+SelectDatabasePage.ui
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/DPFrame/!svn/ver/168/trunk/dpframe/data/upgrader/ui/SelectDatabasePage.ui
+END

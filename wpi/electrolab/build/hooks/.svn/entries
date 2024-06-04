@@ -1,0 +1,34 @@
+10
+
+dir
+935
+http://diposoft.ru/svn/ElectroLab/trunk/electrolab/build/hooks
+http://diposoft.ru/svn/ElectroLab
+
+
+
+2014-02-10T20:27:15.966973Z
+693
+knurov
+has-props
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+3c2f029e-666b-4b85-b6df-eb7141ef79b9
+
+wpm
+dir
+
+wpt
+dir
+

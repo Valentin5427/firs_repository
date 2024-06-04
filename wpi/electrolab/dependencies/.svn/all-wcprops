@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/692/trunk/electrolab/dependencies
+END
+ssleay32.dll
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/160/trunk/electrolab/dependencies/ssleay32.dll
+END
+FastReport3.dll
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/ElectroLab/!svn/ver/692/trunk/electrolab/dependencies/FastReport3.dll
+END
+psqlodbc.msi
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/692/trunk/electrolab/dependencies/psqlodbc.msi
+END
+libeay32.dll
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ElectroLab/!svn/ver/160/trunk/electrolab/dependencies/libeay32.dll
+END

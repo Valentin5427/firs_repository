@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>350</width>
+    <height>156</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>350</width>
+    <height>156</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>9</number>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Оператор</string>
+       </property>
+       <property name="buddy">
+        <cstring>ebOperator</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Поверитель</string>
+       </property>
+       <property name="buddy">
+        <cstring>ebSupervisor</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Ж-ал. окр. среды</string>
+       </property>
+       <property name="buddy">
+        <cstring>ebClimat</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Время создания</string>
+       </property>
+       <property name="buddy">
+        <cstring>dtCreateDateTime</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QDateTimeEdit" name="dtCreateDateTime">
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+       <property name="field" stdset="0">
+        <string>createdatetime</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Стенд</string>
+       </property>
+       <property name="buddy">
+        <cstring>sbStandNumber</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QSpinBox" name="sbStandNumber">
+       <property name="maximum">
+        <number>20</number>
+       </property>
+       <property name="field" stdset="0">
+        <string>stand</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QCheckBox" name="cbAccepted">
+       <property name="text">
+        <string>Принято</string>
+       </property>
+       <property name="field" stdset="0">
+        <string>accepted</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="EllipsisComboBox" name="ebOperator">
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="reference">
+        <string>operator</string>
+       </property>
+       <property name="ellipsisVisible">
+        <bool>true</bool>
+       </property>
+       <property name="field" stdset="0">
+        <string>operator</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="EllipsisComboBox" name="ebSupervisor">
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="reference">
+        <string>operator</string>
+       </property>
+       <property name="field" stdset="0">
+        <string>supervisor</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="EllipsisComboBox" name="ebClimat">
+       <property name="focusPolicy">
+        <enum>Qt::WheelFocus</enum>
+       </property>
+       <property name="reference">
+        <string>climat</string>
+       </property>
+       <property name="field" stdset="0">
+        <string>climat</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EllipsisComboBox</class>
+   <extends>QWidget</extends>
+   <header>electrolab.gui.ellipsiscombobox</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>ebOperator</tabstop>
+  <tabstop>ebSupervisor</tabstop>
+  <tabstop>ebClimat</tabstop>
+  <tabstop>dtCreateDateTime</tabstop>
+  <tabstop>sbStandNumber</tabstop>
+  <tabstop>cbAccepted</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

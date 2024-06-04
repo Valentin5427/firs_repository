@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="menu">
+    <file alias="pause">pause.png</file>
+    <file alias="start">start.png</file>
+    <file alias="stop">stop.png</file>
+  </qresource>
+  <qresource prefix="main">
+    <file alias="nostate">main.png</file>
+    <file alias="notinstalled">agent_noinst.png</file>
+    <file alias="paused">agent_paused.png</file>
+    <file alias="started">agent_run.png</file>
+    <file alias="stopped">agent_stop.png</file>
+  </qresource>
+</RCC>

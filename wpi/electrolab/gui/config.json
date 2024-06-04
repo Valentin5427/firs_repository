@@ -1,0 +1,82 @@
+{
+    "paths": {
+        "ui": "ui", 
+        "resource": "./res", 
+        "rpt": "rpt"
+    }, 
+    "db": {
+        "host": "10.5.0.21",
+        "password": "electrolab", 
+        "user": "electrolab", 
+        "database": "electrolab"
+    }, 
+    "winparam": {
+        "fullscreen": false, 
+        "nomouse": false
+    }, 
+    "devices": {
+        "ca5018_1": {
+            "active": false, 
+            "port": "COM9", 
+            "address": 2
+        }, 
+        "knt05": {
+            "port": "COM4"
+        }, 
+        "ca5018_2": {
+            "active": false, 
+            "port": "COM5", 
+            "address": 1
+        }, 
+        "scanner": "COM3", 
+        "chp02m": {
+            "port": "COM2", 
+            "ammeter": {
+                "address": "0"
+            }, 
+            "voltmeter": {
+                "address": "0"
+            }
+        }, 
+        "pr200": {
+            "port": "COM7", 
+            "address": 1
+        }, 
+        "ca5020": {
+            "active": true, 
+            "port": "COM1", 
+            "address": 0
+        }
+    }, 
+    "wpt_session": {
+        "standNumber": 3
+    }, 
+    "session": {
+        "file": "session.json"
+    }, 
+    "snd_notify": {
+        "current_err": "current_err.wav", 
+        "point_skipped": "point_skipped.wav", 
+        "angular_err": "angular_err.wav", 
+        "coil_done": "point_found.wav", 
+        "point_found": "point_found.wav", 
+        "point_error": "angular_err.wav"
+    }, 
+    "printers": {
+        "report": "\\\\ws18\\Kyocera ECOSYS P2135d KX", 
+        "sticker": "\\\\WS18\\HP LaserJet P2015 Series PCL 6"
+    }, 
+    "ports": {
+        "COM3": {
+            "baudrate": 57600
+        }, 
+        "COM4": {
+            "baudrate": 4801
+        }
+    }, 
+    "verification": {
+        "autoTest": true, 
+        "autoCA5018": true, 
+        "autoPR200": true
+    }
+}

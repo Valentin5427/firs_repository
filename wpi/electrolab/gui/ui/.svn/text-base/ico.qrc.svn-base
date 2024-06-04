@@ -1,0 +1,21 @@
+<RCC>
+  <qresource prefix="EL">
+    <file>ico/print_32.png</file>
+    <file>ico/filter.png</file>
+    <file>ico/refresh.png</file>
+    <file>qt_ru.qm</file>
+    <file>ico/Testing-64x64.png</file>
+    <file>ico/activity_monitor.png</file>
+    <file>ico/thermo_m_64.png</file>
+    <file>ico/weather_64.png</file>
+    <file>ico/error_button.png</file>
+    <file>ico/users_32.png</file>
+    <file>ico/add_32.png</file>
+    <file>ico/pencil_32.png</file>
+    <file>ico/book_close_32.png</file>
+    <file>ico/trash_32.png</file>
+    <file>ico/inventory_32.png</file>
+    <file>ico/barcode_64x64.png</file>
+    <file>ico/inventory_64.png</file>
+  </qresource>
+</RCC>

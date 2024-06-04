@@ -1,0 +1,28 @@
+
+select t1.id as checking_2, t1.item as itemID, t1.coil as coilID
+, t3.coilnumber
+, t3.tap
+, 'И' || cast(t3.coilnumber as varchar ) || 'И' || cast(t3.tap as varchar )  as coil
+, 1000 * t1.r as r            
+, round(t1.un, 4) as un              
+, round(t1.inom, 4) as inom                  
+, t1.k
+, t5.fio
+, t2.createdatetime::date as sdate
+from checking_2 t1,
+item t2, coil t3,
+test_map t4 LEFT OUTER JOIN operator t5 ON (t4.operator = t5.id),
+stand t6, test_type t7
+where t1.item = t2.id       
+and t1.coil = t3.id
+--and t1.stand = :stand
+and t2.test_map = t4.id
+and t1.stand = t6.id 
+and t6.test_type = t7.id
+--and t7.code = :code
+and t7.code = 3
+
+--and t2.serial_number = :snID                                                                  
+--and t2.serial_number = 110006                                                                  
+and t2.serial_number = 254304                                                                  
+order by t3.coilnumber                            

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/ElectroLab/!svn/ver/931/trunk/electrolab/tech
+END
+device.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/625/trunk/electrolab/tech/device.py
+END
+integration.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/931/trunk/electrolab/tech/integration.py
+END
+relay.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/491/trunk/electrolab/tech/relay.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/108/trunk/electrolab/tech/__init__.py
+END
+logger.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/108/trunk/electrolab/tech/logger.py
+END
+owen_modbus.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/681/trunk/electrolab/tech/owen_modbus.py
+END

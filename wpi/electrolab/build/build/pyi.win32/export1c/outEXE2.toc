@@ -1,0 +1,10 @@
+('D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build/pyi.win32/export1c\\export1c.exe',
+ False,
+ False,
+ None,
+ None,
+ [],
+ False,
+ False,
+ 0,
+ 1457946090L)

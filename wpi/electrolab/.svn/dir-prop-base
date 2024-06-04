@@ -1,0 +1,11 @@
+K 10
+svn:ignore
+V 12
+.idea
+*.pyc
+
+K 13
+svn:mergeinfo
+V 38
+/branches/kaa_trunk/electrolab:178-211
+END

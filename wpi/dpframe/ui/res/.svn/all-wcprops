@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res
+END
+touchheader.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res/touchheader.qrc
+END
+agent_paused.png
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent_paused.png
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DPFrame/!svn/ver/20/trunk/dpframe/ui/res/__init__.py
+END
+touchheader.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res/touchheader.py
+END
+arrow_up.png
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res/arrow_up.png
+END
+agent_run.png
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent_run.png
+END
+pause.png
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/20/trunk/dpframe/ui/res/pause.png
+END
+agent.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent.py
+END
+close.png
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res/close.png
+END
+main.png
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/main.png
+END
+agent_stop.png
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent_stop.png
+END
+agent.qrc
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent.qrc
+END
+home.png
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/75/trunk/dpframe/ui/res/home.png
+END
+agent_noinst.png
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/DPFrame/!svn/ver/28/trunk/dpframe/ui/res/agent_noinst.png
+END
+start.png
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/20/trunk/dpframe/ui/res/start.png
+END
+stop.png
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/20/trunk/dpframe/ui/res/stop.png
+END

@@ -1,0 +1,275 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/ElectroLab/!svn/ver/935/trunk/electrolab/gui
+END
+WorkplaceManager.py
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/686/trunk/electrolab/gui/WorkplaceManager.py
+END
+findserialnumber.py
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/943/trunk/electrolab/gui/findserialnumber.py
+END
+TestHeart.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/888/trunk/electrolab/gui/TestHeart.py
+END
+simplechoice.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/604/trunk/electrolab/gui/simplechoice.py
+END
+AccountCSM.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/701/trunk/electrolab/gui/AccountCSM.py
+END
+wpi.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/ElectroLab/!svn/ver/780/trunk/electrolab/gui/wpi.py
+END
+reporting.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/874/trunk/electrolab/gui/reporting.py
+END
+paramclimat.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/718/trunk/electrolab/gui/paramclimat.py
+END
+reference.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/605/trunk/electrolab/gui/reference.py
+END
+msgbox.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/853/trunk/electrolab/gui/msgbox.py
+END
+heartsettings.json
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/806/trunk/electrolab/gui/heartsettings.json
+END
+testmapref.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/955/trunk/electrolab/gui/testmapref.py
+END
+Test_OLS.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/932/trunk/electrolab/gui/Test_OLS.py
+END
+Heart.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/888/trunk/electrolab/gui/Heart.py
+END
+utility1.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/936/trunk/electrolab/gui/utility1.py
+END
+config.json
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/807/trunk/electrolab/gui/config.json
+END
+ClsMsr.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/785/trunk/electrolab/gui/ClsMsr.py
+END
+Archive.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/955/trunk/electrolab/gui/Archive.py
+END
+DigitalKeyboard.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/548/trunk/electrolab/gui/DigitalKeyboard.py
+END
+dump_35023_fast.TXT
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/616/trunk/electrolab/gui/dump_35023_fast.TXT
+END
+devices.json
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/812/trunk/electrolab/gui/devices.json
+END
+menu_WorkplaceManage.json
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/ElectroLab/!svn/ver/757/trunk/electrolab/gui/menu_WorkplaceManage.json
+END
+ReportsExcel.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/955/trunk/electrolab/gui/ReportsExcel.py
+END
+JournalMsr.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/773/trunk/electrolab/gui/JournalMsr.py
+END
+slots.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/757/trunk/electrolab/gui/slots.py
+END
+TestCoilReport.py
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/827/trunk/electrolab/gui/TestCoilReport.py
+END
+dpgrid.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/693/trunk/electrolab/gui/dpgrid.py
+END
+dump_35023.TXT
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/656/trunk/electrolab/gui/dump_35023.TXT
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/110/trunk/electrolab/gui/__init__.py
+END
+ellipsiscombobox.py
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/403/trunk/electrolab/gui/ellipsiscombobox.py
+END
+ReportsMsr.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/785/trunk/electrolab/gui/ReportsMsr.py
+END
+common.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/625/trunk/electrolab/gui/common.py
+END
+HeartSettings.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/HeartSettings.py
+END
+ConfigExport1c.py
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/758/trunk/electrolab/gui/ConfigExport1c.py
+END
+GroupHeart.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/GroupHeart.py
+END
+toast.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/654/trunk/electrolab/gui/toast.py
+END
+params.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/393/trunk/electrolab/gui/params.py
+END
+inits.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ElectroLab/!svn/ver/757/trunk/electrolab/gui/inits.py
+END
+TestCoil.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/955/trunk/electrolab/gui/TestCoil.py
+END
+TestInfo.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/951/trunk/electrolab/gui/TestInfo.py
+END
+GradeIron.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/gui/GradeIron.py
+END
+TestMapFilterDlg.py
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ElectroLab/!svn/ver/468/trunk/electrolab/gui/TestMapFilterDlg.py
+END
+devices.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/919/trunk/electrolab/gui/devices.py
+END
+WPT.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/ElectroLab/!svn/ver/901/trunk/electrolab/gui/WPT.py
+END
+verification.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/949/trunk/electrolab/gui/verification.py
+END

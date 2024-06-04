@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/DPFrame/!svn/ver/222/trunk/dpframe
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/DPFrame/!svn/ver/220/trunk/dpframe/__init__.py
+END
+install.cmd
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/DPFrame/!svn/ver/19/trunk/dpframe/install.cmd
+END
+uiagentsvc.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/192/trunk/dpframe/uiagentsvc.py
+END
+setup.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/DPFrame/!svn/ver/220/trunk/dpframe/setup.py
+END
+conagentsvc.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/19/trunk/dpframe/conagentsvc.py
+END
+run_tests.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/DPFrame/!svn/ver/124/trunk/dpframe/run_tests.py
+END
+agent.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/DPFrame/!svn/ver/192/trunk/dpframe/agent.cfg
+END
+stop.cmd
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/DPFrame/!svn/ver/19/trunk/dpframe/stop.cmd
+END
+start.cmd
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/DPFrame/!svn/ver/19/trunk/dpframe/start.cmd
+END

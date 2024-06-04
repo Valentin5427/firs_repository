@@ -1,0 +1,58 @@
+{
+    "paths": {
+        "resource": "./res", 
+        "ui": "ui", 
+        "rpt": "rpt"
+    }, 
+    "db": {
+        "host": "localhost", 
+        "password": "electrolab", 
+        "user": "electrolab", 
+        "database": "elect"
+    }, 
+    "winparam": {
+        "fullscreen": false, 
+        "nomouse": false
+    }, 
+    "devices": {
+        "chp02m": {
+            "port": "COM2", 
+            "ammeter": {
+                "address": "0"
+            }, 
+            "voltmeter": {
+                "address": "0"
+            }
+        }, 
+        "knt05": {
+            "port": "COM1"
+        }, 
+        "scanner": "COM3"
+    }, 
+    "wpt_session": {
+        "standNumber": 3
+    }, 
+    "session": {
+        "file": "session.json"
+    }, 
+    "snd_notify": {
+        "current_err": "current_err.wav", 
+        "point_skipped": "point_skipped.wav", 
+        "angular_err": "angular_err.wav", 
+        "coil_done": "point_found.wav", 
+        "point_found": "point_found.wav", 
+        "point_error": "angular_err.wav"
+    }, 
+    "printers": {
+        "report": "\\\\ws18\\Kyocera ECOSYS P2135d KX", 
+        "sticker": "\\\\WS18\\HP LaserJet P2015 Series PCL 6"
+    }, 
+    "ports": {
+        "COM1": {
+            "baudrate": 4801
+        }, 
+        "COM3": {
+            "baudrate": 57600
+        }
+    }
+}

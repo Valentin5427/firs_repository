@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/DPFrame/!svn/ver/142/trunk/dpframe/gui
+END
+commonapp.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/33/trunk/dpframe/gui/commonapp.py
+END
+mainwnd.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/114/trunk/dpframe/gui/mainwnd.py
+END
+wfactory.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/9/trunk/dpframe/gui/wfactory.py
+END
+menuitem.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/142/trunk/dpframe/gui/menuitem.py
+END
+menuloaders.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DPFrame/!svn/ver/73/trunk/dpframe/gui/menuloaders.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/9/trunk/dpframe/gui/__init__.py
+END
+touchmenu.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DPFrame/!svn/ver/116/trunk/dpframe/gui/touchmenu.py
+END

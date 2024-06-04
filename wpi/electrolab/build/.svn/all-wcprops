@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/ElectroLab/!svn/ver/806/trunk/electrolab/build
+END
+export1c.spec
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/790/trunk/electrolab/build/export1c.spec
+END
+upload_file_dav.py
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ElectroLab/!svn/ver/793/trunk/electrolab/build/upload_file_dav.py
+END
+agent.spec
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/449/trunk/electrolab/build/agent.spec
+END
+bitten.ini
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/791/trunk/electrolab/build/bitten.ini
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ElectroLab/!svn/ver/129/trunk/electrolab/build/__init__.py
+END
+wpt.spec
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/798/trunk/electrolab/build/wpt.spec
+END
+integration.iss
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/692/trunk/electrolab/build/integration.iss
+END
+JournalMsr.spec
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/749/trunk/electrolab/build/JournalMsr.spec
+END
+bittenlaunch.py
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ElectroLab/!svn/ver/788/trunk/electrolab/build/bittenlaunch.py
+END
+wpm.spec
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/790/trunk/electrolab/build/wpm.spec
+END
+integration.spec
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ElectroLab/!svn/ver/790/trunk/electrolab/build/integration.spec
+END
+TestHeart.spec
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/806/trunk/electrolab/build/TestHeart.spec
+END
+wpt.iss
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/ElectroLab/!svn/ver/692/trunk/electrolab/build/wpt.iss
+END
+wpi.spec
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/794/trunk/electrolab/build/wpi.spec
+END
+build.cmd
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/781/trunk/electrolab/build/build.cmd
+END
+electrolab.iss
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/ElectroLab/!svn/ver/792/trunk/electrolab/build/electrolab.iss
+END

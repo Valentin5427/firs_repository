@@ -1,0 +1,25 @@
+{
+    "name": "integration",
+    "display_name": "Интеграция с 1С",
+    "active": true,
+    "schedule": {
+        "cron": "44 * * * *"
+    },
+    "executable": {
+        "module": "electrolab.app.integration",
+        "func": "integration"
+    },
+    "params": {
+        "db": {
+            "host": "localhost",
+            "database": "electrolab",
+            "user": "electrolab",
+            "password": "electrolab"
+        },
+        "path": "D:/Downloads",
+        "arch": ""
+    },
+    "sys_log": true,
+    "log_level": "info",
+    "log_file": "C:/integration.log"
+}

@@ -1,0 +1,12 @@
+('D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build\\pyi.win32\\wpm\\outPKG3.pkg',
+ {'BINARY': 1,
+  'DATA': 1,
+  'EXECUTABLE': 1,
+  'EXTENSION': 1,
+  'PYMODULE': 1,
+  'PYSOURCE': 1},
+ [('outPYZ1.pyz', 'D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build\\pyi.win32\\wpm\\outPYZ1.pyz', 'PYZ'), ('iu', 'c:\\Program Files\\pyinstaller-1.5.1\\iu.pyc', 'PYMODULE'), ('struct', 'C:\\Program Files\\Python27\\lib\\struct.pyc', 'PYMODULE'), ('archive', 'c:\\Program Files\\pyinstaller-1.5.1\\archive.pyc', 'PYMODULE'), ('pyi_rth_qt4plugins', 'c:\\Program Files\\pyinstaller-1.5.1\\support/rthooks/pyi_rth_qt4plugins.py', 'PYSOURCE'), ('versioneddll', 'c:\\Program Files\\pyinstaller-1.5.1\\support/rthooks/versioneddll.py', 'PYSOURCE'), ('win32comgenpy', 'c:\\Program Files\\pyinstaller-1.5.1\\support/rthooks/win32comgenpy.py', 'PYSOURCE'), ('workplacemanager', '../..\\electrolab/gui/workplacemanager.py', 'PYSOURCE'), ('wpm.exe.manifest', 'D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build\\pyi.win32\\wpm\\wpm.exe.manifest', 'BINARY')],
+ 1,
+ False,
+ False,
+ 0)

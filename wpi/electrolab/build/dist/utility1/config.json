@@ -1,0 +1,44 @@
+{
+    "db": {
+        "host": "localhost",
+        "database": "electrolab1",
+        "user": "electrolab",
+        "password": "electrolab"
+    },
+    "winparam": {
+    	"fullscreen": false,
+    	"nomouse": false
+    },
+    "paths":{
+        "ui": "ui",
+        "rpt": "rpt",
+        "resource": "./res"
+    },
+    "session":{
+        "file": "session.json"
+    },
+    "ports": {
+        "COM1": {
+            "baudrate": 4800
+        },
+        "COM3": {
+            "baudrate": 57600
+        }
+    },
+    "devices": {
+        "scanner": "COM3",
+        "knt05": {"port": "COM1"},
+        "chp02m": {"port": "COM1","ammeter":{"address":"01"},"voltmeter":{"address":"01"}}
+    },
+    "wpt_session": {
+        "standNumber": 3
+    },
+    "snd_notify": {
+        "coil_done": "point_found.wav",
+        "point_found": "point_found.wav",
+        "point_skipped": "point_skipped.wav",
+        "point_error": "angular_err.wav",
+        "angular_err": "angular_err.wav",
+        "current_err": "current_err.wav"
+    }
+}

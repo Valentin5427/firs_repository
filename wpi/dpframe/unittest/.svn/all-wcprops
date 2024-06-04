@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/DPFrame/!svn/ver/161/trunk/dpframe/unittest
+END
+testpgdb.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/DPFrame/!svn/ver/138/trunk/dpframe/unittest/testpgdb.py
+END
+testenvapp.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/DPFrame/!svn/ver/100/trunk/dpframe/unittest/testenvapp.py
+END
+migrate.ini
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/69/trunk/dpframe/unittest/migrate.ini
+END
+db.ini
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/110/trunk/dpframe/unittest/db.ini
+END
+testattrdct.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/DPFrame/!svn/ver/78/trunk/dpframe/unittest/testattrdct.py
+END
+testmetadata.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/DPFrame/!svn/ver/161/trunk/dpframe/unittest/testmetadata.py
+END
+testmenu.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/73/trunk/dpframe/unittest/testmenu.py
+END
+testinits.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/DPFrame/!svn/ver/113/trunk/dpframe/unittest/testinits.py
+END
+testmigratearg.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/DPFrame/!svn/ver/138/trunk/dpframe/unittest/testmigratearg.py
+END
+testjsonschema.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/DPFrame/!svn/ver/48/trunk/dpframe/unittest/testjsonschema.py
+END

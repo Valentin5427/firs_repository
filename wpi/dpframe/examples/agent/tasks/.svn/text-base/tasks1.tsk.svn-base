@@ -1,0 +1,14 @@
+{
+    "name": "task1",
+    "display_name": "Task #1",
+    "active": true,
+    "schedule": {
+        "cron": "*/2 * * * *"
+    },
+    "executable": {
+        "module": "dpframe.examples.agent.tasks",
+        "func": "task1"
+    },
+    "sys_log": true,
+    "log_level": "debug"
+}

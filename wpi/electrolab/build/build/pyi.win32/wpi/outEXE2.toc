@@ -1,0 +1,10 @@
+('D:\\work\\ElectroLab\\trunk\\electrolab\\build\\build/pyi.win32/wpi\\wpi.exe',
+ True,
+ False,
+ '../gui/ui/ico/Manager.ico',
+ None,
+ [],
+ False,
+ False,
+ 0,
+ 1460463217L)

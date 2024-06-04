@@ -1,0 +1,522 @@
+#coding=utf-8
+u"""
+Created on 19.08.2011
+#14
+@author: Anton
+"""
+import sys
+
+from PyQt4.QtGui import QDialog, QAbstractItemView, QHeaderView
+from PyQt4.QtCore import Qt, QAbstractTableModel, QVariant, SIGNAL, QString, QVariant, QEvent
+from dpframe.tech import pgdb
+from electrolab.gui.common import UILoader
+from electrolab.gui.reporting import FRPrintForm
+
+
+import datetime
+import psycopg2
+import psycopg2.extensions
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+from dpframe.tech.pgdb import DBParam
+
+import json
+
+# dpframe.tech.pgdb.DBParam()
+#         oDBConectParam = pgdb.INI(_sINIFile).get_dbparam()
+#         oConnect = pgdb.Connect(oDBConectParam)
+
+
+class DPField(object):
+
+    def __init__(self, table, field, alias=None, visible=True, size=None, subquery=None):
+        self.table = table
+        self.field = field
+        self.alias = alias or field
+        self.visible = visible
+        self.size = size
+        self.subquery = subquery
+
+    def field_name(self):
+        if(self.subquery == None):
+            return u"%s.%s" % (self.table, self.field)
+        else:
+            return u"(%s) as %s" % (self.subquery, self.field)
+
+class DPQuery(psycopg2.extensions.cursor):
+
+    def prepare(self, _query=None, _fields=None, _condition=None, _args=None):
+        self.statment = _query
+        self.fields = _fields
+        self.params = _args
+        self.condition = _condition
+
+    def build(self, _condidion=None):
+        #todo: make as lambda
+        sFieldList = []
+        self.condition = _condidion
+        for index in self.fields:
+            sFieldList.append(self.fields[index].field_name())
+        fieldlist = u', '.join(sFieldList)
+        statment = self.statment % (fieldlist,)
+        if self.condition:
+            return statment + u' where ' + self.condition
+        else:
+            return statment
+
+    def execute(self, _condidion=None, args=None):
+        # print self.build(_condidion)
+        psycopg2.extensions.cursor.execute(self, self.build(_condidion), args)
+
+
+class DPModel(QAbstractTableModel):
+    def __init__(self, _connect, _query, _fields):
+        super(QAbstractTableModel, self).__init__()
+        self.connect = _connect.connection
+
+        self.metadata = _fields
+
+        self.cursor = self.connect.cursor(cursor_factory=DPQuery)
+        self.cursor.prepare(_query, self.metadata)
+        self.select()
+
+    def select(self, _condition=None, _args=None):
+
+        # oldIndex = self.createIndex(self.rowCount(0), self.columnCount(0))
+        # self.emit(SIGNAL("LayoutAboutToBeChanged()"))
+        self.layoutAboutToBeChanged.emit()
+        self.cursor.execute(_condition, _args)
+        self.layoutChanged.emit()
+        # self.dataChanged.emit(self.createIndex(0, 0), oldIndex)
+
+
+    def rowCount(self, QModelIndex_parent=None, *args, **kwargs):
+        return self.cursor.rowcount
+
+    def columnCount(self, QModelIndex_parent=None, *args, **kwargs):
+        return len(self.metadata)
+
+    def data(self, QModelIndex, int_role=None):
+        # if self.cursor.rownumber != QModelIndex.row():
+        if(int_role == Qt.DisplayRole):
+            self.cursor.scroll(QModelIndex.row() - self.cursor.rownumber)
+            return QVariant(self.cursor.fetchone()[QModelIndex.column()])
+        else:
+            return QVariant()
+
+    def setDatat(self, _index, _vlue, _role=None):
+        # if self.cursor.rownumber != QModelIndex.row():
+        if(_role == Qt.DisplayRole):
+            self.cursor.scroll(_index.row() - self.cursor.rownumber)
+            self.cursor.fetchone()[_index.column()]
+            return True
+        else:
+            return False
+
+    # def index(self, p_int, p_int_1, QModelIndex_parent=None, *args, **kwargs):
+    #     return QAbstractTableModel.index(self, p_int, p_int_1, None)#QModelIndex_parent)
+
+    def headerData(self, p_int, Qt_Orientation, int_role=None):
+        if(int_role == Qt.DisplayRole and Qt_Orientation == Qt.Horizontal):
+            return QVariant(self.metadata[p_int].alias)
+        # if(int_role == Qt.DisplayRole and Qt_Orientation == Qt.Vertical):
+        #     return QVariant()
+        return QAbstractTableModel.headerData(self, p_int, Qt_Orientation, int_role)
+
+    # def index(self, _iRow, _iColumn, QModelIndex_parent=None, *args, **kwargs):
+    #     index = self.createIndex(_iRow, _iColumn, QModelIndex_parent)
+    #     index.
+
+
+class TestInfo(QDialog, UILoader):
+    def __init__(self, _window, _env):
+        super(QDialog, self).__init__()
+
+        self.env = _env
+        self.setUI(self.env.config, u"TestInfo.ui")
+        param = DBParam(
+            self.env.config.db.host
+            , self.env.config.db.database
+            , self.env.config.db.user
+            , self.env.config.db.password
+        )
+        self.connect = pgdb.Connect(param)
+
+        self.ui.leYar.setText(str(datetime.date.today().year)[2:4])
+#        self.ui.leNumber.setText('51003')
+#        self.ui.leNumber.setText('385')
+
+
+
+
+
+
+        self.metadata = {
+            0: DPField(u'sn', u'id', None, False)
+            , 1: DPField(u'sn', u'makedate', u'Год')
+            , 2: DPField(u'sn', u'serialnumber', u'Номер')
+            , 3: DPField(u'sn', u'transformer', None, False)
+            , 4: DPField(u'sn', u'series', u'Серия')
+            , 5: DPField(u'sn', u'ordernumber', u'Заказ')
+            , 6: DPField(u'sc', u'sc', u'Испытания')
+            , 7: DPField(u'tf', u'fullname', u'Трансформатор')
+            # , 7: DPField(None, u'sc', u'Втор. обм', subquery=u'exists(select id from item where sn.id = item.serial_number)')
+            # , 8: DPField(None, u'ap', u'Акт. час.')
+            # , 9: DPField(None, u'lt', u'Окон. пов.')
+        }
+
+        sQuery = u'''
+            select
+                %s
+            from
+              serial_number sn
+            inner join
+              transformer tf
+            on
+              tf.id = sn.transformer
+            left join
+                (select distinct item.serial_number, 'Есть' as sc  from item) sc
+            on
+              sc.serial_number = sn.id
+        '''
+        serialNumberModel = DPModel(self.connect, sQuery, self.metadata)
+        self.ui.tableView.setModel(serialNumberModel)
+        self.ui.tableView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.ui.tableView.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        #TODO: в будущем перенести в конструктор собственного виджета грида
+        header = self.ui.tableView.horizontalHeader()
+        header.setMovable(True)
+        self.ui.tableView.installEventFilter(self)
+
+        for idx in self.metadata:
+            fld = self.metadata[idx]
+            self.ui.tableView.setColumnHidden(idx, not fld.visible)
+            if(fld.size):
+                header.resizeSection(idx, fld.size)
+            # if fld_md.visiblePosition >= 0:
+            #     header.moveSection(header.visualIndex(fld_md.cid), fld_md.visiblePosition)
+
+        header.setStretchLastSection(True)
+        # header.setResizeMode(QHeaderView.ResizeToContents)
+        #END TODO
+
+        self.ui.pushButton.clicked.connect(self.pushButton_Click)
+        self.ui.pushButton_2.clicked.connect(self.pushButton_2_Click)
+        self.ui.pushButton_3.clicked.connect(self.pushButton_3_Click)
+        
+        self.ui.pushButton_2.setVisible(False)
+        self.ui.pushButton_3.setVisible(False)
+
+
+        # seriesQuery = u'''
+        #     select
+        #       distinct
+        #       %s
+        #     --  sn.series
+        #     --   , sn.ordernumber
+        #     from
+        #       serial_number sn
+        #     --limit 10
+        # '''
+        # seriesmetadata = {
+        #     0: DPField(u'sn', u'series', None, False)
+        # }
+        #
+        # seriesModel = DPModel(self.connect, seriesQuery, seriesmetadata)
+        # view->setSelectionBehavior(QAbstractItemView::SelectRows);
+        # view->setSelectionMode(QAbstractItemView::SingleSelection);
+        # seriesView = QTableView()
+        # seriesView.setModel(seriesModel)
+        # self.ui.cbSeries.setModel(seriesModel)
+        # self.ui.cbSeries.setView(seriesView)
+
+        self.data = {}
+        self.read_json()
+        
+        self.setFilter()
+
+
+
+    def to_int(self, _value):
+        val = QString(_value)
+        val = val.simplified()
+        if val.toInt()[1]:
+            return unicode(val.toInt()[0])
+        else:
+            return None
+
+    def to_string(self, _value):
+        val = QVariant(_value)
+        if val.isNull() :
+            return None
+        else:
+            return val.toString()
+
+    def equalCondition(self, _fieldMetaData, _value):
+        if _value != None and len(_value) != 0:
+            if issubclass(type(_value), int):
+                return _fieldMetaData.field_name() + u" = " + unicode(_value)
+            else:
+                return _fieldMetaData.field_name() + u" = '" + unicode(_value) + u"'"
+
+    def likeCondition(self, _fieldMetaData, _value):
+        if _value != None:
+            return _fieldMetaData.field_name() + u" like '%" + unicode(_value) + u"%'"
+
+
+    def setFilter(self):
+
+        condition = []
+        c1 = self.equalCondition(DPField(u'sn', u'makedate'), self.to_int(self.ui.leYar.text()))
+        if c1: condition.append(c1)
+
+        c1 = self.equalCondition(DPField(u'sn', u'serialnumber'), self.to_int(self.ui.leNumber.text()))
+        if c1: condition.append(c1)
+
+        c1 = self.equalCondition(DPField(u'sn', u'series'), self.to_int(self.ui.leSeries.text()))
+        if c1: condition.append(c1)
+
+        c1 = self.equalCondition(DPField(u'sn', u'ordernumber'), self.to_string(self.ui.leOrder.text()))
+        if c1: condition.append(c1)
+
+        c1 = self.likeCondition(DPField(u'tf', u'fullname'), self.to_string(self.ui.leTrans.text()))
+        if c1: condition.append(c1)
+
+        if len(condition):
+            self.ui.tableView.model().select(u" and ".join(condition))
+        else:
+            self.ui.tableView.model().select()
+
+        # print str(self.ui.leYar.text())
+
+    
+    def printReport(self, _index):
+        #11.02
+        return
+        
+        # selection = self.ui.tableView.selectionModel().selection().indexes()
+        # # print index
+        # if not len(selection):
+        #     return
+        row = _index.row()
+        index = self.ui.tableView.model().index(row, 0)
+        id = self.ui.tableView.model().data(index, Qt.DisplayRole).toString()
+        self.print_report(int(id))
+
+    def eventFilter(self, _object, _event):
+        #11.02
+        #return
+        u""""""
+        if _event.type() == QEvent.KeyPress and _event.key() == Qt.Key_Return:
+            selection = self.ui.tableView.selectionModel().selection().indexes()
+            if len(selection):
+                self.printReport(selection[0])
+        return QDialog.eventFilter(self, _object, _event)
+        # return True
+    
+    def print_report(self, _iItemID, _SQL, _accuracyR, _accuracyI):
+        u"""Печать"""
+        if not _iItemID:
+            return
+        #10.02
+        #inputParms = {u'snID':_iItemID}
+        inputParms = {u'snID':_iItemID, u'SQL': _SQL, u'accuracyR': _accuracyR, u'accuracyI': _accuracyI}
+        print 'inputParms=', inputParms
+        try:
+            rpt = FRPrintForm(u'error_estimation.fr3' ,inputParms , self.env)
+            rpt.preview()
+            # rpt.design()
+        except:
+            pass
+
+
+    def pushButton_2_Click(self):
+        import ReportsExcel
+        ReportsExcel.BAX_test()
+        pass
+
+    def pushButton_3_Click(self):
+        import ReportsExcel
+        ReportsExcel.BAX_test_2()
+
+
+    def pushButton_Click(self):
+        self.write_json() # Вставил здесь поскольку событие CloseEvent почему-то не срабатывает
+        from PyQt4.QtGui import QMessageBox
+
+        selection = self.ui.tableView.selectionModel().selection().indexes()
+        if len(selection):
+#            QMessageBox.warning(self, u"Предупреждение", u"4", QMessageBox.Ok)
+            row = selection[0].row()
+            index = self.ui.tableView.model().index(row, 0)
+            serial_number = self.ui.tableView.model().data(index, Qt.DisplayRole).toString()
+            print 'id=', serial_number
+            '''
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 0), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 1), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 2), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 3), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 4), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 5), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 6), Qt.DisplayRole).toString()
+            print self.ui.tableView.model().data(self.ui.tableView.model().index(row, 7), Qt.DisplayRole).toString()
+            '''
+            fullname = self.ui.tableView.model().data(self.ui.tableView.model().index(row, 7), Qt.DisplayRole).toString()
+            serialnumbel = self.ui.tableView.model().data(self.ui.tableView.model().index(row, 2), Qt.DisplayRole).toString()            
+            zakaz = self.ui.tableView.model().data(self.ui.tableView.model().index(row, 5), Qt.DisplayRole).toString()
+            series = self.ui.tableView.model().data(self.ui.tableView.model().index(row, 4), Qt.DisplayRole).toString()
+        else:
+            return    
+
+
+
+                    
+        if self.ui.comboBox.currentIndex() == 0:
+            print 'self.print_report(int(serial_number))', int(serial_number)
+
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+            rez = self.oTestCoil.calcGlobal(None, int(serial_number), 16, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())            
+            if rez == False:
+                self.oTestCoil.globalCorridors = [[-1, -1, -1, 0, 0, 0, 0]]                
+                #return
+            
+            # SQL запрос формирую в виде одной стоки, поскольку не знаю как передать 
+            # из питона в FastReport переменную типа TStrings 
+            SQL = u"'select t3.coilnumber "
+            SQL += u", cast(t3.coilnumber as varchar ) || ''И1-'' || cast(t3.coilnumber as varchar ) || ''И'' || cast(t3.tap as varchar )  as coil "
+            SQL += u", t1.r "            
+            SQL += u", round(t1.un, 3) as un "              
+            SQL += u", round(t1.inom, 2) as inom "                  
+            SQL += u", round(t1.k, 1) as k "
+            SQL += u", t1.rating "
+            SQL += u", t5.fio "
+            SQL += u", t2.createdatetime::date as sdate "
+            SQL += u", round(minR, 4) as minR, round(maxR, 4) as maxR, round(minI, 4) as minI, round(maxI, 4) as maxI "            
+            SQL += u"from checking_2 t1, item t2, coil t3, "
+            
+            # Выбираем из self.oTestCoil.globalCorridors данные только по текущему заказу 
+            globalCorridors = []            
+            for i in range(len(self.oTestCoil.globalCorridors)):
+                if str(self.oTestCoil.globalCorridors[i][1]) == zakaz:
+                    globalCorridors += [self.oTestCoil.globalCorridors[i]]
+                    
+            print 'globalCorridors=', globalCorridors        
+                        
+            # Этот подзапрос будет тянуть данные не из таблицы а из списка "globalCorridors"
+            if globalCorridors == []:
+                SQL += u"( select 0 as idCoil, 0 as minR, 0 as maxR, 0 as minI, 0 as maxI ) as corridor,"
+            else:  
+                SQL += u"( "
+                for i in range(len(globalCorridors)):
+                    idCoil = str(globalCorridors[i][2])
+                    minR   = str(globalCorridors[i][3])
+                    maxR   = str(globalCorridors[i][4])
+                    minI   = str(globalCorridors[i][5])
+                    maxI   = str(globalCorridors[i][6])
+                    SQL += u"select " + idCoil + " as idCoil, " + minR + u" as minR, " + maxR + u" as maxR, " + minI + u" as minI, " + maxI + u" as maxI " 
+                    if i < len(globalCorridors) - 1:
+                        SQL += u" union "
+                SQL += u") as corridor, "
+                        
+            SQL += u"test_map t4 LEFT OUTER JOIN operator t5 ON (t4.operator = t5.id) "
+            SQL += u"where t1.item = t2.id "            
+            SQL += u"and t1.coil = t3.id "
+            SQL += u"and t2.test_map = t4.id "
+            SQL += u"and t2.serial_number = " + str(serial_number) + " "                                                                  
+            SQL += u"and t3.id = corridor.idCoil "
+            SQL += u"order by t3.coilnumber, t3.tap'"                            
+            
+            print SQL
+            
+            print 'serial_number=', serial_number
+            
+            accurR = u"'Коридор " + str(self.ui.doubleSpinBox.value()) + "%'"
+            accurI = u"'Коридор " + str(self.ui.doubleSpinBox_2.value()) + "%'"
+            #print 'accurR, accurI,',  accurR, accurI
+            self.print_report(int(serial_number), SQL, accurR, accurI)
+            return
+        
+        if self.ui.comboBox.currentIndex() == 1:
+                        
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+            import ReportsExcel
+
+            coilsInfa = self.oTestCoil.buildCoilsInfa(serial_number)
+            ReportsExcel.BAX_coil1(fullname, serialnumbel, zakaz, coilsInfa)
+
+
+        if self.ui.comboBox.currentIndex() == 2:
+            print 1
+            print 'int(serial_number)=', int(serial_number)
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+            rez = self.oTestCoil.calcGlobal(None, int(serial_number), 16, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())            
+            if rez == False:
+                return
+            print 4
+
+            import ReportsExcel
+
+            ReportsExcel.report(fullname, series, zakaz, self.oTestCoil.globalReport, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())
+            
+            '''            
+            if self.ui.leOrder.text() == '':
+                ReportsExcel.report(fullname, series, None, self.oTestCoil.globalReport, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())
+            else:
+                ReportsExcel.report(fullname, series, self.ui.leOrder.text(), self.oTestCoil.globalReport, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())
+            '''
+                                                
+                
+        if self.ui.comboBox.currentIndex() == 3:
+            from electrolab.gui.Archive import archive
+            self.oArchive = archive(self.env)
+            print 'serialnumbel', serialnumbel
+            print 'serial_number', serial_number
+#            self.oArchive.iSerialNumberID = 151636
+            self.oArchive.iSerialNumberID = serial_number
+            self.oArchive.viewTesting(0)
+            self.oArchive.calcMapItem((0,1,2,5,6))
+#            rpt = FRPrintForm(u'tester_protocol.fr3', {u'test_map':test_mapID}, self.env)
+            print 'self.oArchive.test_map=', self.oArchive.test_map, self.oArchive.item
+            inputParms = {u'test_map':self.oArchive.test_map, u'itemid':self.oArchive.item}
+#            inputParms = {u'test_map':self.test_map}
+            rpt = FRPrintForm(u'tester_protocol.fr3', inputParms, self.env)
+            rpt.preview()
+            return
+                
+                
+                
+    
+    def read_json(self):
+        # Чтение параметров с TestInfo.json файла, если таковой имеется
+        try:
+            f = open('TestInfo.json','r')
+            self.data = json.load(f)
+            self.ui.doubleSpinBox.setValue(self.data['accuracy']['r'])                                         
+            self.ui.doubleSpinBox_2.setValue(self.data['accuracy']['a'])  
+
+        except Exception:
+            print u'Ошибка чтения TestInfo.json!'
+            self.data = {}
+
+    def write_json(self):
+        # ЗАПИСАТЬ
+        f = open('TestInfo.json','w')        
+        self.toData()    
+        json.dump(self.data, f)
+
+        
+    def toData(self):
+        self.data = {}        
+        self.data['accuracy'] = {}
+        self.data['accuracy']['r'] = self.ui.doubleSpinBox.value()
+        self.data['accuracy']['a'] = self.ui.doubleSpinBox_2.value()
+    
+    def closeEvent(self, event):
+        print 'close'
+        self.write_json()
+    
+    

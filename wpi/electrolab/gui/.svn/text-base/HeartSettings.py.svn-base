@@ -1,0 +1,231 @@
+# -*- coding: UTF-8 -*-
+
+'''
+Created on 16.08.2013
+
+@author: atol
+'''
+
+from PyQt4 import QtCore, QtGui, uic
+#from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+from PyQt4.QtGui import QMessageBox, QIcon
+import ui.ico_64_rc
+#import ico_64_rc
+import os
+from serial import Serial
+from serial.serialutil import SerialException
+import JournalMsr
+import TestHeart
+import time
+#from PyQt4.QtGui import *
+#from PyQt4.QtCore import *
+#from pymodbus.client.sync import ModbusSerialClient
+#import pymodbus
+
+
+class HeartSettings(QtGui.QDialog):
+    def __init__(self, env, indAmp, indVolt):
+        QtGui.QDialog.__init__(self)
+        '''        
+        global db1
+        db1 = env.db
+        '''
+        try:
+            global path_ui
+            path_ui = env.config.paths.ui + "/"
+            if not os.path.exists(path_ui):        
+                path_ui = ""
+            print 'path_ui1=', path_ui    
+            if not JournalMsr.MyLoadUi(path_ui, "HeartSettings.ui", self):
+                self.is_show = False
+                return
+
+            self.pushButton.clicked.connect(self.pushButton_Click)
+            self.port = Serial()
+            self.port.port = ''
+            self.port.port = env.config.devices.chp02m.port
+            self.port.baudrate = 9600
+            self.port.bytesize = 8
+            self.port.parity = 'N'
+            self.port.stopbits = 1
+            self.port.timeout = 1
+                
+            self.errStr = ''
+                            
+            if indAmp == 0:
+                self.port.open()
+
+                self.port.write('\x01\x03\x0A\x0C\x00\x01\x47\xD1')
+                s = self.port.read(7)
+                if len(s) < 5:
+                    self.errStr = u"5Ошибка чтения показаний прибора с адресом: 1"
+                    print self.errStr
+                else:        
+                    self.spinBox.setValue(ord(s[4]))
+                self.port.close()
+                time.sleep(0.1)
+            
+            if indVolt == 0:
+                self.port.open()
+                self.port.write('\x02\x03\x0A\x0C\x00\x01\x47\xE2')
+                s = self.port.read(7)
+                if len(s) < 5:
+                    self.errStr = u"Ошибка чтения показаний прибора с адресом: 2"
+                    print self.errStr
+                else:        
+                    self.spinBox_2.setValue(ord(s[4]))            
+                self.port.close()
+
+            if self.errStr <> '':       
+                QMessageBox.warning(None, u"Предупреждение", self.errStr, QMessageBox.Ok)
+
+            self.comboBox.currentIndexChanged.connect(self.comboBox_indexChanged)        
+            self.spinBox.valueChanged.connect(self.spinBox_valueChanged)        
+            self.spinBox_2.valueChanged.connect(self.spinBox_2_valueChanged)
+
+            self.MinAmp = float(self.lineEdit.text())
+        #self.lineEdit.textChanged.connect(self.lineEdit_textChanged)        
+        except SerialException:
+           # isTestHeart = False
+            print u"Порт " + self.port.port + u' не открывается!'
+            self.errStr = u"Порт " + self.port.port + u' не открывается!'
+            #QMessageBox.warning(None, u"Предупреждение", self.errStr, QMessageBox.Ok)
+            return None
+        except Exception:
+            isTestHeart = False
+#            self.errStr = u"1Проблемы с портом "
+            self.errStr = u"1Проблемы с портом " + self.port.port
+            #QMessageBox.warning(None, u"Предупреждение", self.errStr, QMessageBox.Ok)
+            return None
+        finally:
+            pass
+            self.port.close()
+
+
+# Редактирование видов измерения (начало кода)        
+    def pushButton_Click(self):
+#        print self.comboBox.currentIndex()
+#        self.comboBox.setCurrentIndex(1)
+#        return
+        self.close()
+
+    def comboBox_indexChanged(self):
+        self.label_3.setEnabled(self.comboBox.currentIndex() == 0)
+        self.spinBox.setEnabled(self.comboBox.currentIndex() == 0)
+        print self.comboBox.currentIndex()
+ 
+    def spinBox_valueChanged(self, value):
+        #print self.spinBox.value()
+        self.WritePort(1, value)
+
+    def spinBox_2_valueChanged(self, value):
+        #print self.spinBox.value()
+        self.WritePort(2, value)
+
+#    def lineEdit_textChanged(self, value):
+#        self.MinAmp = float(value)
+#        print self.MinAmp
+
+    def ReadDevice(self, port, command):
+        # Чтение показания прибора
+        global isTestHeart
+        try:
+            print "ReadDevice"
+            port.write(command)
+#            s = port.read(15)
+            s = port.read()
+          #  print s
+            '''
+            print 's=', s
+            if len(s) < 7:
+                self.errStr = u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0]))
+                #QMessageBox.warning(None, u"Предупреждение", u"Ошибка чтения показаний прибора с адресом: " + str(ord(command[0])), QMessageBox.Ok)
+                isTestHeart = False
+                return None                            
+            return s[8] + s[7] + s[10] + s[9] + s[12] + s[11]
+            '''
+        except SerialException:
+            isTestHeart = False
+            self.errStr = u"Проблема работы прибора с адресом: " + command
+            QMessageBox.warning(None, u"Предупреждение", u"Проблема работы прибора с адресом: " + command, QMessageBox.Ok)
+            return None                            
+
+        
+    def WritePort(self, adrDevice, value):
+        # Чтение показания приборов (амперметр, вольтметр)    
+        global isTestHeart
+        #global port
+        try:
+            self.port.open()
+            #s = '\x01\x03\x00\x05\x00\x05\x95\xC8'
+            #V = self.ReadDevice(port, '\x02\x03\x00\x05\x00\x05\x95\xFB')
+            if adrDevice == 1:
+                if value == 0:
+                    V = self.ReadDevice(self.port, '\x01\x10\x0A\x0C\x00\x01\x02\x00\x00\x0C\x9C')
+                if value == 1:
+                    V = self.ReadDevice(self.port, '\x01\x10\x0A\x0C\x00\x01\x02\x00\x01\xCD\x5C')
+                if value == 2:
+                    V = self.ReadDevice(self.port, '\x01\x10\x0A\x0C\x00\x01\x02\x00\x02\x8D\x5D')
+                if value == 3:
+                    V = self.ReadDevice(self.port, '\x01\x10\x0A\x0C\x00\x01\x02\x00\x03\x4C\x9D')
+            
+            if adrDevice == 2:
+                if value == 0:
+                    V = self.ReadDevice(self.port, '\x02\x10\x0A\x0C\x00\x01\x02\x00\x00\x18\x6C')
+                if value == 1:
+                    V = self.ReadDevice(self.port, '\x02\x10\x0A\x0C\x00\x01\x02\x00\x01\xD9\xAC')
+                if value == 2:
+                    V = self.ReadDevice(self.port, '\x02\x10\x0A\x0C\x00\x01\x02\x00\x02\x99\xAD')
+                if value == 3:
+                    V = self.ReadDevice(self.port, '\x02\x10\x0A\x0C\x00\x01\x02\x00\x03\x58\x6D')
+            
+            #V = self.ReadDevice(port, '\x01\x10\x0A\x0C\x00\x01\x02\x00\x04\x0D\x5F')
+#            print V
+            if V == None:
+                return None
+
+        except SerialException:
+            print u"Порт " + self.port.port + u' не открывается!'
+            self.errStr = u"Порт " + self.port.port + u' не открывается!'
+            return None
+        except Exception:
+            self.errStr = u"2Проблемы с портом " + self.port.port
+            return None
+        finally:
+            self.port.close()
+        V.strip()
+
+
+
+if __name__ == "__main__":    
+    import sys
+    app = QtGui.QApplication(sys.argv)
+
+    '''
+    class Env():
+        class config():
+            class paths():
+                pass    
+            class session():
+                pass    
+    env = Env()
+    env.config.paths.ui = "ui"
+    '''
+
+    from dpframe.base.inits import json_config_init
+    from dpframe.base.inits import db_connection_init
+    @json_config_init
+    @db_connection_init
+    class ForEnv(QtGui.QWidget):
+        def getEnv(self):
+            return self.env
+    objEnv = ForEnv()
+    env = objEnv.getEnv()
+
+
+    
+    wind = HeartSettings(env, 1, 1)
+    wind.show()
+#    if wind.tag <> 0:        
+#        wind.show()
+    sys.exit(app.exec_())

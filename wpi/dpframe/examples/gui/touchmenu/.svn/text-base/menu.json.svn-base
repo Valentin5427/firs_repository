@@ -1,0 +1,98 @@
+{
+    "toolbars": {
+        "file": [
+            "file.open",
+            "file.save",
+            "sep",
+            "file.exit"
+        ],
+        "edit": [
+            "edit.copy",
+            "edit.paste",
+            "sep",
+            "edit.search.search",
+            "edit.search.replace"
+        ]
+    },
+    "res": ["dpframe.examples.gui.mainwnd.icons1", "dpframe.examples.gui.mainwnd.icons2"],
+    "main": {
+        "file": {
+            "subs": {
+                "open": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.FileSlotHolder.open",
+                    "shortcut": "Ctrl+O",
+                    "title": "&Open...",
+                    "icon": ":/open",
+                    "tooltip": "Open File",
+                    "statustip": "OpenFile",
+                    "menuicon": true
+                },
+                "save": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.FileSlotHolder.save",
+                    "shortcut": "Ctrl+S",
+                    "title": "&Save",
+                    "icon": ":/save",
+                    "params": {"p1": 1, "p2": "a"}
+                },
+                "-": {
+                    "separator": true
+                },
+                "exit": {
+                    "slot": "self.close",
+                    "title": "&Exit",
+                    "icon": ":/exit",
+                    "menuicon": true
+                }
+            },
+            "title": "&File",
+            "icon": "computer.ico"
+        },
+        "edit": {
+            "subs": {
+                "copy": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.EditSlotHolder.copy",
+                    "shortcut": [
+                        "Ctrl+C",
+                        "Ctrl+Insert"
+                    ],
+                    "title": "&Copy"
+                },
+                "paste": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.EditSlotHolder.paste",
+                    "shortcut": ["Ctrl+V", "Shift+Insert"],
+                    "title": "&Paste"
+                },
+                "search": {
+                    "subs": {
+                        "search": {
+                            "slot": "dpframe.examples.gui.mainwnd.slots.EditSlotHolder.search",
+                            "title": "&Search"
+                        },
+                        "replace": {
+                            "slot": "dpframe.examples.gui.mainwnd.slots.EditSlotHolder.replace",
+                            "title": "&Replace"
+                        }
+                    },
+                    "title": "&Search and Replace",
+                    "icon": "preview.ico"
+                }
+            },
+            "title": "&Edit"
+        },
+        "refs": {
+            "title": "Справочники",
+            "subs": {
+                "refPeople": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.RefSlotHolder.openReference",
+                    "title": "Люди",
+                    "params": {"refname": "People", "display": "Люди"}
+                },
+                "refCountry": {
+                    "slot": "dpframe.examples.gui.mainwnd.slots.RefSlotHolder.openReference",
+                    "title": "Страны",
+                    "params": {"refname": "Country", "display": "Страны"}
+                }
+            }
+        }
+    }
+}

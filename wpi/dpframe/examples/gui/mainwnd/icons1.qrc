@@ -1,0 +1,6 @@
+<RCC>
+  <qresource>
+    <file alias="open">folder.ico</file>
+    <file alias="save">save.ico</file>
+  </qresource>
+</RCC>

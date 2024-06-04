@@ -1,0 +1,10 @@
+K 13
+svn:mime-type
+V 10
+text/plain
+K 13
+svn:mergeinfo
+V 105
+/branches/1.0/electrolab/app/integration.py:601
+/branches/kaa_trunk/electrolab/app/integration.py:178-211
+END

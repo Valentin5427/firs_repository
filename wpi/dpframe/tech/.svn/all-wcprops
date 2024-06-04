@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/DPFrame/!svn/ver/222/trunk/dpframe/tech
+END
+AttrDict.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/DPFrame/!svn/ver/178/trunk/dpframe/tech/AttrDict.py
+END
+pgdb.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/DPFrame/!svn/ver/143/trunk/dpframe/tech/pgdb.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/DPFrame/!svn/ver/8/trunk/dpframe/tech/__init__.py
+END
+typecheck.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DPFrame/!svn/ver/176/trunk/dpframe/tech/typecheck.py
+END
+SimpleSound.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/DPFrame/!svn/ver/222/trunk/dpframe/tech/SimpleSound.py
+END
+common.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/DPFrame/!svn/ver/71/trunk/dpframe/tech/common.py
+END
+migrate.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/DPFrame/!svn/ver/140/trunk/dpframe/tech/migrate.py
+END
+singleapp.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/DPFrame/!svn/ver/178/trunk/dpframe/tech/singleapp.py
+END

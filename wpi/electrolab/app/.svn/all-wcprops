@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/ElectroLab/!svn/ver/931/trunk/electrolab/app
+END
+import1c.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/931/trunk/electrolab/app/import1c.py
+END
+export1c.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/910/trunk/electrolab/app/export1c.py
+END
+integration.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ElectroLab/!svn/ver/731/trunk/electrolab/app/integration.py
+END
+item.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/ElectroLab/!svn/ver/717/trunk/electrolab/app/item.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/175/trunk/electrolab/app/__init__.py
+END
+coil.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/ElectroLab/!svn/ver/717/trunk/electrolab/app/coil.py
+END
+integration.ini
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/931/trunk/electrolab/app/integration.ini
+END
+verification.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ElectroLab/!svn/ver/717/trunk/electrolab/app/verification.py
+END
+testmap.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/820/trunk/electrolab/app/testmap.py
+END
+gost.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/ElectroLab/!svn/ver/725/trunk/electrolab/app/gost.py
+END

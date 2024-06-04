@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/DPFrame/!svn/ver/115/trunk/dpframe/unittest/fixtures/metadata
+END
+create_metadata_struct.sql
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/DPFrame/!svn/ver/115/trunk/dpframe/unittest/fixtures/metadata/create_metadata_struct.sql
+END
+create_app_struct.sql
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/DPFrame/!svn/ver/115/trunk/dpframe/unittest/fixtures/metadata/create_app_struct.sql
+END
+fill_metadata.sql
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/DPFrame/!svn/ver/109/trunk/dpframe/unittest/fixtures/metadata/fill_metadata.sql
+END

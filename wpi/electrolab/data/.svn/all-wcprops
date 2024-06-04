@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/ElectroLab/!svn/ver/786/trunk/electrolab/data
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/110/trunk/electrolab/data/__init__.py
+END
+metadata.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ElectroLab/!svn/ver/474/trunk/electrolab/data/metadata.py
+END
+helper.py
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ElectroLab/!svn/ver/786/trunk/electrolab/data/helper.py
+END
+upgrade.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/ElectroLab/!svn/ver/413/trunk/electrolab/data/upgrade.py
+END

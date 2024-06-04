@@ -1,0 +1,149 @@
+{
+    "toolbars": {
+        "refs": [
+            "refs.defect",
+            "refs.operator",
+            "refs.transformer"
+        ], 
+        "logs": [
+			"logs.climat",
+			"logs.test_map",
+			"logs.serial"
+        ]
+    },
+    "res": ["electrolab.gui.ui.ico_rc"],
+    "icon": ":/EL/ico/test",
+    "main": {
+        "file": {
+            "subs": {
+                "-": {
+                    "separator": true
+                },
+                "exit": {
+                    "slot": "self.close",
+                    "title": "&Выход"
+                }
+            },
+            "title": "&Файл"
+        },
+        "refs": {
+            "title": "Справочники",
+            "subs": {
+                "defect": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "icon": ":/EL/ico/error_button",
+                    "menuicon": true,
+                    "title": "Несоответствия",
+                    "params": {"reference": "defect"}
+                },
+                "operator": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "icon": ":/EL/ico/users_32",
+                    "menuicon": true,
+                    "title": "Испытатели",
+                    "params": {"reference": "operator"}
+                },
+                "transformer": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "icon": ":/EL/ico/inventory_32",
+                    "menuicon": true,
+                    "title": "Трансформаторы",
+                    "params": {"reference": "transformer"}
+                },
+                "testing_voltage": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Испытательные напряжения",
+                    "params": {"reference": "testing_voltage"}
+                }
+            }
+        },
+        "logs": {
+            "title": "Журналы",
+            "subs": {
+                "test_map": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_test_map",
+                    "icon": ":/EL/ico/activity_monitor",
+                    "menuicon": true,
+                    "title": "Журнал испытаний",
+                    "params": {"reference": "test_map"}
+                },
+                "climat": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "icon": ":/EL/ico/weather_64",
+                    "menuicon": true,
+                    "title": "Окружающaя среда",
+                    "params": {"reference": "climat"}
+                },
+                "export1c": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_config_export1c",
+                    "title": "Выгрузка 1С",
+                    "params": {"reference": "configExport1c"}
+                },
+                "serial": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "icon": ":/EL/ico/barcode_64x64",
+                    "menuicon": true,
+                    "title": "Серийные номера",
+                    "params": {"reference": "serial_number"}
+                }
+			}
+		},
+        "configuration": {
+            "title": "&Настройка",
+            "subs": {
+                "room": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Помещения",
+                    "params": {"reference": "room"}
+                },
+                "stand": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Стенды",
+                    "params": {"reference": "stand"}
+                },
+                "test_type": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Тип испытания",
+                    "params": {"reference": "test_type"}
+                },
+                "-": {
+                    "separator": true
+                },
+               "device_command": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Команды периферийных устройств",
+                    "params": {"reference": "device_command"}
+                },
+                "defect_testing_type": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "Типы испытаний дефектов",
+                    "params": {"reference": "defect_testing_type"}
+                },
+                "--": {
+                    "separator": true
+                },
+                "gost": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "ГОСТ точки",
+                    "params": {"reference": "gost"}
+                },
+                "gost_quadro": {
+                    "slot": "electrolab.gui.slots.RefSlotHolder.open_reference",
+                    "title": "ГОСТ нагрузки",
+                    "params": {"reference": "quadroload"}
+                }
+            }
+        },
+        "reports": {
+            "title": "Отчеты",
+            "subs": {
+				"report_account": {
+                    "slot": "electrolab.gui.slots.ReportSlotHolder.open_accountSCM",
+                    "title": "Счет для ЦСМ",
+                    "params": {"report": "tester_protocol"}
+				}	
+            }
+        }
+
+    }
+}

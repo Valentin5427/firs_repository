@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1199</width>
+    <height>683</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Рабочее место начальника</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Трансформаторы</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Серийные номера</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1199</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="action"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Справочники</string>
+    </property>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+    <addaction name="action_9"/>
+    <addaction name="action_4"/>
+    <addaction name="action_5"/>
+    <addaction name="separator"/>
+    <addaction name="action_10"/>
+    <addaction name="action_11"/>
+    <addaction name="action_13"/>
+    <addaction name="separator"/>
+    <addaction name="action_15"/>
+    <addaction name="action_16"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Журналы</string>
+    </property>
+    <addaction name="action_6"/>
+    <addaction name="action_7"/>
+    <addaction name="action_1"/>
+    <addaction name="action_8"/>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>Настройка</string>
+    </property>
+    <addaction name="action_12"/>
+   </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>Отчеты</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+   <addaction name="menu_5"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Несоответствия</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Испытатели</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>Трансформаторы</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Испытательные напряжения</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Журнал испытаний</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Окружающая среда</string>
+   </property>
+  </action>
+  <action name="action_1">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Выгрузка 1С</string>
+   </property>
+  </action>
+  <action name="action_8">
+   <property name="text">
+    <string>Серийные номера</string>
+   </property>
+  </action>
+  <action name="action_10">
+   <property name="text">
+    <string>Помещения</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>Стенды</string>
+   </property>
+  </action>
+  <action name="action_9">
+   <property name="text">
+    <string>Типы трансформаторов</string>
+   </property>
+  </action>
+  <action name="action_12">
+   <property name="text">
+    <string>Параметры для отчетов</string>
+   </property>
+  </action>
+  <action name="action_13">
+   <property name="text">
+    <string>Типы испытаний</string>
+   </property>
+  </action>
+  <action name="action_15">
+   <property name="text">
+    <string>ГОСТ точки</string>
+   </property>
+  </action>
+  <action name="action_16">
+   <property name="text">
+    <string>ГОСТ нагрузки</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

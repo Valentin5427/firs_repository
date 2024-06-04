@@ -1,0 +1,5 @@
+[DB]
+Host = localhost
+DB = postgres
+User = dpframe
+Pass = dpframe

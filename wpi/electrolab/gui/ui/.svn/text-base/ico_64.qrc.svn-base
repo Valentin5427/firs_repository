@@ -1,0 +1,45 @@
+<RCC>
+  <qresource prefix="ico">
+    <file>ico/redo_green.png</file>
+    <file>ico/users_32.png</file>
+    <file>ico/user_search_32.png</file>
+    <file>ico/user_32.png</file>
+    <file>ico/user_blue_32.png</file>
+    <file>ico/hand_track.png</file>
+    <file>ico/cross_grey_64.png</file>
+    <file>ico/Pause_64.png</file>
+    <file>ico/Play_Red_128.png</file>
+    <file>ico/right_64.png</file>
+    <file>ico/redo.png</file>
+    <file>ico/tick_64.png</file>
+    <file>ico/new_go_previous.png</file>
+    <file>ico/up_64.png</file>
+    <file>ico/save_64.png</file>
+    <file>ico/barcode-scanner_64.png</file>
+    <file>ico/64_barcode.png</file>
+    <file>ico/64_down.png</file>
+    <file>ico/64_down1.png</file>
+    <file>ico/64_Exit.png</file>
+    <file>ico/64_page_white_add.png</file>
+    <file>ico/64_page-white-delete.png</file>
+    <file>ico/64_page-white-save.png</file>
+    <file>ico/block_64.png</file>
+    <file>ico/delete_64.png</file>
+    <file>ico/diagram_64.png</file>
+    <file>ico/inventory_64.png</file>
+    <file>ico/pencil_64.png</file>
+    <file>ico/plus_64.png</file>
+    <file>ico/print_64.png</file>
+    <file>ico/Testing-64x64.png</file>
+    <file>ico/trash_64.png</file>
+    <file>ico/warning_64.png</file>
+    <file>ico/weather_64.png</file>
+    <file>ico/archive_64.png</file>
+    <file>ico/user_64.png</file>
+    <file>ico/clear_64x64.png</file>
+    <file>ico/enter_64.png</file>
+    <file>ico/book_green.png</file>     
+    <file>ico/64_gray_up.png</file>
+    <file>ico/64_gray_down.png</file>
+  </qresource>
+</RCC>

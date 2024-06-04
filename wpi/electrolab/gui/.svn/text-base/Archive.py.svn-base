@@ -1,0 +1,517 @@
+# -*- coding: UTF-8 -*-
+
+from PyQt4 import QtCore, QtGui, uic
+from PyQt4.QtCore import QEvent, pyqtSlot, pyqtSignal
+from PyQt4.QtGui import QMessageBox, QWidget          ,QSpinBox
+from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+import datetime
+
+
+#QSpinBox.
+
+from electrolab.gui.DigitalKeyboard import DigitalKeyboard
+#from electrolab.gui.findserialnumber import FindSerialNumber
+from electrolab.gui.common import UILoader
+from electrolab.data import helper
+from electrolab.gui.reporting import FRPrintForm
+from devices import Devices
+
+model = QSqlQueryModel()
+model_2 = QSqlQueryModel()
+withCol0 = 35
+withCol1 = 25
+withCol2 = 100
+withCol3 = 50
+VSB1 = False
+
+
+
+
+
+
+
+class MyFilter(QtCore.QObject):
+    def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
+    def widthArea(self, tableView):
+        # Возвращает ширину свободной области таблицы tableView
+        HSWidth = tableView.verticalHeader().width() + 4
+        if tableView.verticalScrollBar().width() < 100 and tableView.verticalScrollBar().isVisible():
+            HSWidth += tableView.verticalScrollBar().width()
+        return tableView.width() - HSWidth    
+    def eventFilter(self, obj, e):
+        try:
+            QtCore.QEvent.Resize
+        except:
+            return True    
+        global VSB1
+                
+#        if obj.objectName() == 'tv1' and (e.type() == QtCore.QEvent.Resize or VSB1 <> obj.verticalScrollBar().isVisible()):        
+        if obj.objectName() == 'tv1':        
+            koef = (1.0 * (self.widthArea(obj)) / (withCol0 + withCol1 + withCol2 + withCol3))
+            obj.setColumnWidth(0, koef * withCol0)
+            obj.setColumnWidth(1, koef * withCol1)
+            obj.setColumnWidth(2, koef * withCol2)
+            obj.setColumnWidth(3, koef * withCol3)
+            VSB1 = obj.verticalScrollBar().isVisible()
+                    
+        return False
+
+
+#class archive(QtGui.QDialog):
+class archive(QtGui.QDialog, UILoader):
+#    def __init__(self, _env, *args):
+    def __init__(self, _env):
+        
+        self.env = _env
+        
+        super(QWidget, self).__init__()
+
+        # QMessageBox.warning(self, u"Предупреждение", u"В БД", QMessageBox.Yes, QMessageBox.No)                        
+
+        self.setUI(_env.config, u"Archive.ui")
+        #self.setEnabled(False
+        
+        self.oDigitalKeyboard = DigitalKeyboard(_env)
+        
+        # Корректировка размеров цифровой клавиатуры
+        fnt = self.oDigitalKeyboard.ui.btn_0.font()
+        fnt.setPointSize(fnt.pointSize() * 0.7)
+        self.oDigitalKeyboard.ui.btn_0.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_1.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_2.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_3.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_4.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_5.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_6.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_7.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_8.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_9.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_dot.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_BackSpace.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_Clear.setFont(fnt)
+        self.oDigitalKeyboard.ui.btn_Ok.setFont(fnt)        
+        minWidth = self.oDigitalKeyboard.ui.btn_BackSpace.minimumWidth()        
+        self.oDigitalKeyboard.ui.btn_1.setMinimumSize(minWidth, 0)
+        self.oDigitalKeyboard.ui.btn_2.setMinimumSize(minWidth, 0)
+        self.oDigitalKeyboard.ui.btn_3.setMinimumSize(minWidth, 0)
+            
+        
+        self.ui.vlKeyboard.addWidget(self.oDigitalKeyboard)
+        #self.oKeyboard.setVisible(False)
+
+
+
+        #self.oDlgSerialNumber = FindSerialNumber(_env, self.oKeyboard)
+        #self.oDlgSerialNumber.ui.btnAdd.setVisible(False)
+        #self.oDlgSerialNumber.ui.btnQuit.setVisible(False)
+        #self.ui.vlView.addWidget(self.oDlgSerialNumber)
+        
+        #self.oDlgSerialNumber.setVisible(False)
+#        self.oDlgSerialNumber.hideDialog.connect(self.hide_serial_find)
+         
+         
+        self.ui.sbYear.valueChanged.connect(self.change_serial_number)
+        self.ui.sbNumber.valueChanged.connect(self.change_serial_number)
+
+        self.ui.pushButton.clicked.connect(self.pushButton_Click)
+        self.ui.pushButton_2.clicked.connect(self.pushButton2_Click)
+
+
+        #self.ui.sbNumber.changeEvent.connect(self.change_serial_number)
+        #QSpinBox.valueChanged()
+         
+        #self.oKeyboard = _oKeyboard
+        self.iSerialNumberID = None
+        self.oHelperSerialNumber = helper.SerialNumber(_env)
+        self.ui.sbYear.installEventFilter(self)
+        self.ui.sbNumber.installEventFilter(self)
+        self.oDigitalKeyboard.enter.connect(self.ui.sbNumber.focusNextChild) #TODO: Странно, почему нельзя цеплять к родителю????
+        self.ui.sbYear.setValue(datetime.datetime.now().year - 2000) 
+#        self.ui.sbYear.setFocus()
+#        self.ui.sbNumber.setFocus()
+         
+        self.Devices = Devices(_env)
+        
+        self.ui.tableView.setModel(model)
+        self.selModel = self.ui.tableView.selectionModel()        
+        #self.connect(self.selModel, QtCore.SIGNAL("currentChanged(const QModelIndex &, const QModelIndex &)"), self.selectionChanged1)
+        self.ui.tableView.setObjectName('tv1')
+        self.ui.tableView.setHorizontalScrollBarPolicy(1)
+        self.ui.tableView.installEventFilter(MyFilter(self.ui.tableView))        
+        self.viewTesting(0)        
+
+
+
+
+
+
+
+
+
+        ## эксперимент : выдает ли команда: print 'MMMMMMMM', unicode(self.query11.record().value(u'fio').toString()) в сборке ошибку
+        '''
+        self.query11 = QSqlQuery(_env.db)
+
+
+        strSQL = """
+select fio from operator order by fio
+"""
+        self.query11.prepare(strSQL)
+        if not self.query11.exec_():
+            QMessageBox.warning(self, u"Предупреждение",  'error1', QMessageBox.Ok)
+            return
+#        else:    
+#            model_2.setQuery(self.query_2)
+
+        self.query11.next()
+        QMessageBox.warning(self, u"Предупреждение",  '1', QMessageBox.Ok)
+        #print 'MMMMMMMM', self.query11.record().value(u'fio').toString()
+        print 'MMMMMMMM', unicode(self.query11.record().value(u'fio').toString())
+        QMessageBox.warning(self, u"Предупреждение",  '2', QMessageBox.Ok)
+        '''
+
+        return
+
+
+    def viewTesting(self, id_search):
+        #if id_search == '':
+        #    return
+        model.clear()        
+        model.reset()
+        model_2.clear()        
+        model_2.reset()
+        if self.iSerialNumberID == None:
+            return        
+
+
+        SQL = '''select series, ordernumber
+from serial_number
+where id = ''' + str(self.iSerialNumberID)
+        print SQL
+        model_2.setQuery(SQL, self.env.db)
+        self.series = int('123')
+###        QMessageBox.warning(self, u"Предупреждение",  '111', QMessageBox.Ok)
+#        print 'model.rowCount=', model_2.rowCount()
+#        print 'model.record(0).field(series).value().toString()', model_2.record(0).field('series').value().toString()
+        self.series = model_2.record(0).field('series').value().toString()
+#        QMessageBox.warning(self, u"Предупреждение",  '222', QMessageBox.Ok)
+        self.ordernumber = model_2.record(0).field('ordernumber').value().toString()
+#        QMessageBox.warning(self, u"Предупреждение",  '333', QMessageBox.Ok)
+#        print 'self.series, self.ordernumber', self.series, self.ordernumber
+#        QMessageBox.warning(self, u"Предупреждение",  '444', QMessageBox.Ok)
+        
+#        QMessageBox.warning(self, u"Предупреждение",  self.series, QMessageBox.Ok)
+###        QMessageBox.warning(self, u"Предупреждение",  '555', QMessageBox.Ok)
+
+
+        
+#        SQL = 'select id, fullname, hostname from stand'
+#        SQL = '''select t2.createdatetime, t3.fullname, t4.fio
+        SQL = '''select to_char(t2.createdatetime, 'dd.mm.yyyy') as createdate,
+to_char(t2.createdatetime, 'hh:mi') as createtime,
+t3.fullname, t4.fio,
+t1.test_map, t1.id as item, t6.code
+from item as t1, test_map as t2, stand as t3, operator as t4, stand as t5, test_type as t6
+where t1.test_map = t2.id
+and t2.stand = t3.id
+and t2.operator = t4.id
+and t2.stand = t5.id
+and t5.test_type = t6.id
+and t1.serial_number = ''' + str(self.iSerialNumberID) + '''
+order by t2.createdatetime'''
+
+        SQL = '''select to_char(t2.createdatetime, 'dd.mm.yyyy') as createdate,
+to_char(t2.createdatetime, 'hh:mi') as createtime,
+t3.fullname, t4.fio,
+t1.test_map, t1.id as item, t5.code
+from item as t1, test_map as t2, stand as t3, operator as t4, test_type as t5
+where t1.test_map = t2.id
+and t2.stand = t3.id
+and t2.operator = t4.id
+and t3.test_type = t5.id
+and t1.serial_number = ''' + str(self.iSerialNumberID) + '''
+order by t2.createdatetime'''
+
+        print 'SQL'
+
+        #query9.bindValue(":serial_number", self.iSerialNumberID)
+        #query9.exec_()                
+
+        
+        model.setQuery(SQL, self.env.db)
+        #self.tableView.setColumnHidden(0, True)        
+        model.setHeaderData(0, QtCore.Qt.Horizontal, u"Дата")
+        model.setHeaderData(1, QtCore.Qt.Horizontal, u"Время")
+        model.setHeaderData(2, QtCore.Qt.Horizontal, u"Тип испытания")
+        model.setHeaderData(3, QtCore.Qt.Horizontal, u"Оператор")
+        #self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
+
+
+
+        '''
+        QMessageBox.warning(self, u"Предупреждение",  '1', QMessageBox.Ok)
+#        unicode(oQuery.record().value(u'FullName').toString())
+        print model.record(0).field('fio').value().toString()
+        QMessageBox.warning(self, u"Предупреждение",  '2', QMessageBox.Ok)
+        '''
+
+
+        
+    def showEvent(self, _event):
+        self.ui.sbNumber.clear()
+        #self.ui.btnAdd.setEnabled(False)
+        self.ui.sbNumber.focusNextChild()
+        self.ui.sbNumber.setFocus()
+
+        #self.ui.sbYear.setFocus()
+        #self.ui.sbNumber.setFocus()
+
+
+
+    def eventFilter(self, _object, _event):
+        u"""Отлавливает переход фокуса, для подключения экранной клавиатуры"""
+        if _event.type() == QEvent.FocusOut:
+            self.oDigitalKeyboard.connect_to_widget()
+        if _event.type() in (QEvent.FocusIn, QEvent.MouseButtonPress):
+            self.oDigitalKeyboard.connect_to_widget(_object)
+        return False
+
+
+    def change_serial_number(self):
+        print 'change_serial_number'
+        if not (self.ui.sbNumber.value and self.ui.sbYear.value):
+            self.ui.leTransformer.clear()
+            self.ui.iSerialNumberID = None
+            #return
+        oSNInfo = self.oHelperSerialNumber.get_id(self.ui.sbYear.value(), self.ui.sbNumber.value())
+        if oSNInfo and oSNInfo.id: 
+            self.ui.leTransformer.setText(oSNInfo.fullname)
+            self.iSerialNumberID = oSNInfo.id
+        else:
+            self.ui.leTransformer.clear()
+            self.iSerialNumberID = None
+      
+        print 'self.iSerialNumberID', self.iSerialNumberID
+        self.viewTesting(0)        
+
+
+    def pushButton_Click(self):
+        if self.ui.comboBox.currentIndex() == 0:
+            self.calcMapItem((3,4))
+            if self.test_map == None:
+                QMessageBox.warning(None, u"Предупреждение",
+                                      u"""Нет данных:host: """,
+                                    QMessageBox.Ok)
+                return
+            inputParms = {u'test_map':self.test_map, u'item':self.item}
+#            inputParms = {u'test_map':self.test_map}
+            try:
+                rpt = FRPrintForm(u'ReportStickers.fr3' ,inputParms , self.env)
+                rpt.preview()
+            # rpt.design()
+            except:
+                pass
+
+
+        if self.ui.comboBox.currentIndex() == 1:
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+#            rez = self.oTestCoil.calcGlobal(None, int(serial_number), 16, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())            
+            rez = self.oTestCoil.calcGlobal(None, self.iSerialNumberID, 16, None, None)            
+            if rez == False:
+                return
+
+            import ReportsExcel
+#            print 11
+#            ReportsExcel.report(fullname, series, zakaz, self.oTestCoil.globalReport, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())
+#            print 'self.oTestCoil.globalReport=', self.oTestCoil.globalReport
+#            print 22
+#            print 'self.series=', self.series, self.ordernumber
+            ReportsExcel.report(self.ui.leTransformer.text(), self.series, self.ordernumber, self.oTestCoil.globalReport, self.Devices.data['accuracy']['r'], self.Devices.data['accuracy']['a'])                
+
+
+        if self.ui.comboBox.currentIndex() == 2:
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+            import ReportsExcel
+
+            coilsInfa = self.oTestCoil.buildCoilsInfa(self.iSerialNumberID)
+            ReportsExcel.BAX_coil1(self.ui.leTransformer.text(),
+                                   str(self.ui.sbYear.value()) + '-' + str(self.ui.sbNumber.value()),
+                                   self.ordernumber, coilsInfa)
+#            ReportsExcel.BAX_coil1(fullname, serialnumbel, zakaz, coilsInfa)
+
+
+
+
+        if self.ui.comboBox.currentIndex() == 3:
+            self.calcMapItem((0,1,2,5,6))
+#            rpt = FRPrintForm(u'tester_protocol.fr3', {u'test_map':test_mapID}, self.env)
+            inputParms = {u'test_map':self.test_map, u'itemid':self.item}
+###            inputParms = {u'test_map':self.test_map, u'itemid':0}
+#            inputParms = {u'test_map':self.test_map}
+            rpt = FRPrintForm(u'tester_protocol.fr3', inputParms, self.env)
+            rpt.preview()
+            return
+
+
+
+        if self.ui.comboBox.currentIndex() == 4:
+
+            print 'self.print_report(int(serial_number))', self.iSerialNumberID
+
+            from electrolab.gui.TestCoil import TestCoil
+            self.oTestCoil = TestCoil(self.env, None, None, None, None, self)
+#            rez = self.oTestCoil.calcGlobal(None, self.iSerialNumberID, 16, self.ui.doubleSpinBox.value(), self.ui.doubleSpinBox_2.value())            
+            rez = self.oTestCoil.calcGlobal(None, self.iSerialNumberID, 16, None, None)            
+            if rez == False:
+                self.oTestCoil.globalCorridors = [[-1, -1, -1, 0, 0, 0, 0]]                
+                #return
+            
+            # SQL запрос формирую в виде одной стоки, поскольку не знаю как передать 
+            # из питона в FastReport переменную типа TStrings 
+            SQL = u"'select t3.coilnumber "
+            SQL += u", cast(t3.coilnumber as varchar ) || ''И1-'' || cast(t3.coilnumber as varchar ) || ''И'' || cast(t3.tap as varchar )  as coil "
+            SQL += u", t1.r "            
+            SQL += u", round(t1.un, 3) as un "              
+            SQL += u", round(t1.inom, 2) as inom "                  
+            SQL += u", round(t1.k, 1) as k "
+            SQL += u", t1.rating "
+            SQL += u", t5.fio "
+            SQL += u", t2.createdatetime::date as sdate "
+            SQL += u", round(minR, 4) as minR, round(maxR, 4) as maxR, round(minI, 4) as minI, round(maxI, 4) as maxI "            
+            SQL += u"from checking_2 t1, item t2, coil t3, "
+            
+            # Выбираем из self.oTestCoil.globalCorridors данные только по текущему заказу 
+            globalCorridors = []            
+            for i in range(len(self.oTestCoil.globalCorridors)):
+                print 'aaa', str(self.oTestCoil.globalCorridors[i][1]), self.ordernumber
+                print 'bbb', unicode(str(self.oTestCoil.globalCorridors[i][1])), unicode(self.ordernumber)
+                
+#                if str(self.oTestCoil.globalCorridors[i][1]) == zakaz:
+#                if str(self.oTestCoil.globalCorridors[i][1]) == self.ordernumber:
+                if unicode(str(self.oTestCoil.globalCorridors[i][1])) == unicode(self.ordernumber):
+                    globalCorridors += [self.oTestCoil.globalCorridors[i]]
+                    
+                    
+                    
+            print 'globalCorridors=', globalCorridors        
+            print 'self.oTestCoil.globalCorridors=', self.oTestCoil.globalCorridors        
+                        
+            # Этот подзапрос будет тянуть данные не из таблицы а из списка "globalCorridors"
+            if globalCorridors == []:
+                SQL += u"( select 0 as idCoil, 0 as minR, 0 as maxR, 0 as minI, 0 as maxI ) as corridor,"
+            else:  
+                SQL += u"( "
+                for i in range(len(globalCorridors)):
+                    idCoil = str(globalCorridors[i][2])
+                    minR   = str(globalCorridors[i][3])
+                    maxR   = str(globalCorridors[i][4])
+                    minI   = str(globalCorridors[i][5])
+                    maxI   = str(globalCorridors[i][6])
+                    SQL += u"select " + idCoil + " as idCoil, " + minR + u" as minR, " + maxR + u" as maxR, " + minI + u" as minI, " + maxI + u" as maxI " 
+                    if i < len(globalCorridors) - 1:
+                        SQL += u" union "
+                SQL += u") as corridor, "
+                        
+            SQL += u"test_map t4 LEFT OUTER JOIN operator t5 ON (t4.operator = t5.id) "
+            SQL += u"where t1.item = t2.id "            
+            SQL += u"and t1.coil = t3.id "
+            SQL += u"and t2.test_map = t4.id "
+            SQL += u"and t2.serial_number = " + str(self.iSerialNumberID) + " "                                                                  
+            SQL += u"and t3.id = corridor.idCoil "
+            SQL += u"order by t3.coilnumber, t3.tap'"                            
+            
+            print SQL
+            
+            print 'serial_number=', self.iSerialNumberID
+            
+            #ReportsExcel.report(self.ui.leTransformer.text(), self.series, self.ordernumber, self.oTestCoil.globalReport, self.Devices.data['accuracy']['r'], self.Devices.data['accuracy']['a'])                
+            
+#            accurR = u"'Коридор " + str(self.ui.doubleSpinBox.value()) + "%'"
+#            accurI = u"'Коридор " + str(self.ui.doubleSpinBox_2.value()) + "%'"
+            accurR = u"'Коридор " + str(self.Devices.data['accuracy']['r']) + "%'"
+            accurI = u"'Коридор " + str(self.Devices.data['accuracy']['a']) + "%'"
+            #print 'accurR, accurI,',  accurR, accurI
+#            self.print_report(int(serial_number), SQL, accurR, accurI)
+            
+            inputParms = {u'snID':self.iSerialNumberID, u'SQL': SQL, u'accuracyR': accurR, u'accuracyI': accurI}
+            print 'inputParms=', inputParms
+            try:
+                rpt = FRPrintForm(u'error_estimation.fr3' ,inputParms , self.env)
+                rpt.preview()
+            # rpt.design()
+            except:
+                pass
+            
+            
+            return
+
+
+
+
+
+    def calcMapItem(self, p):
+        self.test_map = None
+        self.item = None
+        print 'model.rowCount=', model.rowCount()
+        for i in range(model.rowCount()):
+            if int(model.record(i).field('code').value().toString()) in p:
+                self.test_map = int(model.record(i).field('test_map').value().toString())
+                self.item = int(model.record(i).field('item').value().toString())
+
+
+    def pushButton2_Click(self):
+        self.close()
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    
+    from dpframe.base.inits import db_connection_init   
+    from dpframe.base.envapp import checkenv
+    from dpframe.base.inits import json_config_init
+    from dpframe.base.inits import db_connection_init
+    from dpframe.base.inits import default_log_init
+    from electrolab.gui.inits import serial_devices_init
+   
+    
+    @serial_devices_init
+    @json_config_init
+    @db_connection_init
+    @default_log_init    
+    class ForEnv(QtGui.QWidget):
+        def getEnv(self):
+            return self.env
+    objEnv = ForEnv()
+    env = objEnv.getEnv()
+    db = env.db
+    path_ui = env.config.paths.ui + "/"
+
+    import os
+    if not os.path.exists(path_ui):        
+        path_ui = ""
+
+    rez = db.open();
+    if not rez:
+        QMessageBox.warning(None, u"Предупреждение",
+u"""Не установлено соединение с БД со следующими параметрами:
+host: """ + db.hostName() + """
+database: """ + db.databaseName() + """
+user: """ + db.userName() + """
+password: """ + db.password(),
+QMessageBox.Ok)
+                
+    else:
+        #points = [[1,2],[3,4],[5,6]]                
+        #points1 = [[0.1,0.2],[0.3,0.4],[0.5,0.6]]
+                
+#        self.oItem = Item(self.env, None, self.oMap.iMapID, True)
+                        
+        wind = archive(env)
+        wind.setEnabled(True)
+        #if wind.is_show: 
+        wind.show()
+        sys.exit(app.exec_())

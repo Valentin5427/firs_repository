@@ -1,0 +1,405 @@
+# -*- coding: UTF-8 -*-
+
+from PyQt4 import QtCore, QtGui, uic
+from PyQt4.QtSql import QSqlQueryModel, QSqlDatabase, QSqlQuery
+from win32com.client import Dispatch
+from PyQt4.QtGui import QMessageBox, QIcon
+import time
+import os, stat, wmi
+import datetime
+import calendar
+import JournalMsr
+
+# Отчет 'График поверки измерительного инструмента'
+class GraphTestMsr(QtGui.QDialog):
+    def __init__(self, env, *args):
+        QtGui.QDialog.__init__(self, *args)        
+                       
+        global db1
+        db1 = env.db
+        
+        global path_ui                    
+        path_ui = env.config.paths.ui + "/"
+        global path_rpt                    
+        path_rpt = env.config.paths.rpt + "/"
+        if not JournalMsr.MyLoadUi(path_ui, "ReportGraphTestMsr.ui", self):
+            return
+                                                                   
+        self.pushButton.clicked.connect(self.pushButton1_Click)
+        
+        self.query = QSqlQuery(db1)
+        self.query1 = QSqlQuery(db1)
+        self.query2 = QSqlQuery(db1)
+
+        SQL = u"""
+                 SELECT 1 AS srt, -1 AS id, 'По всем видам измерения' AS name_type
+                 UNION ALL
+                 SELECT 2 AS srt, id, '    ' || name_type AS name_type FROM type_msr
+                 WHERE id_category = 1
+                 UNION ALL
+                 SELECT 3 AS srt, -2 AS id, 'По всем видам защиты' AS name_type
+                 UNION ALL
+                 SELECT 4 AS srt, id, '    ' || name_type AS name_type FROM type_msr
+                 WHERE id_category = 2
+                 ORDER BY srt, name_type
+               """
+                                           
+        self.query.prepare(SQL)
+        self.query.exec_()
+        
+        self.comboBox.clear()
+        for i in range(0, self.query.size()):
+            self.query.next()
+            self.comboBox.addItem(self.query.record().value(2).toString(), self.query.record().value(1).toString())
+            
+        #self.spinBox.setValue(2013)
+        
+        self.spinBox.setValue(datetime.date.today().year)
+        
+        self.dateEdit.setDate(datetime.date.today())                        
+        self.radioButton.toggled.connect(self.radioButton_Toggle)
+
+                        
+    def radioButton_Toggle(self, check):
+        self.spinBox.setEnabled(check)    
+        self.dateEdit.setEnabled(not check)                            
+
+        
+    def pushButton1_Click(self):
+        ALF = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')        
+        try:
+            xl = Dispatch('Excel.Application')
+        except:
+            return u"Не запускается Excel"
+                    
+        name_file = u'График поверки средств измерения.xls'
+        inputFile = os.getcwd() + u'/' + path_rpt + name_file  # Шаблон
+        
+        if not os.path.exists(inputFile):        
+            inputFile = os.getcwd() + u'/' + name_file  # Шаблон        
+        
+        #print inputFile
+        try:
+            # установить на шаблон read-only на время формирования отчета 
+            os.chmod(inputFile, stat.S_IREAD)
+        except:    
+            QMessageBox.warning(self, u"Предупреждение", u"Отсутствует шаблон: " + inputFile + u".\nПродолжение невозможно!", QMessageBox.Ok)
+            return
+        try:
+            wb = xl.Workbooks.Open(inputFile)
+        except:
+            QMessageBox.warning(self, u"Предупреждение", u"Не открывается файл: " + inputFile + u".\nПродолжение невозможно!", QMessageBox.Ok)
+            return
+  
+        xl.Visible = True
+                
+        ws = wb.Worksheets(1)
+        
+        nIns = 15  # № строки в шаблоне, откуда начинается вставка перечня средств 
+        nTitle = 10
+        if self.checkBox.isChecked():
+            ws.Rows("15:24").Delete()
+            ws.Rows("1:8").Delete()
+            nTitle = 2
+            nIns = 7 
+        row = ws.Rows(str(nIns + 1))
+                        
+        if self.radioButton.isChecked():
+            strDate = str(self.spinBox.text()) + "-12-31"
+            ws.Cells(nTitle, 1).Value += " " + str(self.spinBox.text()) + u" год"
+        else:    
+            strDate = self.dateEdit.date().toString("yyyy-MM-dd")
+            ws.Cells(nTitle, 1).Value += " " + str(self.dateEdit.text()) + u" г."
+            
+        #print strDate    
+            
+                        
+        currInd = self.comboBox.itemData(self.comboBox.currentIndex()).toString()
+        
+        if str(currInd) in ["-1","-2"]:
+            id_category = -1 * int(currInd)
+            strType = "AND t5.id_category = " + str(id_category)
+#            ws.Cells(nTitle + 1, 1).Value = str(self.comboBox.currentText()) 
+            ws.Cells(nTitle + 1, 1).Value = unicode(self.comboBox.currentText()) 
+                        
+            '''
+            if str(self.comboBox.itemData(self.comboBox.currentIndex()).toString()) == "-1":
+                strType = "AND t5.id_category = 1"
+                ws.Cells(nTitle + 1, 1).Value = u"По всем видам измерения"
+            if str(self.comboBox.itemData(self.comboBox.currentIndex()).toString()) == "-2":
+                strType = "AND t5.id_category = 2"
+                ws.Cells(nTitle + 1, 1).Value = u"По всем видам защиты"
+            '''
+                
+        else:            
+            SQL = u"""
+                   SELECT id_category FROM type_msr
+                   WHERE id = """ + str(self.comboBox.itemData(self.comboBox.currentIndex()).toString())
+            
+            self.query.prepare(SQL)
+            self.query.exec_()
+            self.query.next()
+            id_category = int(self.query.record().value(0).toString())
+                                                    
+            strType = "AND t4.id_type = " + str(currInd)
+            ws.Cells(nTitle + 1, 1).Value += " " + unicode(self.comboBox.currentText())
+ 
+#AGE(timestamp '""" + self.dateEdit.date().toString("yyyy-MM-dd") + """', CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END) AS period_age,
+#AGE(timestamp '""" + self.dateEdit.date().toString("yyyy-MM-dd") + """', CASE WHEN (t2.view_date IS NULL) THEN t1.first_checking ELSE t2.view_date END) AS view_period_age
+        
+        SQL = """
+SELECT id, id_msr, name_group, name_msr, zav_num, period, period_view, first_checking, start_date, finish_date, last_checking_date, last_view_date FROM
+(
+SELECT t1.id, t1.id_msr, t1.zav_num, t1.first_checking, t1.start_date, t1.finish_date, t5.id_category,
+t2.checking_date,
+t3.name_msr, t3.period, t3.period_view,
+t4.name_group,
+CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END AS last_checking_date,
+CASE WHEN (t2.view_date IS NULL) THEN t1.first_checking ELSE t2.view_date END AS last_view_date,
+
+AGE(timestamp '""" + strDate + """', CASE WHEN (t2.checking_date IS NULL) THEN t1.first_checking ELSE t2.checking_date END) AS period_age,
+AGE(timestamp '""" + strDate + """', CASE WHEN (t2.view_date IS NULL) THEN t1.first_checking ELSE t2.view_date END) AS view_period_age
+
+FROM
+zav_msr t1 LEFT OUTER JOIN 
+(
+  select id_zav, MAX(checking_date) AS checking_date, MAX(view_date) AS view_date 
+  FROM journal_checking GROUP BY id_zav
+) t2
+ON (t1.id = t2.id_zav),
+msr t3,
+group_msr t4,
+type_msr t5
+WHERE t1.id_msr = t3.id
+AND t3.id_group = t4.id """ + strType + """
+--AND t3.id_group = t4.id
+AND t4.id_type = t5.id
+AND finish_date IS NULL
+) AS t
+WHERE
+(
+  t.id_category = 1 and
+  (last_checking_date IS NULL OR 12 * EXTRACT(YEAR FROM period_age) + EXTRACT(MONTH FROM period_age) > period - 1)
+) OR
+(
+  t.id_category = 2 and
+  (
+    (last_checking_date IS NULL OR 12 * EXTRACT(YEAR FROM period_age) + EXTRACT(MONTH FROM period_age) > period - 1) or
+    (last_view_date IS NULL OR 12 * EXTRACT(YEAR FROM view_period_age) + EXTRACT(MONTH FROM view_period_age) > period_view - 1)
+  )
+)
+ORDER BY zav_num
+"""
+        
+        #print SQL  
+        
+        self.query.prepare(SQL)            
+        self.query.exec_()
+        if self.query.lastError().isValid():
+            #return u"Ошибка запроса к БД1" + chr(10) + str(self.query.lastError().text())
+            print u"Ошибка запроса к БД1" + chr(10) + str(self.query.lastError().text())
+            return
+ 
+        M = range(self.query.size())       
+        
+        self.query.first()            
+        for i in range(0, self.query.size()):
+            # Присоединяем к типу классы точности и диапазон измерения, выбранные из таблицы "accuracy_msr",
+            # между которыми ставим "\n"                
+            SQL = """
+                  SELECT name_vid, classaccuracy, range_msr FROM accuracy_msr
+                  WHERE id_msr = :id_msr                            
+                  ORDER BY name_vid, classaccuracy, range_msr
+                  """
+            self.query1.prepare(SQL)
+            self.query1.bindValue(':id_msr', self.query.record().value("id_msr").toString())
+            self.query1.exec_()
+         #   print "N строки=", i
+            if self.query1.lastError().isValid():
+                #return u"Ошибка запроса к БД" + chr(10) + str(self.query1.lastError().text())                
+                print u"Ошибка запроса к БД" + chr(10) + str(self.query1.lastError().text())
+                return
+            name_vid = ""
+            classaccuracy = ""
+            range_msr = ""
+            perenos = ""
+            self.query1.first()            
+            for j in range(0, self.query1.size()):
+                if j != 0:
+                    perenos = "\n"
+                if unicode(self.query1.record().value("name_vid").toString()) <> "":    
+                    name_vid += "\n" + unicode(self.query1.record().value("name_vid").toString())
+                if unicode(self.query1.record().value("classaccuracy").toString()) <> "":    
+                    classaccuracy += perenos + unicode(self.query1.record().value("classaccuracy").toString())
+                if unicode(self.query1.record().value("range_msr").toString()) <> "":    
+                    range_msr += perenos + unicode(self.query1.record().value("range_msr").toString())
+                self.query1.next()
+                    
+            # Добавляем пустые строки в шаблон                      
+            row.Insert()     
+     
+            # Заполняем пустые строки
+            currN = nIns + i   # № текущей строки
+            sheet = xl.Worksheets.Item(1)
+            
+            # Заполняем массив M данными
+            M[i]=range(10)
+            M[i][0] = i + 1
+            M[i][1] = unicode(self.query.record().value("name_group").toString() + " " +
+                      self.query.record().value("name_msr").toString() + name_vid)
+            M[i][2] = unicode(self.query.record().value("zav_num").toString())
+            M[i][3] = 1
+            M[i][4] = classaccuracy
+            M[i][5] = range_msr
+            M[i][6] = unicode(self.query.record().value("period").toString())
+            M[i][7] = unicode(self.query.record().value("last_checking_date").toString())
+
+            M[i][8] = self.calcDateCheck(str(self.query.record().value("period").toString()), str(self.query.record().value("last_checking_date").toString()))
+            M[i][9] = self.calcDateCheck(str(self.query.record().value("period_view").toString()), str(self.query.record().value("last_view_date").toString()))
+
+            """
+            # Гавнокод для расчета даты испытания. Думаю можно сделать все проще                        
+            speriod = str(self.query.record().value("period").toString())
+            sdate = str(self.query.record().value("last_checking_date").toString())
+            if speriod <> "" and sdate <> "":
+                period = int(speriod)                         
+                mydate = datetime.datetime.strptime(sdate, "%Y-%m-%d")                        
+                year, month, day, hour, minutes, sec, wday, yday, isdst = mydate.timetuple()
+                nmonth = month + period
+                
+                y = year + nmonth / 12
+                m = nmonth % 12
+                if m == 0:
+                    m = 12
+                    y -= 1
+                # Последний день месяца
+                weekday_for_first_day, last_month_day = calendar.monthrange(y, m)
+                if day > last_month_day:
+                    day = last_month_day                                    
+                
+                M[i][8] = str(y) + "-" + str(m) + "-" + str(day)
+                """
+                                
+#                print 'M[i][7]=', M[i][7]
+#                print 'M[i][8]=', M[i][8]
+                
+                                    
+            self.query.next()
+            if self.query.lastError().isValid():
+                print u"Ошибка запроса к БД1" + chr(10) + str(self.query.lastError().text())
+
+        ws.Range("A" + str(nIns) + ":K" + str(self.query.size() + nIns - 1)).Select()
+        xl.Selection.Borders(1).LineStyle = 1
+        xl.Selection.Borders(2).LineStyle = 1
+        xl.Selection.Borders(3).LineStyle = 1
+        xl.Selection.Borders(4).LineStyle = 1
+
+        ws.Range(ALF[2] + str(nIns) + ":" + ALF[2] + str(self.query.size() + nIns - 1)).Select()
+        xl.Selection.NumberFormat = '@'
+
+        ws.Range(ALF[0] + str(nIns) + ":" + ALF[8] + str(self.query.size() + nIns - 1)).Select()
+        xl.Selection.HorizontalAlignment = 2
+        xl.Selection.VerticalAlignment = 1
+        xl.Selection.WrapText = True
+        
+        for c in (0, 3, 6, 7, 8, 9):
+            ws.Range(ALF[c] + str(nIns) + ":" + ALF[c] + str(self.query.size() + nIns - 1)).Select()
+            xl.Selection.HorizontalAlignment = 3
+            xl.Selection.VerticalAlignment = 2
+
+        for c in (4, 5):
+            ws.Range(ALF[c] + str(nIns) + ":" + ALF[c] + str(self.query.size() + nIns - 1)).Select()
+            xl.Selection.VerticalAlignment = 3
+
+        if self.query.size() > 3:
+            ws.Range(ALF[10] + str(nIns) + ":" + ALF[10] + str(self.query.size() + nIns - 1)).Select()
+        else:    
+            ws.Range(ALF[10] + str(nIns) + ":" + ALF[10] + str(3 + nIns - 1)).Select()
+#        ws.Range(ALF[8] + str(nIns + 1) + ":" + ALF[8] + str(self.query.size() + nIns - 1)).Select()
+        xl.Selection.Merge(False)
+        xl.Selection.WrapText = True
+        xl.Selection.HorizontalAlignment = 3
+                
+        ws.Range("A" + str(nIns) + ":J" + str(self.query.size() + nIns - 1)).Select()
+        xl.Selection.Value = M        
+        ws.Range("A1").Select()
+
+        if self.checkBox.isChecked():
+            ws.Columns(4).Delete()
+            ws.Columns(6).Delete()
+#            ws.Columns(8).Delete()
+            ws.Columns(9).Delete()
+            if id_category == 1:
+                ws.Columns(8).Delete()
+            #ws.PageSetup.TopMargin = 150;
+            ws.PageSetup.Orientation = 1
+
+            ws.PageSetup.LeftMargin = 28
+            ws.PageSetup.RightMargin = 28
+            ws.PageSetup.BottomMargin = 42
+            ws.PageSetup.PrintTitleRows = "$6:$6"    # Для переноса малой шапки на следующие страницы
+
+            for i in range(1,5):
+                ws.Cells(1, i).ColumnWidth = 0.85 * ws.Cells(1, i).ColumnWidth
+        else:
+            if id_category == 1:
+                ws.Columns(10).Delete()
+            ws.PageSetup.PrintTitleRows = "$14:$14"    # Для переноса малой шапки на следующие страницы
+
+        os.chmod(inputFile, stat.S_IWRITE) # снять read-only
+
+#            if not visibleExcel:
+#                xl.Quit()
+
+        return u"Отчет успешно сформирован!"     
+
+    def calcDateCheck(self, speriod, sdate):
+        # Гавнокод для расчета даты испытания. Думаю можно сделать все проще                        
+#        speriod = str(self.query.record().value("period").toString())
+#        sdate = str(self.query.record().value("last_checking_date").toString())
+        if speriod <> "" and sdate <> "":
+            period = int(speriod)                         
+            mydate = datetime.datetime.strptime(sdate, "%Y-%m-%d")                        
+            year, month, day, hour, minutes, sec, wday, yday, isdst = mydate.timetuple()
+            nmonth = month + period
+             
+            y = year + nmonth / 12
+            m = nmonth % 12
+            if m == 0:
+                m = 12
+                y -= 1
+            # Последний день месяца
+            weekday_for_first_day, last_month_day = calendar.monthrange(y, m)
+            if day > last_month_day:
+                day = last_month_day                                    
+                
+            return  str(y) + "-" + str(m) + "-" + str(day)
+        else:
+            return ""
+
+
+# Для запуска модуля в автономном режиме
+if __name__ == "__main__":   
+    import sys
+    app = QtGui.QApplication(sys.argv)
+           
+    db = QSqlDatabase("QPSQL")
+    db.setHostName("localhost")
+    db.setDatabaseName("el22")
+    db.setUserName("electrolab")
+    db.setPassword("electrolab")
+    rez = db.open()
+        
+    class Env():
+        class config():
+            class paths():
+                pass    
+    env = Env()
+    env.db = db    
+    env.config.paths.ui = "ui"
+    env.config.paths.rpt = "rpt"
+    
+    window = GraphTestMsr(env)
+   
+    window.show()
+    sys.exit(app.exec_())
